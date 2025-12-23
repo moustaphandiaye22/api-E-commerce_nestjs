@@ -1,0 +1,299 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ROLE_UTILISATEUR {
+  ADMIN
+  USER
+}
+
+enum TYPE_ADRESSE {
+  LIVRAISON
+  FACTURATION
+}
+
+enum STATUT_COMMANDE {
+  EN_ATTENTE
+  CONFIRME
+  EXPEDIE
+  LIVRE
+  ANNULE
+}
+
+enum STATUT_PAIEMENT {
+  EN_ATTENTE
+  REUSSI
+  ECHEC
+  REMBOURSE
+}
+
+enum TYPE_REDUCTION {
+  POURCENTAGE
+  MONTANT_FIXE
+}
+
+model UTILISATEURS {
+  id                String   @id @default(uuid()) @db.Uuid
+  email             String   @unique
+  mot_de_passe_hash String
+  prenom            String
+  nom               String
+  telephone         String?
+  role              ROLE_UTILISATEUR
+  est_actif         Boolean  @default(true)
+  email_verifie     Boolean  @default(false)
+  cree_le           DateTime @default(now()) @db.Timestamp
+  modifie_le        DateTime @updatedAt @db.Timestamp
+
+  adresses      ADRESSES[]
+  commandes     COMMANDES[]
+  avis          AVIS[]
+  liste_souhaits LISTE_SOUHAITS[]
+  paniers       PANIERS[]
+
+  @@map("utilisateurs")
+}
+
+model ADRESSES {
+  id             String        @id @default(uuid()) @db.Uuid
+  utilisateur_id String        @db.Uuid
+  type_adresse   TYPE_ADRESSE
+  rue            String
+  ville          String
+  region         String
+  code_postal     String
+  pays           String
+  par_defaut     Boolean       @default(false)
+  cree_le        DateTime      @default(now()) @db.Timestamp
+
+  utilisateur UTILISATEURS @relation(fields: [utilisateur_id], references: [id], onDelete: Cascade)
+
+  @@map("adresses")
+}
+
+model COMMANDES {
+  id                  String   @id @default(uuid()) @db.Uuid
+  numero_commande     String   @unique
+  utilisateur_id      String   @db.Uuid
+  statut              STATUT_COMMANDE
+  sous_total          Decimal  @db.Decimal
+  montant_taxe        Decimal  @db.Decimal
+  montant_livraison   Decimal  @db.Decimal
+  montant_reduction   Decimal  @db.Decimal
+  montant_total       Decimal  @db.Decimal
+  adresse_livraison   Json     @db.JsonB
+  adresse_facturation Json     @db.JsonB
+  notes               String?
+  cree_le             DateTime @default(now()) @db.Timestamp
+
+  utilisateur     UTILISATEURS      @relation(fields: [utilisateur_id], references: [id], onDelete: Cascade)
+  articles_commande ARTICLES_COMMANDE[]
+  paiements       PAIEMENTS[]
+  avis            AVIS[]
+  coupons         COUPONS?          @relation(fields: [coupon_id], references: [id])
+  coupon_id       String?           @db.Uuid
+
+  @@map("commandes")
+}
+
+model AVIS {
+  id            String   @id @default(uuid()) @db.Uuid
+  produit_id    String   @db.Uuid
+  utilisateur_id String  @db.Uuid
+  commande_id   String   @db.Uuid
+  note          Int
+  titre         String
+  commentaire   String
+  est_verifie   Boolean  @default(false)
+  est_approuve  Boolean  @default(false)
+  cree_le       DateTime @default(now()) @db.Timestamp
+
+  produit     PRODUITS     @relation(fields: [produit_id], references: [id], onDelete: Cascade)
+  utilisateur UTILISATEURS @relation(fields: [utilisateur_id], references: [id], onDelete: Cascade)
+  commande    COMMANDES    @relation(fields: [commande_id], references: [id], onDelete: Cascade)
+
+  @@map("avis")
+}
+
+model LISTE_SOUHAITS {
+  id             String   @id @default(uuid()) @db.Uuid
+  utilisateur_id String   @db.Uuid
+  produit_id     String   @db.Uuid
+  cree_le        DateTime @default(now()) @db.Timestamp
+
+  utilisateur UTILISATEURS @relation(fields: [utilisateur_id], references: [id], onDelete: Cascade)
+  produit     PRODUITS     @relation(fields: [produit_id], references: [id], onDelete: Cascade)
+
+  @@map("liste_souhaits")
+}
+
+model PANIERS {
+  id             String   @id @default(uuid()) @db.Uuid
+  utilisateur_id String   @db.Uuid
+  session_id     String   @unique
+  cree_le        DateTime @default(now()) @db.Timestamp
+  modifie_le     DateTime @updatedAt @db.Timestamp
+
+  utilisateur UTILISATEURS @relation(fields: [utilisateur_id], references: [id], onDelete: Cascade)
+  articles_panier ARTICLES_PANIER[]
+
+  @@map("paniers")
+}
+
+model CATEGORIES {
+  id                String  @id @default(uuid()) @db.Uuid
+  nom               String
+  slug              String  @unique
+  description       String?
+  categorie_parent_id String? @db.Uuid
+  url_image         String?
+  est_active        Boolean @default(true)
+  cree_le           DateTime @default(now()) @db.Timestamp
+
+  categorie_parent CATEGORIES? @relation("CategorieSousCategories", fields: [categorie_parent_id], references: [id])
+  sous_categories  CATEGORIES[] @relation("CategorieSousCategories")
+  produits         PRODUITS[]
+
+  @@map("categories")
+}
+
+model PRODUITS {
+  id                  String   @id @default(uuid()) @db.Uuid
+  nom                 String
+  slug                String   @unique
+  description         String
+  description_courte  String
+  sku                 String   @unique
+  prix                Decimal  @db.Decimal
+  prix_compare        Decimal? @db.Decimal
+  prix_coutant        Decimal? @db.Decimal
+  categorie_id        String   @db.Uuid
+  marque              String?
+  est_actif           Boolean  @default(true)
+  est_vedette         Boolean  @default(false)
+  quantite_stock      Int
+  seuil_stock_bas     Int
+  poids               Decimal? @db.Decimal
+  dimensions          Json?    @db.JsonB
+  cree_le             DateTime @default(now()) @db.Timestamp
+
+  categorie       CATEGORIES           @relation(fields: [categorie_id], references: [id], onDelete: Cascade)
+  images_produits IMAGES_PRODUITS[]
+  variantes       VARIANTES_PRODUITS[]
+  avis            AVIS[]
+  liste_souhaits  LISTE_SOUHAITS[]
+  articles_panier ARTICLES_PANIER[]
+  articles_commande ARTICLES_COMMANDE[]
+
+  @@map("produits")
+}
+
+model IMAGES_PRODUITS {
+  id         String   @id @default(uuid()) @db.Uuid
+  produit_id String   @db.Uuid
+  url_image  String
+  texte_alt  String
+  est_principale Boolean @default(false)
+  ordre_tri  Int
+  cree_le    DateTime @default(now()) @db.Timestamp
+
+  produit PRODUITS @relation(fields: [produit_id], references: [id], onDelete: Cascade)
+
+  @@map("images_produits")
+}
+
+model VARIANTES_PRODUITS {
+  id             String   @id @default(uuid()) @db.Uuid
+  produit_id     String   @db.Uuid
+  sku            String   @unique
+  nom            String
+  prix           Decimal  @db.Decimal
+  quantite_stock Int
+  attributs      Json     @db.JsonB
+  cree_le        DateTime @default(now()) @db.Timestamp
+
+  produit PRODUITS @relation(fields: [produit_id], references: [id], onDelete: Cascade)
+  articles_panier ARTICLES_PANIER[]
+  articles_commande ARTICLES_COMMANDE[]
+
+  @@map("variantes_produits")
+}
+
+model ARTICLES_PANIER {
+  id          String   @id @default(uuid()) @db.Uuid
+  panier_id   String   @db.Uuid
+  produit_id  String   @db.Uuid
+  variante_id String?  @db.Uuid
+  quantite    Int
+  prix_unitaire Decimal @db.Decimal
+  cree_le     DateTime @default(now()) @db.Timestamp
+
+  panier   PANIERS           @relation(fields: [panier_id], references: [id], onDelete: Cascade)
+  produit  PRODUITS          @relation(fields: [produit_id], references: [id], onDelete: Cascade)
+  variante VARIANTES_PRODUITS? @relation(fields: [variante_id], references: [id])
+
+  @@map("articles_panier")
+}
+
+model ARTICLES_COMMANDE {
+  id          String   @id @default(uuid()) @db.Uuid
+  commande_id String   @db.Uuid
+  produit_id  String   @db.Uuid
+  variante_id String?  @db.Uuid
+  nom_produit String
+  sku         String
+  quantite    Int
+  prix_unitaire Decimal @db.Decimal
+  total       Decimal  @db.Decimal
+  cree_le     DateTime @default(now()) @db.Timestamp
+
+  commande COMMANDES         @relation(fields: [commande_id], references: [id], onDelete: Cascade)
+  produit  PRODUITS          @relation(fields: [produit_id], references: [id], onDelete: Cascade)
+  variante VARIANTES_PRODUITS? @relation(fields: [variante_id], references: [id])
+
+  @@map("articles_commande")
+}
+
+model PAIEMENTS {
+  id              String   @id @default(uuid()) @db.Uuid
+  commande_id     String   @db.Uuid
+  methode_paiement String
+  fournisseur_paiement String
+  id_transaction  String
+  montant         Decimal  @db.Decimal
+  devise          String
+  statut          STATUT_PAIEMENT
+  metadonnees     Json     @db.JsonB
+  cree_le         DateTime @default(now()) @db.Timestamp
+
+  commande COMMANDES @relation(fields: [commande_id], references: [id], onDelete: Cascade)
+
+  @@map("paiements")
+}
+
+model COUPONS {
+  id                  String   @id @default(uuid()) @db.Uuid
+  code                String   @unique
+  description         String
+  type_reduction      TYPE_REDUCTION
+  valeur_reduction    Decimal  @db.Decimal
+  montant_achat_min   Decimal? @db.Decimal
+  montant_reduction_max Decimal? @db.Decimal
+  limite_utilisation  Int?
+  nombre_utilisations Int      @default(0)
+  date_debut          DateTime
+  date_fin            DateTime
+  est_actif           Boolean  @default(true)
+  cree_le             DateTime @default(now()) @db.Timestamp
+
+  commandes COMMANDES[]
+
+  @@map("coupons")
+}
