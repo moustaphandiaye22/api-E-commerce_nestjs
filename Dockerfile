@@ -34,6 +34,10 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy the built application from the base stage
 COPY --from=base /app/dist ./dist
 
+# Copy the generated Prisma client
+COPY --from=base /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=base /app/node_modules/@prisma ./node_modules/@prisma
+
 # Expose the port the app runs on
 EXPOSE 3000
 
