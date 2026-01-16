@@ -2,12 +2,24 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Configuration CORS pour le frontend
+  app.enableCors({
+    origin: ['http://localhost:5173', 'http://localhost:3000'], // Vite dev server + autres origins
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
   // Validation globale
   app.useGlobalPipes(new ValidationPipe());
+
+  // Intercepteur global pour standardiser les réponses
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   // Configuration Swagger
   const config = new DocumentBuilder()
