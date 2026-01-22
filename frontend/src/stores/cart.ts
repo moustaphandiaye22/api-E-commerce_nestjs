@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { cartsAPI } from '../api/carts'
+import { couponsAPI } from '../api/coupons'
 import { useApi } from '../composables/useApi'
-import type { Cart, CartItem, AddToCartDto } from '../types/api'
+import type { Cart, CartItem, AddToCartDto, CouponValidationResult } from '../types/api'
 
 /**
  * Store du panier
@@ -11,6 +12,7 @@ import type { Cart, CartItem, AddToCartDto } from '../types/api'
 export const useCartStore = defineStore('cart', () => {
   // État
   const cart = ref<Cart | null>(null)
+  const appliedCoupon = ref<CouponValidationResult | null>(null)
   const { loading, error, execute } = useApi<Cart>()
 
   // Getters
@@ -24,6 +26,16 @@ export const useCartStore = defineStore('cart', () => {
     return cart.value.articles_panier.reduce((total, item) => {
       return total + (parseFloat(item.prix_unitaire) * item.quantite)
     }, 0)
+  })
+
+  const discountAmount = computed(() => {
+    if (!appliedCoupon.value) return 0
+    const { discount } = appliedCoupon.value
+    return discount
+  })
+
+  const finalAmount = computed(() => {
+    return totalAmount.value - discountAmount.value
   })
 
   /**
@@ -88,24 +100,53 @@ export const useCartStore = defineStore('cart', () => {
       async () => {
         await cartsAPI.clear()
         cart.value = null
+        appliedCoupon.value = null
         return null
       }
     )
   }
 
+  /**
+   * Appliquer un coupon
+   */
+  async function applyCoupon(code: string) {
+    return execute(
+      async () => {
+        const response = await couponsAPI.validate({
+          code,
+          cartTotal: totalAmount.value
+        })
+        appliedCoupon.value = response.data!
+        return response.data!
+      }
+    )
+  }
+
+  /**
+   * Retirer le coupon
+   */
+  function removeCoupon() {
+    appliedCoupon.value = null
+  }
+
   return {
     // État
     cart,
+    appliedCoupon,
     loading,
     error,
     // Getters
     itemCount,
     totalAmount,
+    discountAmount,
+    finalAmount,
     // Actions
     fetchCart,
     addItem,
     updateItem,
     removeItem,
     clearCart,
+    applyCoupon,
+    removeCoupon,
   }
 })

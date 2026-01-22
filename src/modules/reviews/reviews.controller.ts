@@ -5,6 +5,7 @@ import { CurrentUser } from '../../common/decorators/user.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDtoSchema } from './dto/create-review.dto';
+import type { CreateReviewDto } from './dto/create-review.dto';
 import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('reviews')
@@ -82,8 +83,7 @@ export class ReviewsController {
   })
   @ApiResponse({ status: 400, description: 'Données invalides ou avis déjà existant' })
   @ApiResponse({ status: 404, description: 'Produit non trouvé' })
-  @UsePipes(new ZodValidationPipe(CreateReviewDtoSchema))
-  create(@Body() body: any, @CurrentUser() user) {
+  create(@Body() body: CreateReviewDto, @CurrentUser() user) {
     return this.reviewsService.create(user.id, body);
   }
 

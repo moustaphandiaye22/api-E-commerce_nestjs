@@ -34,68 +34,63 @@ export class ReviewsService {
     });
   }
 
-  async create(userId: string, data: CreateReviewDto) {
-    // Verify product exists and is active
-    const product = await this.prisma.pRODUITS.findUnique({
-      where: { id: data.produit_id },
-    });
+  async create(userId: string, data: any) {
+    try {
+      console.log('Creating review with data:', data);
+      console.log('User ID:', userId);
 
-    if (!product || !product.est_actif) {
-      throw new NotFoundException('Produit non trouvé ou indisponible');
-    }
+      // Verify product exists and is active
+      const product = await this.prisma.pRODUITS.findUnique({
+        where: { id: data.produit_id },
+      });
 
-    // Check if user has already reviewed this product
-    const existingReview = await this.prisma.aVIS.findFirst({
-      where: {
-        produit_id: data.produit_id,
-        utilisateur_id: userId,
-      },
-    });
+      if (!product || !product.est_actif) {
+        throw new NotFoundException('Produit non trouvé ou indisponible');
+      }
 
-    if (existingReview) {
-      throw new BadRequestException('Vous avez déjà laissé un avis pour ce produit');
-    }
-
-    // Find a recent order for this product (for verified reviews)
-    const recentOrder = await this.prisma.aRTICLES_COMMANDE.findFirst({
-      where: {
-        commande: {
+      // Check if user has already reviewed this product
+      const existingReview = await this.prisma.aVIS.findFirst({
+        where: {
+          produit_id: data.produit_id,
           utilisateur_id: userId,
-          statut: { in: ['LIVRE', 'CONFIRME', 'EXPEDIE'] },
         },
-        produit_id: data.produit_id,
-      },
-      include: { commande: true },
-      orderBy: { commande: { cree_le: 'desc' } },
-    });
+      });
 
-    return this.prisma.aVIS.create({
-      data: {
-        produit_id: data.produit_id,
-        utilisateur_id: userId,
-        commande_id: recentOrder?.commande.id || '', // Use empty string if no order found
-        note: data.note,
-        titre: data.titre,
-        commentaire: data.commentaire,
-        est_verifie: !!recentOrder,
-        est_approuve: true, // Auto-approve for now
-      },
-      include: {
-        utilisateur: {
-          select: {
-            id: true,
-            prenom: true,
-            nom: true,
+      if (existingReview) {
+        throw new BadRequestException('Vous avez déjà laissé un avis pour ce produit');
+      }
+
+      return this.prisma.aVIS.create({
+        data: {
+          produit_id: data.produit_id,
+          utilisateur_id: userId,
+          commande_id: '', // Empty string for commande_id
+          note: data.note,
+          titre: data.titre,
+          commentaire: data.commentaire,
+          est_verifie: false, // Not verified without order
+          est_approuve: true, // Auto-approve for now
+        },
+        include: {
+          utilisateur: {
+            select: {
+              id: true,
+              prenom: true,
+              nom: true,
+            },
+          },
+          produit: {
+            select: {
+              id: true,
+              nom: true,
+            },
           },
         },
-        produit: {
-          select: {
-            id: true,
-            nom: true,
-          },
-        },
-      },
-    });
+      });
+    } catch (error) {
+      console.error('Error creating review:', error);
+      throw error;
+    }
   }
 
   async update(userId: string, reviewId: string, data: Partial<CreateReviewDto>) {

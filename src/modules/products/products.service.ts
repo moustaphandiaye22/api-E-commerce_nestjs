@@ -8,17 +8,54 @@ export class ProductsService implements IProductsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(filters?: any) {
-    // Very simple query to debug
-    const products = await this.prisma.pRODUITS.findMany({
-      where: { est_actif: true },
-      take: 10,
-    });
+    const page = parseInt(filters?.page) || 1;
+    const limit = parseInt(filters?.limit) || 12;
+    const skip = (page - 1) * limit;
+
+    const where: any = { est_actif: true };
+
+    if (filters?.category) {
+      where.categorie_id = { in: filters.category.split(',') };
+    }
+
+    if (filters?.search) {
+      where.OR = [
+        { nom: { contains: filters.search, mode: 'insensitive' } },
+        { description: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (filters?.minPrice) {
+      where.prix = { ...where.prix, gte: parseFloat(filters.minPrice) };
+    }
+
+    if (filters?.maxPrice) {
+      where.prix = { ...where.prix, lte: parseFloat(filters.maxPrice) };
+    }
+
+    if (filters?.inStock === 'true') {
+      where.quantite_stock = { gt: 0 };
+    }
+
+    const [products, total] = await Promise.all([
+      this.prisma.pRODUITS.findMany({
+        where,
+        include: {
+          // Removed categorie and avis includes for performance - not needed in list view
+          images_produits: true,
+        },
+        skip,
+        take: limit,
+        orderBy: { cree_le: 'desc' },
+      }),
+      this.prisma.pRODUITS.count({ where }),
+    ]);
 
     return {
       data: products,
-      total: products.length,
-      page: 1,
-      limit: 10,
+      total,
+      page,
+      limit,
     };
   }
 
@@ -45,17 +82,24 @@ export class ProductsService implements IProductsService {
   }
 
   async create(data: any) {
-    const slug = SlugifyUtil.slugify(data.nom);
-    return this.prisma.pRODUITS.create({
-      data: {
-        ...data,
-        slug,
-      },
-      include: {
-        categorie: true,
-        images_produits: true,
-      },
-    });
+    try {
+      const slug = SlugifyUtil.slugify(data.nom);
+      return await this.prisma.pRODUITS.create({
+        data: {
+          ...data,
+          slug,
+          est_actif: data.est_actif !== undefined ? data.est_actif : true,
+          est_vedette: data.est_vedette !== undefined ? data.est_vedette : false,
+        },
+        include: {
+          categorie: true,
+          images_produits: true,
+        },
+      });
+    } catch (error) {
+      console.error('Error creating product:', error);
+      throw error;
+    }
   }
 
   async update(id: string, data: any) {

@@ -83,7 +83,7 @@ export class AuthService implements IAuthService {
   async refreshTokenFromToken(token: string) {
     try {
       const payload = this.jwtService.verify(token, {
-        secret: this.configService.get<string>('jwt.refreshSecret'),
+        secret: this.configService.get<string>('jwt.refreshSecret') || 'refreshSecret',
       });
       return this.generateTokens(payload);
     } catch (error) {
@@ -92,10 +92,13 @@ export class AuthService implements IAuthService {
   }
 
   private async generateTokens(payload: any) {
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('jwt.secret') || 'defaultSecret',
+      expiresIn: '15m',
+    });
     const refreshToken = this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('jwt.refreshSecret'),
-      expiresIn: '7d' as any,
+      secret: this.configService.get<string>('jwt.refreshSecret') || 'refreshSecret',
+      expiresIn: '7d',
     });
 
     return {
