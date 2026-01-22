@@ -8,7 +8,7 @@ import { errorService } from '../services/error.service'
  */
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
-  timeout: 10000,
+  timeout: 60000, // Increased timeout to 60 seconds for slow database connections
   headers: {
     'Content-Type': 'application/json',
   },
@@ -37,7 +37,7 @@ apiClient.interceptors.response.use(
   (response) => {
     // Le backend retourne toujours { success, statusCode, message, data }
     // On retourne l'objet ApiResponse complet pour accès au message si nécessaire
-    return response.data as ApiResponse
+    return response.data as any
   },
   async (error: AxiosError<ApiError>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
@@ -53,12 +53,12 @@ apiClient.interceptors.response.use(
         const refreshToken = localStorage.getItem('refresh_token')
         if (refreshToken) {
           // Tentative de rafraîchissement du token
-          const response = await axios.post<ApiResponse<{ access_token: string; refresh_token: string }>>(
-            '/api/auth/refresh',
+          const response = await apiClient.post<{ access_token: string; refresh_token: string }>(
+            '/auth/refresh',
             { refresh_token: refreshToken }
           )
 
-          const { access_token, refresh_token: newRefreshToken } = response.data.data!
+          const { access_token, refresh_token: newRefreshToken } = response.data
 
           // Sauvegarder les nouveaux tokens
           localStorage.setItem('access_token', access_token)

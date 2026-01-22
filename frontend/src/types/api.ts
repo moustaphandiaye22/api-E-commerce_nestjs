@@ -94,7 +94,9 @@ export interface Review {
   produit_id: string
   utilisateur_id: string
   note: number
+  titre?: string
   commentaire?: string
+  est_verifie: boolean
   cree_le: string
   utilisateur?: {
     prenom: string

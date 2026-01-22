@@ -1,14 +1,12 @@
 <template>
   <div id="app">
     <!-- Header/Navbar -->
-    <header v-if="authStore.isAuthenticated" class="app-header">
+    <header class="app-header">
       <div class="header-container">
         <div class="header-brand">
           <router-link to="/" class="brand-link">
-            <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <span class="brand-text">ShopHub</span>
+            <img src="/images/logo.png" alt="Baobab Market" class="brand-logo" />
+            <span class="brand-text">Baobab Market</span>
           </router-link>
         </div>
 
@@ -26,36 +24,55 @@
             </svg>
             <span>Produits</span>
           </router-link>
-          <router-link to="/cart" class="nav-link">
+          <router-link v-if="authStore.isAuthenticated" to="/cart" class="nav-link">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             <span>Panier</span>
             <span v-if="cartStore.itemCount > 0" class="nav-badge">{{ cartStore.itemCount }}</span>
           </router-link>
-          <router-link to="/wishlist" class="nav-link">
+          <router-link v-if="authStore.isAuthenticated" to="/wishlist" class="nav-link">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
             <span>Favoris</span>
             <span v-if="wishlistStore.itemCount > 0" class="nav-badge">{{ wishlistStore.itemCount }}</span>
           </router-link>
-          <router-link to="/orders" class="nav-link">
+          <router-link v-if="authStore.isAuthenticated" to="/orders" class="nav-link">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span>Commandes</span>
           </router-link>
-          <router-link to="/profile" class="nav-link">
+          <button v-if="authStore.isAuthenticated" @click="toggleNotifications" class="nav-link notifications-btn" :class="{ active: showNotifications }">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM15 17H9a6 6 0 01-6-6V9a6 6 0 0110-4.472M15 17v5l5-5h-5zM9 15l6-6m0 0l-6 6m6-6H3" />
+            </svg>
+            <span>Notifications</span>
+            <span v-if="notificationsStore.unreadCount > 0" class="nav-badge">{{ notificationsStore.unreadCount }}</span>
+          </button>
+          <router-link v-if="authStore.isAuthenticated" to="/profile" class="nav-link">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
             <span>Profil</span>
           </router-link>
+          <router-link v-if="!authStore.isAuthenticated" to="/login" class="nav-link">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span>Connexion</span>
+          </router-link>
+          <router-link v-if="!authStore.isAuthenticated" to="/register" class="nav-link">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            <span>Inscription</span>
+          </router-link>
         </nav>
 
         <div class="header-actions">
-          <button @click="handleLogout" class="btn-ghost">
+          <button v-if="authStore.isAuthenticated" @click="handleLogout" class="btn-ghost">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
@@ -88,32 +105,73 @@
           </svg>
           <span>Produits</span>
         </router-link>
-        <router-link to="/cart" class="mobile-nav-link" @click="mobileMenuOpen = false">
+        <router-link v-if="authStore.isAuthenticated" to="/cart" class="mobile-nav-link" @click="mobileMenuOpen = false">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
           <span>Panier</span>
           <span v-if="cartStore.itemCount > 0" class="mobile-nav-badge">{{ cartStore.itemCount }}</span>
         </router-link>
-        <router-link to="/wishlist" class="mobile-nav-link" @click="mobileMenuOpen = false">
+        <router-link v-if="authStore.isAuthenticated" to="/wishlist" class="mobile-nav-link" @click="mobileMenuOpen = false">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
           <span>Favoris</span>
           <span v-if="wishlistStore.itemCount > 0" class="mobile-nav-badge">{{ wishlistStore.itemCount }}</span>
         </router-link>
-        <router-link to="/orders" class="mobile-nav-link" @click="mobileMenuOpen = false">
+        <router-link v-if="authStore.isAuthenticated" to="/orders" class="mobile-nav-link" @click="mobileMenuOpen = false">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <span>Commandes</span>
         </router-link>
-        <router-link to="/profile" class="mobile-nav-link" @click="mobileMenuOpen = false">
+        <router-link v-if="authStore.isAuthenticated" to="/profile" class="mobile-nav-link" @click="mobileMenuOpen = false">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
           <span>Profil</span>
         </router-link>
+        <router-link v-if="!authStore.isAuthenticated" to="/login" class="mobile-nav-link" @click="mobileMenuOpen = false">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          <span>Connexion</span>
+        </router-link>
+        <router-link v-if="!authStore.isAuthenticated" to="/register" class="mobile-nav-link" @click="mobileMenuOpen = false">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+          </svg>
+          <span>Inscription</span>
+        </router-link>
+      </div>
+
+      <!-- Notifications Dropdown -->
+      <div v-if="showNotifications && authStore.isAuthenticated" class="notifications-dropdown">
+        <div class="notifications-header">
+          <h3>Notifications</h3>
+          <button @click="showNotifications = false" class="close-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div v-if="notificationsStore.notifications.length === 0" class="no-notifications">
+          <p>Aucune notification</p>
+        </div>
+        <div v-else class="notifications-list">
+          <div
+            v-for="notification in notificationsStore.notifications"
+            :key="notification.id"
+            class="notification-item"
+            :class="{ unread: !notification.read }"
+          >
+            <div class="notification-content">
+              <h4>{{ notification.title }}</h4>
+              <p>{{ notification.message }}</p>
+              <span class="notification-date">{{ formatDate(notification.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -125,22 +183,49 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from './stores/auth'
 import { useCartStore } from './stores/cart'
 import { useWishlistStore } from './stores/wishlist'
+import { useNotificationsStore } from './stores/notifications'
 import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
+const notificationsStore = useNotificationsStore()
 const router = useRouter()
 const mobileMenuOpen = ref(false)
+const showNotifications = ref(false)
 
 const handleLogout = async () => {
   await authStore.logout()
   router.push('/login')
 }
+
+const toggleNotifications = () => {
+  showNotifications.value = !showNotifications.value
+  if (showNotifications.value) {
+    // Mark all as read when opening
+    notificationsStore.markAllAsRead()
+  }
+}
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+onMounted(async () => {
+  if (authStore.isAuthenticated) {
+    await notificationsStore.fetchNotifications()
+  }
+})
 </script>
 
 <style>
@@ -195,10 +280,10 @@ const handleLogout = async () => {
   color: var(--color-primary);
 }
 
-.brand-icon {
-  width: 28px;
-  height: 28px;
-  color: var(--color-primary);
+.brand-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
 .brand-text {
@@ -378,6 +463,107 @@ const handleLogout = async () => {
   margin-left: var(--spacing-2);
   min-width: 18px;
   text-align: center;
+}
+
+/* === NOTIFICATIONS === */
+
+.notifications-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 20px;
+  width: 350px;
+  max-height: 400px;
+  background-color: var(--color-bg-primary);
+  border: var(--border-width) solid var(--color-border-light);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+  overflow: hidden;
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-4);
+  border-bottom: var(--border-width) solid var(--color-border-light);
+  background-color: var(--color-bg-secondary);
+}
+
+.notifications-header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--spacing-1);
+  border-radius: var(--border-radius-md);
+  transition: background-color var(--transition-fast);
+}
+
+.close-btn:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.close-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.notifications-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  padding: var(--spacing-4);
+  border-bottom: var(--border-width) solid var(--color-border-light);
+  transition: background-color var(--transition-fast);
+}
+
+.notification-item:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.notification-item.unread {
+  background-color: var(--color-primary-lighter);
+  border-left: 3px solid var(--color-primary);
+}
+
+.notification-content h4 {
+  margin: 0 0 var(--spacing-1) 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.notification-content p {
+  margin: 0 0 var(--spacing-2) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.notification-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.no-notifications {
+  padding: var(--spacing-8);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.notifications-btn.active {
+  background-color: var(--color-primary-lighter);
+  color: var(--color-primary-dark);
 }
 
 /* === MAIN CONTENT === */

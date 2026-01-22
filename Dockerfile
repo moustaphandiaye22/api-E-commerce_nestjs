@@ -34,6 +34,9 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy the built application from the base stage
 COPY --from=base /app/dist ./dist
 
+# Copy the public folder for static files
+COPY --from=base /app/public ./public
+
 # Copy the generated Prisma client
 COPY --from=base /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=base /app/node_modules/@prisma ./node_modules/@prisma

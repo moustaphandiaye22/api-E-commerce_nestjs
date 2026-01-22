@@ -1,54 +1,72 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
+// Lazy-loaded components for better performance
+const Home = () => import('../views/Home.vue')
+const Login = () => import('../views/Login.vue')
+const Register = () => import('../views/Register.vue')
+const Products = () => import('../views/Products.vue')
+const ProductDetail = () => import('../views/ProductDetail.vue')
+const Profile = () => import('../views/Profile.vue')
+const Cart = () => import('../views/Cart.vue')
+const Wishlist = () => import('../views/Wishlist.vue')
+const Orders = () => import('../views/Orders.vue')
+const Checkout = () => import('../views/Checkout.vue')
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('../views/Home.vue'),
+    component: Home,
   },
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/Login.vue'),
+    component: Login,
   },
   {
     path: '/register',
     name: 'Register',
-    component: () => import('../views/Register.vue'),
+    component: Register,
   },
   {
     path: '/products',
     name: 'Products',
-    component: () => import('../views/Products.vue'),
+    component: Products,
   },
   {
     path: '/products/:id',
     name: 'ProductDetail',
-    component: () => import('../views/ProductDetail.vue'),
+    component: ProductDetail,
   },
   {
     path: '/profile',
     name: 'Profile',
-    component: () => import('../views/Profile.vue'),
+    component: Profile,
     meta: { requiresAuth: true },
   },
   {
     path: '/cart',
     name: 'Cart',
-    component: () => import('../views/Cart.vue'),
+    component: Cart,
     meta: { requiresAuth: true },
   },
   {
     path: '/wishlist',
     name: 'Wishlist',
-    component: () => import('../views/Wishlist.vue'),
+    component: Wishlist,
     meta: { requiresAuth: true },
   },
   {
     path: '/orders',
     name: 'Orders',
-    component: () => import('../views/Orders.vue'),
+    component: Orders,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/checkout',
+    name: 'Checkout',
+    component: Checkout,
     meta: { requiresAuth: true },
   },
 ]

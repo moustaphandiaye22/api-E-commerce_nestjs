@@ -41,7 +41,7 @@
             <div class="item-image">
               <img
                 v-if="item.produit.images_produits && item.produit.images_produits.length > 0"
-                :src="item.produit.images_produits.find(img => img.est_principale)?.url_image || item.produit.images_produits[0]?.url_image"
+                :src="getImageUrl(item.produit.images_produits.find(img => img.est_principale)?.url_image || item.produit.images_produits[0]?.url_image)"
                 :alt="item.produit.nom"
               />
               <div v-else class="no-image">Pas d'image</div>
@@ -92,9 +92,38 @@
         <div class="cart-summary">
           <div class="summary-content">
             <h3>Résumé de la commande</h3>
+
+            <!-- Coupon Section -->
+            <div class="coupon-section">
+              <div v-if="!cartStore.appliedCoupon" class="coupon-input">
+                <input
+                  v-model="couponCode"
+                  type="text"
+                  placeholder="Code promo"
+                  @keyup.enter="applyCoupon"
+                />
+                <button @click="applyCoupon" :disabled="!couponCode.trim()" class="btn-apply">
+                  Appliquer
+                </button>
+              </div>
+              <div v-else class="applied-coupon">
+                <div class="coupon-info">
+                  <span class="coupon-code">{{ cartStore.appliedCoupon.coupon.code }}</span>
+                  <span class="coupon-discount">-{{ formatPrice(cartStore.discountAmount) }} €</span>
+                </div>
+                <button @click="removeCoupon" class="btn-remove">
+                  Retirer
+                </button>
+              </div>
+            </div>
+
             <div class="summary-row">
               <span>Sous-total ({{ cartStore.itemCount }} article{{ cartStore.itemCount > 1 ? 's' : '' }})</span>
               <span>{{ formatPrice(cartStore.totalAmount) }} €</span>
+            </div>
+            <div v-if="cartStore.discountAmount > 0" class="summary-row discount">
+              <span>Réduction</span>
+              <span>-{{ formatPrice(cartStore.discountAmount) }} €</span>
             </div>
             <div class="summary-row">
               <span>Livraison</span>
@@ -103,7 +132,7 @@
             <div class="summary-divider"></div>
             <div class="summary-row total">
               <span>Total</span>
-              <span>{{ formatPrice(cartStore.totalAmount) }} €</span>
+              <span>{{ formatPrice(cartStore.finalAmount) }} €</span>
             </div>
             <button class="btn-checkout" @click="proceedToCheckout">
               Procéder au paiement
@@ -119,13 +148,19 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 import { formatPrice } from '../utils/formatters'
 
+// API base URL for images
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+
 const cartStore = useCartStore()
 const router = useRouter()
+
+// Coupon
+const couponCode = ref('')
 
 onMounted(() => {
   cartStore.fetchCart()
@@ -146,9 +181,28 @@ const clearCart = async () => {
   }
 }
 
+const applyCoupon = async () => {
+  if (!couponCode.value.trim()) return
+
+  try {
+    await cartStore.applyCoupon(couponCode.value.trim())
+    couponCode.value = ''
+  } catch (error) {
+    console.error('Error applying coupon:', error)
+  }
+}
+
+const removeCoupon = () => {
+  cartStore.removeCoupon()
+}
+
 const proceedToCheckout = () => {
-  // TODO: Navigate to checkout page
-  alert('Fonctionnalité de paiement à implémenter')
+  router.push('/checkout')
+}
+
+const getImageUrl = (url: string) => {
+  if (url.startsWith('http')) return url
+  return `${API_BASE_URL}${url}`
 }
 </script>
 
@@ -479,5 +533,93 @@ const proceedToCheckout = () => {
 
 .btn-clear:hover {
   background-color: var(--color-error-light);
+}
+
+/* === COUPON STYLES === */
+.coupon-section {
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-4);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--border-radius-md);
+}
+
+.coupon-input {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.coupon-input input {
+  flex: 1;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: var(--border-width) solid var(--color-border-medium);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+}
+
+.coupon-input input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.btn-apply {
+  padding: var(--spacing-2) var(--spacing-4);
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.btn-apply:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+}
+
+.btn-apply:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.applied-coupon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.coupon-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.coupon-code {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-success);
+}
+
+.coupon-discount {
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+}
+
+.btn-remove {
+  padding: var(--spacing-1) var(--spacing-2);
+  background-color: transparent;
+  color: var(--color-error);
+  border: var(--border-width) solid var(--color-error);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-remove:hover {
+  background-color: var(--color-error-light);
+}
+
+.summary-row.discount {
+  color: var(--color-success);
 }
 </style>

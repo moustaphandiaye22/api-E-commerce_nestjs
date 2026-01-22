@@ -7,9 +7,21 @@ export class CartsService {
   constructor(private prisma: PrismaService) {}
 
   async findUserCart(userId: string) {
-    // Simplified query to debug
     const cart = await this.prisma.pANIERS.findFirst({
       where: { utilisateur_id: userId },
+      include: {
+        articles_panier: {
+          include: {
+            produit: {
+              include: {
+                categorie: true,
+                images_produits: { where: { est_principale: true }, take: 1 },
+              },
+            },
+            variante: true,
+          },
+        },
+      },
     });
 
     if (!cart) {
@@ -23,12 +35,7 @@ export class CartsService {
       return { ...newCart, articles_panier: [] };
     }
 
-    // Get cart items separately
-    const items = await this.prisma.aRTICLES_PANIER.findMany({
-      where: { panier_id: cart.id },
-    });
-
-    return { ...cart, articles_panier: items };
+    return cart;
   }
 
   async addItem(userId: string, data: AddToCartDto) {
@@ -75,22 +82,13 @@ export class CartsService {
 
     if (existingItem) {
       // Update quantity
-      return this.prisma.aRTICLES_PANIER.update({
+      await this.prisma.aRTICLES_PANIER.update({
         where: { id: existingItem.id },
         data: { quantite: existingItem.quantite + data.quantite },
-        include: {
-          produit: {
-            include: {
-              categorie: true,
-              images_produits: { where: { est_principale: true }, take: 1 },
-            },
-          },
-          variante: true,
-        },
       });
     } else {
       // Create new item
-      return this.prisma.aRTICLES_PANIER.create({
+      await this.prisma.aRTICLES_PANIER.create({
         data: {
           panier_id: cart.id,
           produit_id: data.produit_id,
@@ -98,17 +96,11 @@ export class CartsService {
           quantite: data.quantite,
           prix_unitaire: product.prix,
         },
-        include: {
-          produit: {
-            include: {
-              categorie: true,
-              images_produits: { where: { est_principale: true }, take: 1 },
-            },
-          },
-          variante: true,
-        },
       });
     }
+
+    // Return the full cart
+    return this.findUserCart(userId);
   }
 
   async updateItemQuantity(userId: string, itemId: string, quantity: number) {
@@ -128,19 +120,14 @@ export class CartsService {
       throw new NotFoundException('Article non trouvé dans le panier');
     }
 
-    return this.prisma.aRTICLES_PANIER.update({
+    // Update the item
+    await this.prisma.aRTICLES_PANIER.update({
       where: { id: itemId },
       data: { quantite: quantity },
-      include: {
-        produit: {
-          include: {
-            categorie: true,
-            images_produits: { where: { est_principale: true }, take: 1 },
-          },
-        },
-        variante: true,
-      },
     });
+
+    // Return the full cart
+    return this.findUserCart(userId);
   }
 
   async removeItem(userId: string, itemId: string) {

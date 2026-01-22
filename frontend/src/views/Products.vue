@@ -182,7 +182,7 @@
             <div class="product-image">
               <img
                 v-if="product.images_produits && product.images_produits.length > 0"
-                :src="product.images_produits.find(img => img.est_principale)?.url_image || product.images_produits[0]?.url_image"
+                :src="getImageUrl(product.images_produits.find(img => img.est_principale)?.url_image || product.images_produits[0]?.url_image)"
                 :alt="product.nom"
                 loading="lazy"
               />
@@ -254,8 +254,8 @@
                 Plus que {{ product.stock }} en stock
               </div>
 
-              <!-- Add to cart (for list view) -->
-              <div v-if="viewMode === 'list'" class="product-actions">
+              <!-- Add to cart (for both grid and list view) -->
+              <div class="product-actions">
                 <Button
                   @click.stop="addToCart(product.id)"
                   :disabled="!product.est_actif || product.stock === 0"
@@ -331,7 +331,7 @@
           <div class="quick-view-image">
             <img
               v-if="quickViewProduct.images_produits && quickViewProduct.images_produits.length > 0"
-              :src="quickViewProduct.images_produits.find(img => img.est_principale)?.url_image || quickViewProduct.images_produits[0]?.url_image"
+              :src="getImageUrl(quickViewProduct.images_produits.find(img => img.est_principale)?.url_image || quickViewProduct.images_produits[0]?.url_image)"
               :alt="quickViewProduct.nom"
             />
             <div v-else class="no-image">Pas d'image</div>
@@ -362,15 +362,20 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useProductsStore } from '../stores/products'
 import { useCartStore } from '../stores/cart'
 import { useWishlistStore } from '../stores/wishlist'
+import { useCategoriesStore } from '../stores/categories'
 import { useRouter } from 'vue-router'
 import { formatPrice } from '../utils/formatters'
 import Button from '../components/ui/Button.vue'
-import type { Product } from '../types/api'
+import type { Product, Category } from '../types/api'
+
+// API base URL for images
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 // Stores
 const productsStore = useProductsStore()
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
+const categoriesStore = useCategoriesStore()
 const router = useRouter()
 
 // Reactive data
@@ -383,7 +388,9 @@ const filters = ref({
   inStock: false
 })
 const quickViewProduct = ref<Product | null>(null)
-const categories = ref<any[]>([]) // Will be populated from API
+
+// Computed categories from store
+const categories = computed(() => categoriesStore.categories)
 
 let searchTimeout: NodeJS.Timeout | null = null
 
@@ -560,13 +567,18 @@ const retryLoad = () => {
   applyFilters()
 }
 
+const getImageUrl = (url: string) => {
+  if (url.startsWith('http')) return url
+  return `${API_BASE_URL}${url}`
+}
+
 // Load initial data
 onMounted(async () => {
-  // Load categories (you might want to create a categories store)
-  // For now, we'll assume categories are loaded elsewhere
-
-  // Load products
-  await productsStore.fetchProducts({ page: 1, limit: 12 })
+  // Load categories and products in parallel
+  await Promise.all([
+    categoriesStore.fetchCategories(),
+    productsStore.fetchProducts({ page: 1, limit: 12 })
+  ])
 })
 
 // Watch for filter changes

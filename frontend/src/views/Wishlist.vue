@@ -41,7 +41,7 @@
             <div class="item-image">
               <img
                 v-if="item.produit.images_produits && item.produit.images_produits.length > 0"
-                :src="item.produit.images_produits.find(img => img.est_principale)?.url_image || item.produit.images_produits[0]?.url_image"
+                :src="getImageUrl(item.produit.images_produits.find(img => img.est_principale)?.url_image || item.produit.images_produits[0]?.url_image)"
                 :alt="item.produit.nom"
               />
               <div v-else class="no-image">Pas d'image</div>
@@ -102,6 +102,9 @@ import { useWishlistStore } from '../stores/wishlist'
 import { useCartStore } from '../stores/cart'
 import { formatPrice } from '../utils/formatters'
 
+// API base URL for images
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+
 const wishlistStore = useWishlistStore()
 const cartStore = useCartStore()
 const router = useRouter()
@@ -120,6 +123,11 @@ const goToProduct = (productId: string) => {
 
 const removeFromWishlist = async (productId: string) => {
   await wishlistStore.removeFromWishlist(productId)
+}
+
+const getImageUrl = (url: string) => {
+  if (url.startsWith('http')) return url
+  return `${API_BASE_URL}${url}`
 }
 </script>
 
