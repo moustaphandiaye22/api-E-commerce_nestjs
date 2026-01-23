@@ -10,7 +10,7 @@ export class StripeService {
     this.stripe = new Stripe(
       this.configService.get<string>('stripe.secretKey') || '',
       {
-        apiVersion: '2024-06-20',
+        apiVersion: '2023-10-16',
       },
     );
   }
@@ -35,7 +35,7 @@ export class StripeService {
     return this.stripe.paymentIntents.cancel(paymentIntentId);
   }
 
-  async constructEvent(payload: Buffer, signature: string, webhookSecret: string) {
+  constructEvent(payload: Buffer, signature: string, webhookSecret: string) {
     return this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
   }
 
