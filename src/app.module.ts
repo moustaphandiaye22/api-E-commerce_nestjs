@@ -35,6 +35,14 @@ import mailConfig from './config/mail.config';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'public'),
+      serveStaticOptions: {
+        setHeaders: (res) => {
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+          res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        },
+      },
     }),
     ThrottlerModule.forRoot([
       {
