@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { join } from 'path';
+import { HealthController } from './common/controllers/health.controller';
+import { AuditService } from './common/services/audit.service';
+import { AddressesModule } from './modules/addresses/addresses.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -32,7 +36,14 @@ import mailConfig from './config/mail.config';
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'public'),
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1 minute
+        limit: 10, // 10 requests per minute
+      },
+    ]),
     PrismaModule,
+    AddressesModule,
     AuthModule,
     UsersModule,
     ProductsModule,
@@ -46,7 +57,7 @@ import mailConfig from './config/mail.config';
     NotificationsModule,
     UploadModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, HealthController],
+  providers: [AppService, AuditService],
 })
 export class AppModule {}

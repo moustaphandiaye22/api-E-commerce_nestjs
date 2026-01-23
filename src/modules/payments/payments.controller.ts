@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Headers, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 import { PaymentsService } from './payments.service';
+import type { Request } from 'express';
 
 @ApiTags('payments')
 @Controller('payments')
@@ -94,7 +96,35 @@ export class PaymentsController {
     return this.paymentsService.getPaymentStats();
   }
 
+  @Post('create-intent/:orderId')
+  @ApiOperation({ summary: 'Créer un PaymentIntent Stripe pour une commande' })
+  @ApiParam({ name: 'orderId', description: 'ID de la commande', example: 'uuid' })
+  @ApiBearerAuth('JWT-auth')
+  @ApiResponse({
+    status: 201,
+    description: 'PaymentIntent créé',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        statusCode: { type: 'number', example: 201 },
+        message: { type: 'string', example: 'PaymentIntent créé avec succès' },
+        data: {
+          type: 'object',
+          properties: {
+            clientSecret: { type: 'string' },
+            paymentIntentId: { type: 'string' },
+          },
+        },
+      },
+    },
+  })
+  createPaymentIntent(@Param('orderId') orderId: string) {
+    return this.paymentsService.createPaymentIntent(orderId);
+  }
+
   @Post('webhook')
+  @Public()
   @ApiOperation({ summary: 'Webhook Stripe pour les paiements' })
   @ApiResponse({
     status: 200,
@@ -102,15 +132,16 @@ export class PaymentsController {
     schema: {
       type: 'object',
       properties: {
-        success: { type: 'boolean', example: true },
-        statusCode: { type: 'number', example: 200 },
-        message: { type: 'string', example: 'Webhook traité avec succès' },
+        received: { type: 'boolean', example: true },
       },
     },
   })
-  handleWebhook(@Body() body: any) {
-    // TODO: Implement Stripe webhook handling
-    console.log('Stripe webhook received:', body);
-    return { message: 'Stripe webhook processed' };
+  handleWebhook(
+    @Req() req: Request,
+    @Headers('stripe-signature') signature: string,
+  ) {
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
+    const rawBody = (req as any).rawBody as Buffer;
+    return this.paymentsService.handleWebhook(rawBody, signature, webhookSecret);
   }
 }

@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { HashUtil } from '../../common/utils/hash.util';
+import { AuditService } from '../../common/services/audit.service';
 import { IAuthService } from './interfaces/auth.interface';
 import { UnauthorizedException, ConflictException } from '../../common/exceptions/business.exception';
 import type { RegisterDto } from './dto/register.dto';
@@ -14,6 +15,7 @@ export class AuthService implements IAuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private auditService: AuditService,
   ) {}
 
   async register(data: RegisterDto) {
@@ -45,6 +47,10 @@ export class AuthService implements IAuthService {
         cree_le: true,
       },
     });
+
+    // Audit logging
+    this.auditService.logAuthAction('USER_REGISTERED', user.id);
+
     return { message: 'Utilisateur enregistré avec succès', user };
   }
 
@@ -63,6 +69,10 @@ export class AuthService implements IAuthService {
     }
     const payload = { email: user.email, sub: user.id, role: user.role };
     const tokens = await this.generateTokens(payload);
+
+    // Audit logging
+    this.auditService.logAuthAction('USER_LOGIN_SUCCESS', user.id);
+
     return {
       ...tokens,
       user: {
