@@ -16,7 +16,7 @@ async function bootstrap() {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:"],
+        imgSrc: ["'self'", "data:", "https:", "*.vercel.app"],
       },
     },
     hsts: {
@@ -32,6 +32,7 @@ async function bootstrap() {
       'http://localhost:3000', // Local development
       'https://baobabmarketecommerce.vercel.app', // Production Vercel
       /\.vercel\.app$/, // Allow all Vercel domains for preview deployments
+      /^https:\/\/.*\.vercel\.app$/, // Allow all Vercel preview deployments
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

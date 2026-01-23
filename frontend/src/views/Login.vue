@@ -60,10 +60,9 @@ const form = reactive({
 const handleSubmit = async () => {
   try {
     await authStore.login(form)
-    
-    // Rediriger vers la page d'origine ou la page d'accueil
-    const redirect = (route.query.redirect as string) || '/'
-    router.push(redirect)
+
+    // Forcer un rechargement de la page pour synchroniser l'état du menu
+    window.location.href = '/'
   } catch (error) {
     // L'erreur est déjà gérée par le store et affichée via authStore.error
     console.error('Erreur de connexion:', error)
