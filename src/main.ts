@@ -27,7 +27,12 @@ async function bootstrap() {
 
   // Configuration CORS pour le frontend
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'], // Vite dev server + autres origins
+    origin: [
+      'http://localhost:5173', // Vite dev server
+      'http://localhost:3000', // Local development
+      'https://baobabmarketecommerce.vercel.app', // Production Vercel
+      /\.vercel\.app$/, // Allow all Vercel domains for preview deployments
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
