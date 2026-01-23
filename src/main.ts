@@ -41,9 +41,6 @@ async function bootstrap() {
   // Validation globale
   app.useGlobalPipes(new ValidationPipe());
 
-  // Rate limiting global
-  app.useGlobalGuards(app.get(ThrottlerGuard));
-
   // Intercepteur global pour standardiser les réponses
   app.useGlobalInterceptors(new TransformInterceptor());
 
