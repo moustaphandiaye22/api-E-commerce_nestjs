@@ -47,6 +47,7 @@
 
         <div class="product-actions">
           <button
+            v-if="authStore.isAuthenticated"
             @click="toggleWishlist"
             class="wishlist-btn"
             :class="{ active: isInWishlist }"
@@ -56,8 +57,19 @@
             </svg>
             {{ isInWishlist ? 'Retirer des favoris' : 'Ajouter aux favoris' }}
           </button>
+          <button
+            v-else
+            @click="toggleWishlist"
+            class="wishlist-btn"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            Se connecter pour ajouter aux favoris
+          </button>
 
           <button
+            v-if="authStore.isAuthenticated"
             @click="addToCart"
             class="add-to-cart-btn"
             :disabled="!product.est_actif || product.stock === 0"
@@ -66,6 +78,16 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             {{ product.est_actif && product.stock > 0 ? 'Ajouter au panier' : 'Produit indisponible' }}
+          </button>
+          <button
+            v-else
+            @click="addToCart"
+            class="add-to-cart-btn"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Se connecter pour acheter
           </button>
         </div>
 
@@ -215,12 +237,22 @@ const goBack = () => {
 }
 
 const addToCart = async () => {
+  if (!authStore.isAuthenticated) {
+    router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
+    return
+  }
+
   if (product.value) {
     await cartStore.addItem({ produit_id: product.value.id, quantite: 1 })
   }
 }
 
 const toggleWishlist = async () => {
+  if (!authStore.isAuthenticated) {
+    router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
+    return
+  }
+
   if (product.value) {
     await wishlistStore.toggleWishlist(product.value.id)
   }

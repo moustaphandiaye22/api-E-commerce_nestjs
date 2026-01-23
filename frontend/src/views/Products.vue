@@ -195,10 +195,21 @@
               <!-- Quick actions overlay -->
               <div class="product-overlay">
                 <button
+                  v-if="authStore.isAuthenticated"
                   @click.stop="toggleWishlist(product.id)"
                   class="overlay-btn wishlist-btn"
                   :class="{ active: isInWishlist(product.id) }"
                   title="Ajouter aux favoris"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </button>
+                <button
+                  v-else
+                  @click.stop="redirectToLogin"
+                  class="overlay-btn wishlist-btn"
+                  title="Connectez-vous pour ajouter aux favoris"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -257,12 +268,21 @@
               <!-- Add to cart (for both grid and list view) -->
               <div class="product-actions">
                 <Button
+                  v-if="authStore.isAuthenticated"
                   @click.stop="addToCart(product.id)"
                   :disabled="!product.est_actif || product.stock === 0"
                   size="sm"
                   :variant="product.stock === 0 ? 'outline' : 'primary'"
                 >
                   {{ product.stock === 0 ? 'Épuisé' : 'Ajouter au panier' }}
+                </Button>
+                <Button
+                  v-else
+                  @click.stop="redirectToLogin"
+                  size="sm"
+                  variant="primary"
+                >
+                  Se connecter pour acheter
                 </Button>
               </div>
             </div>
@@ -343,8 +363,21 @@
             <p class="quick-view-description">{{ quickViewProduct.description || 'Aucune description disponible.' }}</p>
 
             <div class="quick-view-actions">
-              <Button @click="addToCart(quickViewProduct.id)" variant="primary" fullWidth>
+              <Button
+                v-if="authStore.isAuthenticated"
+                @click="addToCart(quickViewProduct.id)"
+                variant="primary"
+                fullWidth
+              >
                 Ajouter au panier
+              </Button>
+              <Button
+                v-else
+                @click="redirectToLogin"
+                variant="primary"
+                fullWidth
+              >
+                Se connecter pour acheter
               </Button>
               <Button @click="goToProduct(quickViewProduct.id)" variant="outline" fullWidth>
                 Voir le détail
@@ -363,6 +396,7 @@ import { useProductsStore } from '../stores/products'
 import { useCartStore } from '../stores/cart'
 import { useWishlistStore } from '../stores/wishlist'
 import { useCategoriesStore } from '../stores/categories'
+import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
 import { formatPrice } from '../utils/formatters'
 import Button from '../components/ui/Button.vue'
@@ -376,6 +410,7 @@ const productsStore = useProductsStore()
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
 const categoriesStore = useCategoriesStore()
+const authStore = useAuthStore()
 const router = useRouter()
 
 // Reactive data
@@ -514,6 +549,11 @@ const goToProduct = (id: string) => {
 }
 
 const addToCart = async (productId: string) => {
+  if (!authStore.isAuthenticated) {
+    router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
+    return
+  }
+
   try {
     await cartStore.addItem({ produit_id: productId, quantite: 1 })
     // Could show a toast notification here
@@ -523,11 +563,20 @@ const addToCart = async (productId: string) => {
 }
 
 const toggleWishlist = async (productId: string) => {
+  if (!authStore.isAuthenticated) {
+    router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
+    return
+  }
+
   try {
     await wishlistStore.toggleWishlist(productId)
   } catch (error) {
     console.error('Error toggling wishlist:', error)
   }
+}
+
+const redirectToLogin = () => {
+  router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
 }
 
 const isInWishlist = (productId: string) => {

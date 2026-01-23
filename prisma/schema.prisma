@@ -52,6 +52,9 @@ model UTILISATEURS {
   cree_le           DateTime @default(now()) @db.Timestamp
   modifie_le        DateTime @updatedAt @db.Timestamp
 
+  @@index([email])
+  @@index([role])
+
   adresses      ADRESSES[]
   commandes     COMMANDES[]
   avis          AVIS[]
@@ -183,6 +186,11 @@ model PRODUITS {
   poids               Decimal? @db.Decimal
   dimensions          Json?    @db.JsonB
   cree_le             DateTime @default(now()) @db.Timestamp
+
+  @@index([nom])
+  @@index([categorie_id])
+  @@index([est_actif])
+  @@index([prix])
 
   categorie       CATEGORIES           @relation(fields: [categorie_id], references: [id], onDelete: Cascade)
   images_produits IMAGES_PRODUITS[]

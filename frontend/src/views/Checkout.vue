@@ -265,11 +265,14 @@ const handleSubmit = async () => {
       billingAddress: sameAddress.value ? shippingAddress.value : billingAddress.value
     }
 
-    await ordersStore.createOrder(orderData)
-    await cartStore.clearCart()
+    const order = await ordersStore.createOrder(orderData)
 
-    // Redirect to order confirmation or orders page
-    router.push('/orders')
+    if (order) {
+      // TODO: Implement Stripe payment flow
+      // For now, just clear cart and redirect to orders
+      await cartStore.clearCart()
+      router.push('/orders')
+    }
   } catch (error) {
     console.error('Error creating order:', error)
   }

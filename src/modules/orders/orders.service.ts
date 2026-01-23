@@ -6,21 +6,26 @@ export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
   async findUserOrders(userId: string) {
-    // Simplified query to debug
-    const orders = await this.prisma.cOMMANDES.findMany({
+    return this.prisma.cOMMANDES.findMany({
       where: { utilisateur_id: userId },
+      include: {
+        articles_commande: {
+          include: {
+            produit: {
+              include: {
+                categorie: true,
+                images_produits: {
+                  where: { est_principale: true },
+                  take: 1,
+                },
+              },
+            },
+            variante: true,
+          },
+        },
+      },
       orderBy: { cree_le: 'desc' },
     });
-
-    // Get order items separately
-    for (const order of orders) {
-      const items = await this.prisma.aRTICLES_COMMANDE.findMany({
-        where: { commande_id: order.id },
-      });
-      (order as any).articles_commande = items;
-    }
-
-    return orders;
   }
 
   async findOne(id: string, userId: string) {
@@ -138,6 +143,30 @@ export class OrdersService {
           total: (Number(item.prix_unitaire) * item.quantite).toString(),
         },
       });
+    }
+
+    // Update stock levels
+    for (const item of cart.articles_panier) {
+      await this.prisma.pRODUITS.update({
+        where: { id: item.produit_id },
+        data: {
+          quantite_stock: {
+            decrement: item.quantite,
+          },
+        },
+      });
+
+      // If variant, update variant stock too
+      if (item.variante_id) {
+        await this.prisma.vARIANTES_PRODUITS.update({
+          where: { id: item.variante_id },
+          data: {
+            quantite_stock: {
+              decrement: item.quantite,
+            },
+          },
+        });
+      }
     }
 
     // Clear cart

@@ -50,22 +50,22 @@
             </div>
 
             <div class="order-items">
-              <div class="order-item" v-for="item in order.articles_commande.slice(0, 3)" :key="item.id">
+              <div class="order-item" v-for="item in (order.articles_commande || []).slice(0, 3)" :key="item.id">
                 <div class="item-image">
                   <img
-                    v-if="item.produit.images_produits && item.produit.images_produits.length > 0"
-                    :src="item.produit.images_produits.find(img => img.est_principale)?.url_image || item.produit.images_produits[0]?.url_image"
-                    :alt="item.produit.nom"
+                    v-if="item.produit?.images_produits && item.produit.images_produits.length > 0"
+                    :src="getImageUrl(item.produit.images_produits.find(img => img.est_principale)?.url_image || item.produit.images_produits[0]?.url_image)"
+                    :alt="item.produit?.nom || 'Produit'"
                   />
                   <div v-else class="no-image">Pas d'image</div>
                 </div>
                 <div class="item-details">
-                  <p class="item-name">{{ item.produit.nom }}</p>
+                  <p class="item-name">{{ item.produit?.nom || 'Produit inconnu' }}</p>
                   <p class="item-quantity">Qté: {{ item.quantite }}</p>
                 </div>
               </div>
-              <div v-if="order.articles_commande.length > 3" class="more-items">
-                +{{ order.articles_commande.length - 3 }} autres
+              <div v-if="(order.articles_commande || []).length > 3" class="more-items">
+                +{{ (order.articles_commande || []).length - 3 }} autres
               </div>
             </div>
 
@@ -121,28 +121,28 @@
                 <h3>Articles commandés</h3>
                 <div class="order-items-detailed">
                   <div
-                    v-for="item in ordersStore.currentOrder.articles_commande"
+                    v-for="item in (ordersStore.currentOrder.articles_commande || [])"
                     :key="item.id"
                     class="detailed-item"
                   >
                     <div class="item-image">
                       <img
-                        v-if="item.produit.images_produits && item.produit.images_produits.length > 0"
-                        :src="item.produit.images_produits.find(img => img.est_principale)?.url_image || item.produit.images_produits[0]?.url_image"
-                        :alt="item.produit.nom"
+                        v-if="item.produit?.images_produits && item.produit.images_produits.length > 0"
+                        :src="getImageUrl(item.produit.images_produits.find(img => img.est_principale)?.url_image || item.produit.images_produits[0]?.url_image)"
+                        :alt="item.produit?.nom || 'Produit'"
                       />
                       <div v-else class="no-image">Pas d'image</div>
                     </div>
                     <div class="item-info">
-                      <h4>{{ item.produit.nom }}</h4>
-                      <p class="item-category" v-if="item.produit.categorie">
+                      <h4>{{ item.produit?.nom || 'Produit inconnu' }}</h4>
+                      <p class="item-category" v-if="item.produit?.categorie">
                         {{ item.produit.categorie.nom }}
                       </p>
                       <p class="item-quantity">Quantité: {{ item.quantite }}</p>
-                      <p class="item-price">{{ formatPrice(parseFloat(item.prix_unitaire)) }} €</p>
+                      <p class="item-price">{{ formatPrice(parseFloat(item.prix_unitaire || '0')) }} €</p>
                     </div>
                     <div class="item-total">
-                      {{ formatPrice(parseFloat(item.prix_unitaire) * item.quantite) }} €
+                      {{ formatPrice(parseFloat(item.prix_unitaire || '0') * (item.quantite || 0)) }} €
                     </div>
                   </div>
                 </div>
@@ -233,6 +233,14 @@ const closeOrderDetails = () => {
   showOrderDetails.value = false
   ordersStore.currentOrder = null
 }
+
+const getImageUrl = (url: string) => {
+  if (url.startsWith('http')) return url
+  return `${API_BASE_URL}${url}`
+}
+
+// API base URL for images
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 </script>
 
 <style scoped>

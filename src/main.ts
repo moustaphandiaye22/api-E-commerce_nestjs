@@ -1,11 +1,29 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Sécurité : Headers HTTP avec Helmet
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+    },
+  }));
 
   // Configuration CORS pour le frontend
   app.enableCors({
@@ -17,6 +35,10 @@ async function bootstrap() {
 
   // Validation globale
   app.useGlobalPipes(new ValidationPipe());
+
+  // Rate limiting global
+  const throttlerGuard = app.get(ThrottlerGuard);
+  app.useGlobalGuards(throttlerGuard);
 
   // Intercepteur global pour standardiser les réponses
   app.useGlobalInterceptors(new TransformInterceptor());
