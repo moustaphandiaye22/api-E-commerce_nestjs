@@ -1,52 +1,52 @@
 <template>
   <div class="register-container">
     <div class="register-card">
-      <h2>Inscription</h2>
-      
+      <h2>{{ t('auth.register.title') }}</h2>
+
       <form @submit.prevent="handleSubmit">
         <div class="form-row">
           <div class="form-group">
-            <label for="prenom">Prénom</label>
+            <label for="prenom">{{ t('auth.register.firstName') }}</label>
             <input
               id="prenom"
               v-model="form.prenom"
               type="text"
               required
-              placeholder="John"
+              :placeholder="t('auth.register.firstName')"
             />
           </div>
 
           <div class="form-group">
-            <label for="nom">Nom</label>
+            <label for="nom">{{ t('auth.register.lastName') }}</label>
             <input
               id="nom"
               v-model="form.nom"
               type="text"
               required
-              placeholder="Doe"
+              :placeholder="t('auth.register.lastName')"
             />
           </div>
         </div>
 
         <div class="form-group">
-          <label for="email">Email</label>
+          <label for="email">{{ t('auth.register.email') }}</label>
           <input
             id="email"
             v-model="form.email"
             type="email"
             required
-            placeholder="votre@email.com"
+            :placeholder="t('auth.register.email')"
           />
         </div>
 
         <div class="form-group">
-          <label for="password">Mot de passe</label>
+          <label for="password">{{ t('auth.register.password') }}</label>
           <input
             id="password"
             v-model="form.password"
             type="password"
             required
-            placeholder="********"
+            :placeholder="t('auth.register.password')"
             minlength="6"
           />
         </div>
@@ -56,17 +56,17 @@
         </div>
 
         <div v-if="success" class="success-message">
-          Inscription réussie ! Redirection vers la page de connexion...
+          {{ t('common.success') }} ! {{ t('auth.register.loginLink') }}...
         </div>
 
         <button type="submit" class="btn-submit" :disabled="loading">
-          {{ loading ? 'Inscription...' : 'S\'inscrire' }}
+          {{ loading ? t('common.loading') : t('auth.register.submit') }}
         </button>
       </form>
 
       <p class="login-link">
-        Déjà un compte ?
-        <router-link to="/login">Se connecter</router-link>
+        {{ t('auth.register.hasAccount') }}
+        <router-link to="/login">{{ t('auth.register.loginLink') }}</router-link>
       </p>
     </div>
   </div>
@@ -76,9 +76,11 @@
 import { reactive, ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
+import { useI18n } from '../composables/useI18n'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const { t } = useI18n()
 
 const form = reactive({
   prenom: '',
@@ -113,34 +115,46 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
+@import '../styles/design-system.css';
+
 .register-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f5f5;
-  padding: 1rem;
+  background-color: var(--color-bg-secondary);
+  padding: var(--spacing-4);
 }
 
 .register-card {
-  background: white;
+  background: var(--color-bg-primary);
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 500px;
+  border: var(--border-width) solid var(--color-border-light);
 }
 
 .register-card h2 {
   margin-bottom: 1.5rem;
   text-align: center;
-  color: #333;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: var(--spacing-4);
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2);
+  }
 }
 
 .form-group {
@@ -150,74 +164,105 @@ const handleSubmit = async () => {
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #555;
-  font-weight: 500;
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
 }
 
 .form-group input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  border: var(--border-width) solid var(--color-border-medium);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
   box-sizing: border-box;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-fast);
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-lighter);
 }
 
 .error-message {
-  background-color: #ffebee;
-  color: #c62828;
+  background-color: var(--color-error-light);
+  color: var(--color-error);
   padding: 0.75rem;
-  border-radius: 4px;
+  border-radius: var(--border-radius-md);
   margin-bottom: 1rem;
+  font-size: var(--font-size-sm);
+  border: var(--border-width) solid var(--color-error-light);
 }
 
 .success-message {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: var(--color-success-light);
+  color: var(--color-success);
   padding: 0.75rem;
-  border-radius: 4px;
+  border-radius: var(--border-radius-md);
   margin-bottom: 1rem;
+  font-size: var(--font-size-sm);
+  border: var(--border-width) solid var(--color-success-light);
 }
 
 .btn-submit {
   width: 100%;
   padding: 0.75rem;
-  background-color: #4CAF50;
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  font-weight: 500;
+  transition: background-color var(--transition-fast);
 }
 
 .btn-submit:hover:not(:disabled) {
-  background-color: #45a049;
+  background-color: var(--color-primary-dark);
 }
 
 .btn-submit:disabled {
-  background-color: #ccc;
+  background-color: var(--color-text-tertiary);
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .login-link {
   text-align: center;
   margin-top: 1.5rem;
-  color: #666;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .login-link a {
-  color: #4CAF50;
+  color: var(--color-primary);
   text-decoration: none;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-fast);
 }
 
 .login-link a:hover {
+  color: var(--color-primary-dark);
   text-decoration: underline;
+}
+
+/* Dark theme support */
+:global(.dark) .register-card {
+  background: var(--color-bg-primary);
+  border-color: var(--color-border-light);
+}
+
+:global(.dark) .form-group input {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border-medium);
+  color: var(--color-text-primary);
+}
+
+:global(.dark) .form-group input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(70, 130, 180, 0.1);
 }
 </style>

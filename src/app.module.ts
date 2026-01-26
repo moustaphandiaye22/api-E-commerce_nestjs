@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { join } from 'path';
 import { HealthController } from './common/controllers/health.controller';
 import { AuditService } from './common/services/audit.service';
+import { CacheModule } from './cache/cache.module';
+import { LoggerModule } from './logger/logger.module';
+import { MonitoringModule } from './monitoring/monitoring.module';
+import { APP_GUARD } from '@nestjs/core';
 import { AddressesModule } from './modules/addresses/addresses.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -50,6 +54,9 @@ import mailConfig from './config/mail.config';
         limit: 10, // 10 requests per minute
       },
     ]),
+    CacheModule,
+    LoggerModule,
+    MonitoringModule,
     PrismaModule,
     AddressesModule,
     AuthModule,
@@ -66,6 +73,13 @@ import mailConfig from './config/mail.config';
     UploadModule,
   ],
   controllers: [AppController, HealthController],
-  providers: [AppService, AuditService],
+  providers: [
+    AppService,
+    AuditService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

@@ -1,28 +1,28 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <h2>Connexion</h2>
-      
+      <h2>{{ t('auth.login.title') }}</h2>
+
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
-          <label for="email">Email</label>
+          <label for="email">{{ t('auth.login.email') }}</label>
           <input
             id="email"
             v-model="form.email"
             type="email"
             required
-            placeholder="votre@email.com"
+            :placeholder="t('auth.login.email')"
           />
         </div>
 
         <div class="form-group">
-          <label for="password">Mot de passe</label>
+          <label for="password">{{ t('auth.login.password') }}</label>
           <input
             id="password"
             v-model="form.password"
             type="password"
             required
-            placeholder="********"
+            :placeholder="t('auth.login.password')"
           />
         </div>
 
@@ -31,13 +31,13 @@
         </div>
 
         <button type="submit" class="btn-submit" :disabled="authStore.loading">
-          {{ authStore.loading ? 'Connexion...' : 'Se connecter' }}
+          {{ authStore.loading ? t('common.loading') : t('auth.login.submit') }}
         </button>
       </form>
 
       <p class="register-link">
-        Pas encore de compte ?
-        <router-link to="/register">S'inscrire</router-link>
+        {{ t('auth.login.noAccount') }}
+        <router-link to="/register">{{ t('auth.login.registerLink') }}</router-link>
       </p>
     </div>
   </div>
@@ -47,10 +47,12 @@
 import { reactive } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from '../composables/useI18n'
 
 const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 
 const form = reactive({
   email: '',
@@ -71,27 +73,32 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
+@import '../styles/design-system.css';
+
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: var(--color-bg-secondary);
 }
 
 .login-card {
-  background: white;
+  background: var(--color-bg-primary);
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 400px;
+  border: var(--border-width) solid var(--color-border-light);
 }
 
 .login-card h2 {
   margin-bottom: 1.5rem;
   text-align: center;
-  color: #333;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
 }
 
 .form-group {
@@ -101,66 +108,95 @@ const handleSubmit = async () => {
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #555;
-  font-weight: 500;
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
 }
 
 .form-group input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  border: var(--border-width) solid var(--color-border-medium);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
   box-sizing: border-box;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-fast);
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-lighter);
 }
 
 .error-message {
-  background-color: #ffebee;
-  color: #c62828;
+  background-color: var(--color-error-light);
+  color: var(--color-error);
   padding: 0.75rem;
-  border-radius: 4px;
+  border-radius: var(--border-radius-md);
   margin-bottom: 1rem;
+  font-size: var(--font-size-sm);
+  border: var(--border-width) solid var(--color-error-light);
 }
 
 .btn-submit {
   width: 100%;
   padding: 0.75rem;
-  background-color: #4CAF50;
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  font-weight: 500;
+  transition: background-color var(--transition-fast);
 }
 
 .btn-submit:hover:not(:disabled) {
-  background-color: #45a049;
+  background-color: var(--color-primary-dark);
 }
 
 .btn-submit:disabled {
-  background-color: #ccc;
+  background-color: var(--color-text-tertiary);
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .register-link {
   text-align: center;
   margin-top: 1.5rem;
-  color: #666;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .register-link a {
-  color: #4CAF50;
+  color: var(--color-primary);
   text-decoration: none;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-fast);
 }
 
 .register-link a:hover {
+  color: var(--color-primary-dark);
   text-decoration: underline;
+}
+
+/* Dark theme support */
+:global(.dark) .login-card {
+  background: var(--color-bg-primary);
+  border-color: var(--color-border-light);
+}
+
+:global(.dark) .form-group input {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border-medium);
+  color: var(--color-text-primary);
+}
+
+:global(.dark) .form-group input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(70, 130, 180, 0.1);
 }
 </style>

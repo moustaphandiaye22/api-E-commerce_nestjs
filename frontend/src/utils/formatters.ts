@@ -3,8 +3,50 @@
  * Principe DRY: Fonctions réutilisables pour le formatage
  */
 
+// Taux de conversion Euro vers CFA (fixe pour la démonstration)
+const EUR_TO_XAF_RATE = 655.957
+
+/**
+ * Convertit un prix en Euro vers CFA
+ */
+export function convertEurToXaf(eurPrice: number): number {
+  return eurPrice * EUR_TO_XAF_RATE
+}
+
 /**
  * Formate un prix en euros
+ */
+export function formatPriceEur(price: number): string {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(price)
+}
+
+/**
+ * Formate un prix en Francs CFA
+ */
+export function formatPriceXaf(price: number): string {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'XAF',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price)
+}
+
+/**
+ * Formate un prix avec les deux devises (Euro + CFA)
+ */
+export function formatPriceDual(priceEur: number): string {
+  const priceXaf = convertEurToXaf(priceEur)
+  return `${formatPriceEur(priceEur)} (${formatPriceXaf(priceXaf)})`
+}
+
+/**
+ * Formate un prix simple (rétrocompatibilité)
  */
 export function formatPrice(price: number): string {
   return new Intl.NumberFormat('fr-FR', {
