@@ -6,23 +6,53 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
+// Compression middleware (will be available after npm install)
+let compression: any;
+try {
+  compression = require('compression');
+} catch (error) {
+  console.warn('Compression middleware not available, install with: npm install compression');
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Sécurité : Headers HTTP avec Helmet
+  // Compression pour améliorer les performances
+  if (compression) {
+    app.use(compression({
+      level: 6, // Bon compromis entre vitesse et compression
+      threshold: 1024, // Compresser seulement les réponses > 1KB
+      filter: (req, res) => {
+        // Ne pas compresser si déjà compressé ou si c'est une réponse d'erreur
+        if (res.getHeader('Content-Encoding')) {
+          return false;
+        }
+        return compression.filter(req, res);
+      },
+    }));
+  }
+
+  // Sécurité : Headers HTTP avec Helmet renforcés
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:", "*.vercel.app"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        imgSrc: ["'self'", "data:", "https:", "*.vercel.app", "*.stripe.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        connectSrc: ["'self'", "https://api.stripe.com"],
+        frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"],
       },
     },
     hsts: {
       maxAge: 31536000,
       includeSubDomains: true,
+      preload: true,
     },
+    noSniff: true,
+    xssFilter: true,
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   }));
 
   // Configuration CORS pour le frontend

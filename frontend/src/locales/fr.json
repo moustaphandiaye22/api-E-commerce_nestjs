@@ -1,0 +1,122 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "view": "Voir",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "close": "Fermer",
+    "open": "Ouvrir",
+    "noNotifications": "Aucune notification"
+  },
+  "nav": {
+    "home": "Accueil",
+    "products": "Produits",
+    "cart": "Panier",
+    "wishlist": "Favoris",
+    "orders": "Commandes",
+    "profile": "Profil",
+    "login": "Connexion",
+    "register": "Inscription",
+    "logout": "Déconnexion",
+    "notifications": "Notifications"
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "email": "Email",
+      "password": "Mot de passe",
+      "submit": "Se connecter",
+      "noAccount": "Pas encore de compte ?",
+      "registerLink": "S'inscrire"
+    },
+    "register": {
+      "title": "Inscription",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "Email",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "submit": "S'inscrire",
+      "hasAccount": "Déjà un compte ?",
+      "loginLink": "Se connecter"
+    }
+  },
+  "products": {
+    "title": "Produits",
+    "noProducts": "Aucun produit trouvé",
+    "addToCart": "Ajouter au panier",
+    "addToWishlist": "Ajouter aux favoris",
+    "removeFromWishlist": "Retirer des favoris",
+    "outOfStock": "Rupture de stock",
+    "price": "Prix",
+    "category": "Catégorie",
+    "description": "Description",
+    "specifications": "Spécifications",
+    "reviews": "Avis clients",
+    "relatedProducts": "Produits similaires"
+  },
+  "cart": {
+    "title": "Panier",
+    "empty": "Votre panier est vide",
+    "total": "Total",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "tax": "TVA",
+    "checkout": "Commander",
+    "continueShopping": "Continuer les achats",
+    "remove": "Retirer",
+    "quantity": "Quantité",
+    "update": "Mettre à jour"
+  },
+  "orders": {
+    "title": "Mes Commandes",
+    "orderNumber": "Commande n°",
+    "date": "Date",
+    "status": "Statut",
+    "total": "Total",
+    "details": "Détails",
+    "track": "Suivre",
+    "cancel": "Annuler",
+    "statuses": {
+      "pending": "En attente",
+      "confirmed": "Confirmée",
+      "shipped": "Expédiée",
+      "delivered": "Livrée",
+      "cancelled": "Annulée"
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "theme": "Thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "auto": "Automatique"
+  },
+  "errors": {
+    "network": "Erreur de réseau",
+    "server": "Erreur serveur",
+    "validation": "Erreur de validation",
+    "unauthorized": "Non autorisé",
+    "forbidden": "Accès interdit",
+    "notFound": "Page non trouvée"
+  },
+  "validation": {
+    "required": "Ce champ est requis",
+    "email": "Email invalide",
+    "minLength": "Minimum {min} caractères",
+    "maxLength": "Maximum {max} caractères"
+  }
+}

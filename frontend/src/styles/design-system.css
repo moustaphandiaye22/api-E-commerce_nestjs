@@ -176,3 +176,48 @@ body {
     --container-padding: var(--spacing-8);
   }
 }
+
+/* === DARK THEME === */
+
+.dark {
+  /* Text Colors */
+  --color-text-primary: #E5E7EB;
+  --color-text-secondary: #9CA3AF;
+  --color-text-tertiary: #6B7280;
+
+  /* Background Colors */
+  --color-bg-primary: #1F2937;
+  --color-bg-secondary: #111827;
+  --color-bg-tertiary: #0F172A;
+  --color-bg-hover: #374151;
+  --color-bg-active: #4B5563;
+
+  /* Border Colors */
+  --color-border-light: #374151;
+  --color-border-medium: #4B5563;
+  --color-border-dark: #6B7280;
+
+  /* Success Colors */
+  --color-success-light: #064E3B;
+
+  /* Error Colors */
+  --color-error-light: #7F1D1D;
+
+  /* Warning Colors */
+  --color-warning-light: #78350F;
+
+  /* Info Colors */
+  --color-info-light: #1E3A8A;
+}
+
+/* === LIGHT THEME (default) === */
+
+.light {
+  /* Les variables par défaut sont déjà définies dans :root */
+}
+
+/* === THEME TRANSITIONS === */
+
+* {
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
