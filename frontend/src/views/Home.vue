@@ -1,96 +1,207 @@
 <template>
   <div class="home">
     <!-- Hero Section -->
-    <section class="hero">
-      <h1>Bienvenue sur Baobab Market</h1>
-      <p>Découvrez notre sélection de produits de qualité</p>
-      <router-link to="/products" class="btn btn-primary">Voir tous les produits</router-link>
+    <section class="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      
+      <div class="container mx-auto px-4 py-16 md:py-24 relative">
+        <div class="max-w-4xl mx-auto text-center space-y-8">
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-(--color-primary-100) text-(--color-primary-800) text-sm font-medium mb-4">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+            <span>Découvrez nos nouveautés</span>
+          </div>
+          
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-(--text-primary) leading-tight">
+            Bienvenue sur
+            <span class="gradient-text">Baobab Market</span>
+          </h1>
+          
+          <p class="text-lg md:text-xl text-(--text-secondary) max-w-2xl mx-auto">
+            Découvrez notre sélection de produits africains authentiques. 
+            Qualité premium, livraison rapide et paiement sécurisé.
+          </p>
+          
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <Button
+              variant="primary"
+              size="lg"
+              class="group"
+              @click="$router.push('/products')"
+            >
+              <span>Explorer les produits</span>
+              <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              @click="scrollToFeatures"
+            >
+              <span>En savoir plus</span>
+            </Button>
+          </div>
+
+          <!-- Stats -->
+          <div class="grid grid-cols-3 gap-8 pt-12 max-w-2xl mx-auto">
+            <div class="space-y-2">
+              <p class="text-3xl md:text-4xl font-bold text-(--color-primary)">500+</p>
+              <p class="text-sm text-(--text-muted)">Produits</p>
+            </div>
+            <div class="space-y-2">
+              <p class="text-3xl md:text-4xl font-bold text-(--color-primary)">5000+</p>
+              <p class="text-sm text-(--text-muted)">Clients</p>
+            </div>
+            <div class="space-y-2">
+              <p class="text-3xl md:text-4xl font-bold text-(--color-primary)">98%</p>
+              <p class="text-sm text-(--text-muted)">Satisfaits</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Featured Products -->
-    <section class="featured-products">
-      <h2>Produits populaires</h2>
+    <section ref="featuresSection" class="py-16 md:py-24 bg-(--bg-primary)">
+      <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between mb-12">
+          <div>
+            <h2 class="text-3xl md:text-4xl font-bold text-(--text-primary) mb-3">
+              Produits populaires
+            </h2>
+            <p class="text-(--text-secondary)">Découvrez nos meilleures ventes</p>
+          </div>
+          <Button
+            variant="outline"
+            @click="$router.push('/products')"
+            class="hidden sm:flex items-center gap-2"
+          >
+            <span>Voir tout</span>
+            <ArrowRight class="w-4 h-4" />
+          </Button>
+        </div>
 
-      <div v-if="productsStore.loading" class="loading">
-        <div class="skeleton-grid">
-          <div v-for="n in 4" :key="n" class="skeleton-card">
-            <div class="skeleton-image"></div>
-            <div class="skeleton-content">
-              <div class="skeleton-title"></div>
-              <div class="skeleton-price"></div>
-            </div>
+        <!-- Loading State -->
+        <div v-if="productsStore.loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div v-for="n in 4" :key="n" class="animate-pulse">
+            <div class="bg-(--bg-tertiary) aspect-square rounded-xl mb-4"></div>
+            <div class="h-4 bg-(--bg-tertiary) rounded mb-2"></div>
+            <div class="h-4 bg-(--bg-tertiary) rounded w-2/3"></div>
           </div>
         </div>
-      </div>
 
-      <div v-else-if="productsStore.error" class="error-message">
-        <p>{{ productsStore.error }}</p>
-        <button @click="loadProducts" class="btn btn-outline">Réessayer</button>
-      </div>
-
-      <div v-else-if="featuredProducts.length > 0" class="products-grid">
-        <div
-          v-for="product in featuredProducts"
-          :key="product.id"
-          class="product-card"
-          @click="goToProduct(product.id)"
+        <!-- Error State -->
+        <Alert
+          v-else-if="productsStore.error"
+          variant="error"
+          :title="'Erreur de chargement'"
+          closeable
+          @close="productsStore.error = null"
         >
-          <!-- Product Image -->
-          <div class="product-image">
-            <img
-              v-if="product.images_produits && product.images_produits.length > 0"
-              :src="getImageUrl(product.images_produits.find(img => img.est_principale)?.url_image || product.images_produits[0]?.url_image)"
-              :alt="product.nom"
-              loading="lazy"
-              :srcset="getImageSrcSet(product)"
-              sizes="(max-width: 768px) 250px, 280px"
-            />
-            <div v-else class="no-image">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+          <p>{{ productsStore.error }}</p>
+          <Button variant="outline" size="sm" class="mt-3" @click="loadProducts">
+            Réessayer
+          </Button>
+        </Alert>
+
+        <!-- Products Grid -->
+        <div v-else-if="featuredProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <ProductCard
+            v-for="product in featuredProducts"
+            :key="product.id"
+            :product="product"
+            :is-in-wishlist="wishlistStore.isInWishlist(product.id)"
+            @click="goToProduct"
+            @add-to-cart="addToCart"
+            @toggle-wishlist="toggleWishlist"
+          />
+        </div>
+
+        <!-- Empty State -->
+        <div v-else class="text-center py-16">
+          <Package class="w-16 h-16 mx-auto text-(--text-muted) mb-4" />
+          <p class="text-(--text-secondary)">Aucun produit disponible pour le moment</p>
+        </div>
+
+        <!-- View All Button Mobile -->
+        <div class="mt-8 text-center sm:hidden">
+          <Button
+            variant="outline"
+            full-width
+            @click="$router.push('/products')"
+          >
+            <span>Voir tous les produits</span>
+            <ArrowRight class="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16 md:py-24 bg-(--bg-secondary)">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-(--text-primary) mb-3">
+            Pourquoi choisir Baobab Market ?
+          </h2>
+          <p class="text-(--text-secondary)">Une expérience d'achat exceptionnelle</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div class="group p-6 bg-(--bg-primary) rounded-xl border border-(--border-light) hover:border-(--color-primary) hover:shadow-lg transition-smooth">
+            <div class="w-12 h-12 rounded-lg bg-(--color-primary-100) flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Truck class="w-6 h-6 text-(--color-primary)" />
             </div>
+            <h3 class="text-xl font-semibold text-(--text-primary) mb-2">Livraison rapide</h3>
+            <p class="text-(--text-secondary)">Livraison en 24-48h dans toute l'Europe</p>
           </div>
 
-          <!-- Product Info -->
-          <div class="product-info">
-            <h3 class="product-title">{{ product.nom }}</h3>
-            <p class="product-price">{{ formatPrice(product.prix) }} €</p>
-            <button @click.stop="addToCart(product.id)" class="btn btn-small">
-              Ajouter au panier
-            </button>
+          <div class="group p-6 bg-(--bg-primary) rounded-xl border border-(--border-light) hover:border-(--color-primary) hover:shadow-lg transition-smooth">
+            <div class="w-12 h-12 rounded-lg bg-(--color-primary-100) flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Shield class="w-6 h-6 text-(--color-primary)" />
+            </div>
+            <h3 class="text-xl font-semibold text-(--text-primary) mb-2">Paiement sécurisé</h3>
+            <p class="text-(--text-secondary)">Transactions 100% sécurisées et cryptées</p>
           </div>
-        </div>
-      </div>
 
-      <div v-else class="no-products">
-        <p>Aucun produit disponible pour le moment.</p>
-      </div>
-    </section>
-
-    <!-- User Actions -->
-    <section class="user-actions" v-if="!authStore.isAuthenticated">
-      <div class="action-cards">
-        <div class="action-card">
-          <h3>Créer un compte</h3>
-          <p>Profitez d'avantages exclusifs</p>
-          <router-link to="/register" class="btn btn-outline">S'inscrire</router-link>
-        </div>
-        <div class="action-card">
-          <h3>Se connecter</h3>
-          <p>Accédez à votre compte</p>
-          <router-link to="/login" class="btn btn-outline">Se connecter</router-link>
+          <div class="group p-6 bg-(--bg-primary) rounded-xl border border-(--border-light) hover:border-(--color-primary) hover:shadow-lg transition-smooth">
+            <div class="w-12 h-12 rounded-lg bg-(--color-primary-100) flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Headphones class="w-6 h-6 text-(--color-primary)" />
+            </div>
+            <h3 class="text-xl font-semibold text-(--text-primary) mb-2">Support 24/7</h3>
+            <p class="text-(--text-secondary)">Notre équipe à votre service 7j/7</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="user-actions" v-else>
-      <div class="welcome-user">
-        <h3>Bonjour {{ authStore.user?.prenom }} !</h3>
-        <div class="user-links">
-          <router-link to="/profile" class="btn btn-outline">Mon profil</router-link>
-          <router-link to="/orders" class="btn btn-outline">Mes commandes</router-link>
-          <button @click="handleLogout" class="btn btn-danger">Déconnexion</button>
+    <!-- CTA Section -->
+    <section v-if="!authStore.isAuthenticated" class="py-16 md:py-24 bg-(--bg-primary)">
+      <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto text-center gradient-bg rounded-2xl p-12 text-white">
+          <h2 class="text-3xl md:text-4xl font-bold mb-4">
+            Rejoignez notre communauté
+          </h2>
+          <p class="text-lg mb-8 opacity-90">
+            Créez votre compte et profitez d'avantages exclusifs
+          </p>
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button
+              variant="secondary"
+              size="lg"
+              @click="$router.push('/register')"
+            >
+              Créer un compte
+            </Button>
+            <Button
+              variant="ghost"
+              size="lg"
+              class="!text-white hover:!bg-white/20"
+              @click="$router.push('/login')"
+            >
+              Se connecter
+            </Button>
+          </div>
         </div>
       </div>
     </section>
@@ -99,424 +210,81 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useProductsStore } from '../stores/products'
 import { useCartStore } from '../stores/cart'
-import { useRouter } from 'vue-router'
-import { formatPrice } from '../utils/formatters'
-import type { Product } from '../types/api'
+import { useWishlistStore } from '../stores/wishlist'
+import Button from '../components/ui/Button.vue'
+import Alert from '../components/ui/Alert.vue'
+import ProductCard from '../components/shared/ProductCard.vue'
+import {
+  ArrowRight,
+  Package,
+  Truck,
+  Shield,
+  Headphones,
+} from 'lucide-vue-next'
 
+const router = useRouter()
 const authStore = useAuthStore()
 const productsStore = useProductsStore()
 const cartStore = useCartStore()
-const router = useRouter()
+const wishlistStore = useWishlistStore()
 
-// API base URL for images
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const featuresSection = ref<HTMLElement>()
 
-// Reactive data
-const featuredProducts = ref<Product[]>([])
-
-// Computed
-const isAuthenticated = computed(() => authStore.isAuthenticated)
-
-// Methods
-const handleLogout = async () => {
-  await authStore.logout()
-  router.push('/login')
-}
+const featuredProducts = computed(() => {
+  return productsStore.products.slice(0, 8)
+})
 
 const loadProducts = async () => {
-  // Use cached data if available, otherwise fetch
-  if (productsStore.products.length === 0) {
-    await productsStore.fetchProducts({ page: 1, limit: 8 })
-  }
-  featuredProducts.value = productsStore.products.slice(0, 4)
+  await productsStore.fetchProducts({ limit: 8 })
 }
 
-const goToProduct = (id: string) => {
-  router.push(`/products/${id}`)
+const goToProduct = (product: any) => {
+  router.push(`/products/${product.id}`)
 }
 
 const addToCart = async (productId: string) => {
-  try {
-    await cartStore.addItem({ produit_id: productId, quantite: 1 })
-  } catch (error) {
-    console.error('Error adding to cart:', error)
+  await cartStore.addItem({ produit_id: productId, quantite: 1 })
+}
+
+const toggleWishlist = async (productId: string) => {
+  if (wishlistStore.isInWishlist(productId)) {
+    await wishlistStore.removeItem(productId)
+  } else {
+    await wishlistStore.addItem(productId)
   }
 }
 
-const getImageUrl = (url: string) => {
-  if (url.startsWith('http')) return url
-  return `${API_BASE_URL}${url}`
+const scrollToFeatures = () => {
+  featuresSection.value?.scrollIntoView({ behavior: 'smooth' })
 }
 
-const getImageSrcSet = (product: any) => {
-  // For now, return single image. In production, you'd have multiple sizes
-  const imageUrl = getImageUrl(product.images_produits?.find((img: any) => img.est_principale)?.url_image || product.images_produits?.[0]?.url_image)
-  return imageUrl ? `${imageUrl} 280w` : ''
-}
-
-// Load data on mount
-onMounted(async () => {
-  await loadProducts()
+onMounted(() => {
+  loadProducts()
 })
 </script>
 
 <style scoped>
-@import '../styles/design-system.css';
-
-.home {
-  max-width: var(--max-width-2xl);
-  margin: 0 auto;
-  padding: 0 var(--container-padding);
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, var(--border-light) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border-light) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
-/* === HERO SECTION === */
-.hero {
-  text-align: center;
-  padding: var(--spacing-16) var(--spacing-4);
-  background: linear-gradient(135deg, var(--color-primary-lighter) 0%, var(--color-primary) 100%);
-  border-radius: var(--border-radius-lg);
-  margin-bottom: var(--spacing-12);
-  color: white;
-}
-
-.hero h1 {
-  font-size: var(--font-size-5xl);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--spacing-4);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.hero p {
-  font-size: var(--font-size-xl);
-  margin-bottom: var(--spacing-8);
-  opacity: 0.9;
-}
-
-.hero .btn {
-  background-color: white;
-  color: var(--color-primary);
-  padding: var(--spacing-4) var(--spacing-8);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-}
-
-.hero .btn:hover {
-  background-color: var(--color-bg-primary);
-  transform: translateY(-2px);
-}
-
-/* === FEATURED PRODUCTS === */
-.featured-products {
-  margin-bottom: var(--spacing-12);
-}
-
-.featured-products h2 {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  text-align: center;
-  margin-bottom: var(--spacing-8);
-}
-
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--spacing-6);
-  margin-bottom: var(--spacing-8);
-}
-
-.product-card {
-  background-color: var(--color-bg-primary);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-}
-
-.product-image {
-  width: 100%;
-  height: 200px;
-  background-color: var(--color-bg-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.product-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform var(--transition-fast);
-}
-
-.product-card:hover .product-image img {
-  transform: scale(1.05);
-}
-
-.product-image .no-image {
-  color: var(--color-text-tertiary);
-  font-size: var(--font-size-sm);
-}
-
-.product-image .no-image svg {
-  width: 48px;
-  height: 48px;
-}
-
-.product-info {
-  padding: var(--spacing-4);
-}
-
-.product-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-2);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-height: 1.4;
-}
-
-.product-price {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
-  margin-bottom: var(--spacing-3);
-}
-
-.btn-small {
-  width: 100%;
-  padding: var(--spacing-2) var(--spacing-4);
-  font-size: var(--font-size-sm);
-}
-
-/* === USER ACTIONS === */
-.user-actions {
-  margin-bottom: var(--spacing-8);
-}
-
-.action-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--spacing-6);
-}
-
-.action-card {
-  background-color: var(--color-bg-primary);
-  padding: var(--spacing-6);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
-  text-align: center;
-}
-
-.action-card h3 {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-2);
-}
-
-.action-card p {
-  color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-4);
-}
-
-.welcome-user {
-  text-align: center;
-  background-color: var(--color-bg-primary);
-  padding: var(--spacing-6);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.welcome-user h3 {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-4);
-}
-
-.user-links {
-  display: flex;
-  gap: var(--spacing-3);
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-/* === LOADING & ERROR === */
-.loading, .error-message {
-  text-align: center;
-  padding: var(--spacing-12);
-}
-
-.skeleton-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--spacing-6);
-}
-
-.skeleton-card {
-  background-color: var(--color-bg-primary);
-  border-radius: var(--border-radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-
-.skeleton-image {
-  width: 100%;
-  height: 200px;
-  background-color: var(--color-bg-secondary);
-  position: relative;
-  overflow: hidden;
-}
-
-.skeleton-image::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  animation: shimmer 1.5s infinite;
-}
-
-.skeleton-content {
-  padding: var(--spacing-4);
-}
-
-.skeleton-title {
-  height: 20px;
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--border-radius-sm);
-  margin-bottom: var(--spacing-2);
-  position: relative;
-  overflow: hidden;
-}
-
-.skeleton-title::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  animation: shimmer 1.5s infinite;
-}
-
-.skeleton-price {
-  height: 24px;
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--border-radius-sm);
-  width: 60%;
-  position: relative;
-  overflow: hidden;
-}
-
-.skeleton-price::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  100% {
-    left: 100%;
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
 
-.no-products {
-  text-align: center;
-  padding: var(--spacing-12);
-  color: var(--color-text-secondary);
-}
-
-/* === BUTTONS === */
-.btn {
-  display: inline-block;
-  padding: var(--spacing-3) var(--spacing-6);
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
-  text-decoration: none;
-  border-radius: var(--border-radius-md);
-  border: none;
-  cursor: pointer;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  transition: all var(--transition-fast);
-}
-
-.btn:hover {
-  background-color: var(--color-primary-dark);
-  transform: translateY(-1px);
-}
-
-.btn-outline {
-  background-color: transparent;
-  color: var(--color-primary);
-  border: 2px solid var(--color-primary);
-}
-
-.btn-outline:hover {
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
-}
-
-.btn-danger {
-  background-color: var(--color-error);
-  color: white;
-}
-
-.btn-danger:hover {
-  background-color: var(--color-error);
-  opacity: 0.9;
-}
-
-.btn-small {
-  padding: var(--spacing-2) var(--spacing-4);
-  font-size: var(--font-size-sm);
-}
-
-/* === RESPONSIVE === */
-@media (max-width: 768px) {
-  .hero {
-    padding: var(--spacing-8) var(--spacing-4);
-  }
-
-  .hero h1 {
-    font-size: var(--font-size-4xl);
-  }
-
-  .products-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--spacing-4);
-  }
-
-  .action-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .user-links {
-    flex-direction: column;
-    align-items: center;
-  }
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 </style>

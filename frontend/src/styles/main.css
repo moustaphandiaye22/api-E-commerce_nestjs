@@ -1,0 +1,321 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* Import Tailwind CSS v4 */
+@import "tailwindcss";
+
+/* ============================================
+   DESIGN SYSTEM - Baobab Market E-commerce
+   Modern, Professional, Orange Theme
+   ============================================ */
+
+@layer base {
+  /* CSS Variables for Design Tokens */
+  :root {
+    /* === PRIMARY COLORS (Vibrant Orange) === */
+    --color-primary: #FE6F5E;
+    --color-primary-50: #FFF4F2;
+    --color-primary-100: #FFE7E4;
+    --color-primary-200: #FFCEC9;
+    --color-primary-300: #FFB6AE;
+    --color-primary-400: #FE9E93;
+    --color-primary-500: #FE8578;
+    --color-primary-600: #FE6F5E;
+    --color-primary-700: #FE3923;
+    --color-primary-800: #E61801;
+    --color-primary-900: #AD1201;
+    --color-primary-950: #730C01;
+
+    /* === NEUTRAL COLORS === */
+    --color-gray-50: #F9FAFB;
+    --color-gray-100: #F3F4F6;
+    --color-gray-200: #E5E7EB;
+    --color-gray-300: #D1D5DB;
+    --color-gray-400: #9CA3AF;
+    --color-gray-500: #6B7280;
+    --color-gray-600: #4B5563;
+    --color-gray-700: #374151;
+    --color-gray-800: #1F2937;
+    --color-gray-900: #111827;
+    --color-gray-950: #030712;
+
+    /* === SEMANTIC COLORS === */
+    --color-success: #10B981;
+    --color-success-light: #D1FAE5;
+    --color-warning: #F59E0B;
+    --color-warning-light: #FEF3C7;
+    --color-error: #EF4444;
+    --color-error-light: #FEE2E2;
+    --color-info: #3B82F6;
+    --color-info-light: #DBEAFE;
+
+    /* === BACKGROUND COLORS === */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F9FAFB;
+    --bg-tertiary: #F3F4F6;
+    --bg-hover: #E5E7EB;
+    --bg-active: #D1D5DB;
+
+    /* === TEXT COLORS === */
+    --text-primary: #111827;
+    --text-secondary: #4B5563;
+    --text-tertiary: #6B7280;
+    --text-inverse: #FFFFFF;
+    --text-muted: #9CA3AF;
+
+    /* === BORDER COLORS === */
+    --border-light: #E5E7EB;
+    --border-medium: #D1D5DB;
+    --border-dark: #9CA3AF;
+
+    /* === SHADOWS === */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Dark Theme */
+  .dark {
+    --color-primary: #FE8578;
+    
+    --bg-primary: #111827;
+    --bg-secondary: #1F2937;
+    --bg-tertiary: #374151;
+    --bg-hover: #4B5563;
+    --bg-active: #6B7280;
+
+    --text-primary: #F9FAFB;
+    --text-secondary: #D1D5DB;
+    --text-tertiary: #9CA3AF;
+    --text-inverse: #111827;
+    --text-muted: #6B7280;
+
+    --border-light: #374151;
+    --border-medium: #4B5563;
+    --border-dark: #6B7280;
+  }
+
+  /* === BASE RESETS === */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+
+  /* === TYPOGRAPHY === */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+
+  h1 {
+    font-size: 2.25rem; /* 36px */
+  }
+
+  h2 {
+    font-size: 1.875rem; /* 30px */
+  }
+
+  h3 {
+    font-size: 1.5rem; /* 24px */
+  }
+
+  h4 {
+    font-size: 1.25rem; /* 20px */
+  }
+
+  h5 {
+    font-size: 1.125rem; /* 18px */
+  }
+
+  h6 {
+    font-size: 1rem; /* 16px */
+  }
+
+  p {
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color 150ms ease;
+  }
+
+  a:hover {
+    color: var(--color-primary-700);
+  }
+
+  /* === SELECTION === */
+  ::selection {
+    background-color: var(--color-primary-200);
+    color: var(--text-primary);
+  }
+
+  /* === SCROLLBAR === */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--border-dark);
+  }
+
+  /* === FOCUS VISIBLE === */
+  *:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* === IMAGE === */
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* === BUTTON RESET === */
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  /* === INPUT RESET === */
+  input, textarea, select {
+    font-family: inherit;
+  }
+}
+
+@layer components {
+  /* === CONTAINER === */
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      max-width: 640px;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container {
+      max-width: 768px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      max-width: 1024px;
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container {
+      max-width: 1280px;
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .container {
+      max-width: 1536px;
+    }
+  }
+
+  /* === GLASS MORPHISM === */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .dark .glass {
+    background: rgba(17, 24, 39, 0.7);
+    border: 1px solid rgba(75, 85, 99, 0.18);
+  }
+
+  /* === GRADIENT TEXT === */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-700) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* === ANIMATED GRADIENT === */
+  .gradient-bg {
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-800) 100%);
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+  }
+
+  @keyframes gradient-shift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+}
+
+/* === CUSTOM UTILITIES === */
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility scrollbar-hidden {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@utility transition-smooth {
+  transition: all 200ms ease;
+}
+
+@utility shadow-glow {
+  box-shadow: 0 0 20px rgba(254, 111, 94, 0.3);
+}
