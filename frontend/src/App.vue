@@ -1,219 +1,343 @@
 <template>
-  <div id="app">
+  <div id="app" class="min-h-screen flex flex-col bg-(--bg-secondary)">
     <!-- Header/Navbar -->
-    <header class="app-header">
-      <div class="header-container">
-        <div class="header-brand">
-          <router-link to="/" class="brand-link">
-            <img src="/images/logos.png" alt="Baobab Market" class="brand-logo" />
-            <span class="brand-text">Baobab Market</span>
+    <header class="sticky top-0 z-40 bg-(--bg-primary) border-b border-(--border-light) backdrop-blur-lg bg-opacity-90">
+      <div class="container mx-auto">
+        <div class="flex items-center justify-between h-16">
+          <!-- Brand -->
+          <router-link to="/" class="flex items-center gap-3 group">
+            <img src="/images/logos.png" alt="Baobab Market" class="h-10 w-10 object-contain" />
+            <span class="text-xl font-bold gradient-text hidden sm:block">Baobab Market</span>
           </router-link>
-        </div>
 
-        <!-- Desktop Navigation -->
-        <nav class="desktop-nav">
-          <router-link to="/" class="nav-link">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <span>{{ t('nav.home') }}</span>
-          </router-link>
-          <router-link to="/products" class="nav-link">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
-            <span>{{ t('nav.products') }}</span>
-          </router-link>
-        </nav>
-
-        <!-- Right Section -->
-        <div class="header-right">
-          <!-- User Actions -->
-          <div v-if="authStore.isAuthenticated" class="user-actions">
-            <!-- Cart -->
-            <router-link to="/cart" class="nav-link">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              <span v-if="cartStore.itemCount > 0" class="nav-badge">{{ cartStore.itemCount }}</span>
+          <!-- Desktop Navigation -->
+          <nav class="hidden md:flex items-center gap-1">
+            <router-link
+              to="/"
+              class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
+              active-class="!text-(--color-primary) !bg-(--color-primary-100)"
+            >
+              <Home class="w-4 h-4" />
+              <span>{{ t('nav.home') }}</span>
             </router-link>
-
-            <!-- Wishlist -->
-            <router-link to="/wishlist" class="nav-link">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-              <span v-if="wishlistStore.itemCount > 0" class="nav-badge">{{ wishlistStore.itemCount }}</span>
+            <router-link
+              to="/products"
+              class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
+              active-class="!text-(--color-primary) !bg-(--color-primary-100)"
+            >
+              <Package class="w-4 h-4" />
+              <span>{{ t('nav.products') }}</span>
             </router-link>
+          </nav>
 
-            <!-- Notifications -->
-            <button @click="toggleNotifications" class="nav-link notifications-btn" :class="{ active: showNotifications }">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM15 17H9a6 6 0 01-6-6V9a6 6 0 0110-4.472M15 17v5l5-5h-5zM9 15l6-6m0 0l-6 6m6-6H3" />
-              </svg>
-              <span v-if="notificationsStore.unreadCount > 0" class="nav-badge">{{ notificationsStore.unreadCount }}</span>
-            </button>
+          <!-- Right Section -->
+          <div class="flex items-center gap-2">
+            <!-- Global Actions -->
+            <div class="hidden sm:flex items-center gap-1">
+              <LanguageSelector />
+              <CurrencySelector />
+              <ThemeToggle />
+            </div>
 
-            <!-- User Menu Dropdown -->
-            <div class="user-menu">
-              <button @click="toggleUserMenu" class="user-menu-btn" :class="{ active: showUserMenu }">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
+            <!-- User Actions -->
+            <div v-if="authStore.isAuthenticated" class="flex items-center gap-1">
+              <!-- Cart -->
+              <router-link
+                to="/cart"
+                class="relative p-2 rounded-lg text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
+              >
+                <ShoppingCart class="w-5 h-5" />
+                <Badge
+                  v-if="cartStore.itemCount > 0"
+                  variant="primary"
+                  size="sm"
+                  rounded
+                  class="absolute -top-1 -right-1 min-w-[1.25rem] h-5"
+                >
+                  {{ cartStore.itemCount }}
+                </Badge>
+              </router-link>
+
+              <!-- Wishlist -->
+              <router-link
+                to="/wishlist"
+                class="relative p-2 rounded-lg text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
+              >
+                <Heart class="w-5 h-5" />
+                <Badge
+                  v-if="wishlistStore.itemCount > 0"
+                  variant="primary"
+                  size="sm"
+                  rounded
+                  class="absolute -top-1 -right-1 min-w-[1.25rem] h-5"
+                >
+                  {{ wishlistStore.itemCount }}
+                </Badge>
+              </router-link>
+
+              <!-- Notifications -->
+              <button
+                @click="toggleNotifications"
+                class="relative p-2 rounded-lg text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
+                :class="{ '!bg-(--color-primary-100) !text-(--color-primary)': showNotifications }"
+              >
+                <Bell class="w-5 h-5" />
+                <Badge
+                  v-if="notificationsStore.unreadCount > 0"
+                  variant="error"
+                  dot
+                  class="absolute top-1.5 right-1.5"
+                />
               </button>
 
-              <!-- User Dropdown Menu -->
-              <div v-if="showUserMenu" class="user-dropdown">
-                <router-link to="/orders" class="dropdown-item" @click="showUserMenu = false">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>{{ t('nav.orders') }}</span>
-                </router-link>
-                <router-link to="/profile" class="dropdown-item" @click="showUserMenu = false">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  <span>{{ t('nav.profile') }}</span>
-                </router-link>
-                <hr class="dropdown-divider">
-                <button @click="handleLogout" class="dropdown-item logout-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  <span>{{ t('nav.logout') }}</span>
+              <!-- User Menu -->
+              <div class="relative">
+                <button
+                  @click="toggleUserMenu"
+                  class="flex items-center gap-2 p-2 rounded-lg text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
+                  :class="{ '!bg-(--color-primary-100) !text-(--color-primary)': showUserMenu }"
+                >
+                  <Avatar :name="authStore.user?.prenom" size="sm" />
+                  <ChevronDown class="w-4 h-4 hidden sm:block" />
                 </button>
+
+                <!-- User Dropdown -->
+                <Transition
+                  enter-active-class="transition-all duration-200 ease-out"
+                  enter-from-class="opacity-0 scale-95 -translate-y-2"
+                  enter-to-class="opacity-100 scale-100 translate-y-0"
+                  leave-active-class="transition-all duration-150 ease-in"
+                  leave-from-class="opacity-100 scale-100 translate-y-0"
+                  leave-to-class="opacity-0 scale-95 -translate-y-2"
+                >
+                  <div
+                    v-if="showUserMenu"
+                    ref="userMenu"
+                    class="absolute right-0 mt-2 w-56 bg-(--bg-primary) rounded-xl shadow-xl border border-(--border-light) overflow-hidden"
+                  >
+                    <div class="p-3 border-b border-(--border-light) bg-(--bg-secondary)">
+                      <p class="font-semibold text-(--text-primary)">{{ authStore.user?.prenom }} {{ authStore.user?.nom }}</p>
+                      <p class="text-sm text-(--text-muted)">{{ authStore.user?.email }}</p>
+                    </div>
+                    <div class="py-2">
+                      <router-link
+                        to="/orders"
+                        class="flex items-center gap-3 px-4 py-2 text-sm text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+                        @click="showUserMenu = false"
+                      >
+                        <ShoppingBag class="w-4 h-4" />
+                        <span>{{ t('nav.orders') }}</span>
+                      </router-link>
+                      <router-link
+                        to="/profile"
+                        class="flex items-center gap-3 px-4 py-2 text-sm text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+                        @click="showUserMenu = false"
+                      >
+                        <User class="w-4 h-4" />
+                        <span>{{ t('nav.profile') }}</span>
+                      </router-link>
+                      <hr class="my-2 border-(--border-light)" />
+                      <button
+                        @click="handleLogout"
+                        class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-smooth"
+                      >
+                        <LogOut class="w-4 h-4" />
+                        <span>{{ t('nav.logout') }}</span>
+                      </button>
+                    </div>
+                  </div>
+                </Transition>
               </div>
             </div>
-          </div>
 
-          <!-- Auth Links for non-authenticated users -->
-          <div v-if="!authStore.isAuthenticated" class="auth-links">
-            <router-link to="/login" class="nav-link">
-              <span>{{ t('nav.login') }}</span>
-            </router-link>
-            <router-link to="/register" class="btn-primary">
-              <span>{{ t('nav.register') }}</span>
-            </router-link>
-          </div>
-
-          <!-- Global Actions -->
-          <div class="global-actions">
-            <LanguageSelector />
-            <ThemeToggle />
-          </div>
-        </div>
-
-        <!-- Mobile Menu Button -->
-        <button @click="mobileMenuOpen = !mobileMenuOpen" class="mobile-menu-btn">
-          <svg v-if="!mobileMenuOpen" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-          <svg v-else class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Mobile Navigation -->
-      <div v-if="mobileMenuOpen" class="mobile-nav">
-        <router-link to="/" class="mobile-nav-link" @click="mobileMenuOpen = false">
-          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-          <span>{{ t('nav.home') }}</span>
-        </router-link>
-        <router-link to="/products" class="mobile-nav-link" @click="mobileMenuOpen = false">
-          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-          </svg>
-          <span>{{ t('nav.products') }}</span>
-        </router-link>
-        <!-- User Actions in Mobile Menu -->
-        <div v-if="authStore.isAuthenticated" class="mobile-section">
-          <div class="mobile-section-title">{{ t('nav.account') }}</div>
-          <router-link to="/cart" class="mobile-nav-link" @click="mobileMenuOpen = false">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <span>{{ t('nav.cart') }}</span>
-            <span v-if="cartStore.itemCount > 0" class="mobile-nav-badge">{{ cartStore.itemCount }}</span>
-          </router-link>
-          <router-link to="/wishlist" class="mobile-nav-link" @click="mobileMenuOpen = false">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            <span>{{ t('nav.wishlist') }}</span>
-            <span v-if="wishlistStore.itemCount > 0" class="mobile-nav-badge">{{ wishlistStore.itemCount }}</span>
-          </router-link>
-          <router-link to="/orders" class="mobile-nav-link" @click="mobileMenuOpen = false">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span>{{ t('nav.orders') }}</span>
-          </router-link>
-          <router-link to="/profile" class="mobile-nav-link" @click="mobileMenuOpen = false">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            <span>{{ t('nav.profile') }}</span>
-          </router-link>
-          <button @click="handleLogout" class="mobile-nav-link logout-mobile">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span>{{ t('nav.logout') }}</span>
-          </button>
-        </div>
-        <router-link v-if="!authStore.isAuthenticated" to="/login" class="mobile-nav-link" @click="mobileMenuOpen = false">
-          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          <span>{{ t('nav.login') }}</span>
-        </router-link>
-        <router-link v-if="!authStore.isAuthenticated" to="/register" class="mobile-nav-link" @click="mobileMenuOpen = false">
-          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-          </svg>
-          <span>{{ t('nav.register') }}</span>
-        </router-link>
-      </div>
-
-      <!-- Notifications Dropdown -->
-      <div v-if="showNotifications && authStore.isAuthenticated" class="notifications-dropdown">
-        <div class="notifications-header">
-          <h3>{{ t('nav.notifications') }}</h3>
-          <button @click="showNotifications = false" class="close-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <div v-if="notificationsStore.notifications.length === 0" class="no-notifications">
-          <p>{{ t('common.noNotifications') }}</p>
-        </div>
-        <div v-else class="notifications-list">
-          <div
-            v-for="notification in notificationsStore.notifications"
-            :key="notification.id"
-            class="notification-item"
-            :class="{ unread: !notification.read }"
-          >
-            <div class="notification-content">
-              <h4>{{ notification.title }}</h4>
-              <p>{{ notification.message }}</p>
-              <span class="notification-date">{{ formatDate(notification.createdAt) }}</span>
+            <!-- Auth Links -->
+            <div v-else class="flex items-center gap-2">
+              <router-link
+                to="/login"
+                class="px-4 py-2 text-sm font-medium text-(--text-secondary) hover:text-(--color-primary) transition-smooth hidden sm:block"
+              >
+                {{ t('nav.login') }}
+              </router-link>
+              <Button
+                variant="primary"
+                size="sm"
+                @click="$router.push('/register')"
+              >
+                {{ t('nav.register') }}
+              </Button>
             </div>
+
+            <!-- Mobile Menu Button -->
+            <button
+              @click="toggleMobileMenu"
+              class="md:hidden p-2 rounded-lg text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
+            >
+              <Menu v-if="!showMobileMenu" class="w-6 h-6" />
+              <X v-else class="w-6 h-6" />
+            </button>
           </div>
         </div>
       </div>
     </header>
 
+    <!-- Mobile Menu -->
+    <Transition
+      enter-active-class="transition-all duration-200 ease-out"
+      enter-from-class="opacity-0 -translate-y-4"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition-all duration-150 ease-in"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-4"
+    >
+      <div
+        v-if="showMobileMenu"
+        class="md:hidden fixed inset-x-0 top-16 z-30 bg-(--bg-primary) border-b border-(--border-light) shadow-xl"
+      >
+        <nav class="container mx-auto py-4 space-y-1">
+          <router-link
+            to="/"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+            active-class="!bg-(--color-primary-100) !text-(--color-primary)"
+            @click="showMobileMenu = false"
+          >
+            <Home class="w-5 h-5" />
+            <span class="font-medium">{{ t('nav.home') }}</span>
+          </router-link>
+          <router-link
+            to="/products"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+            active-class="!bg-(--color-primary-100) !text-(--color-primary)"
+            @click="showMobileMenu = false"
+          >
+            <Package class="w-5 h-5" />
+            <span class="font-medium">{{ t('nav.products') }}</span>
+          </router-link>
+
+          <template v-if="authStore.isAuthenticated">
+            <hr class="my-2 border-(--border-light)" />
+            <router-link
+              to="/cart"
+              class="flex items-center justify-between px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+              @click="showMobileMenu = false"
+            >
+              <div class="flex items-center gap-3">
+                <ShoppingCart class="w-5 h-5" />
+                <span class="font-medium">{{ t('nav.cart') }}</span>
+              </div>
+              <Badge v-if="cartStore.itemCount > 0" variant="primary" size="sm">
+                {{ cartStore.itemCount }}
+              </Badge>
+            </router-link>
+            <router-link
+              to="/wishlist"
+              class="flex items-center justify-between px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+              @click="showMobileMenu = false"
+            >
+              <div class="flex items-center gap-3">
+                <Heart class="w-5 h-5" />
+                <span class="font-medium">{{ t('nav.wishlist') }}</span>
+              </div>
+              <Badge v-if="wishlistStore.itemCount > 0" variant="primary" size="sm">
+                {{ wishlistStore.itemCount }}
+              </Badge>
+            </router-link>
+            <router-link
+              to="/orders"
+              class="flex items-center gap-3 px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+              @click="showMobileMenu = false"
+            >
+              <ShoppingBag class="w-5 h-5" />
+              <span class="font-medium">{{ t('nav.orders') }}</span>
+            </router-link>
+            <router-link
+              to="/profile"
+              class="flex items-center gap-3 px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+              @click="showMobileMenu = false"
+            >
+              <User class="w-5 h-5" />
+              <span class="font-medium">{{ t('nav.profile') }}</span>
+            </router-link>
+          </template>
+
+          <template v-else>
+            <hr class="my-2 border-(--border-light)" />
+            <router-link
+              to="/login"
+              class="flex items-center gap-3 px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+              @click="showMobileMenu = false"
+            >
+              <LogIn class="w-5 h-5" />
+              <span class="font-medium">{{ t('nav.login') }}</span>
+            </router-link>
+            <router-link
+              to="/register"
+              class="flex items-center gap-3 px-4 py-3 rounded-lg bg-(--color-primary) text-white font-medium"
+              @click="showMobileMenu = false"
+            >
+              <UserPlus class="w-5 h-5" />
+              <span>{{ t('nav.register') }}</span>
+            </router-link>
+          </template>
+
+          <hr class="my-2 border-(--border-light)" />
+          <div class="px-4 py-2 space-y-2">
+            <p class="text-xs text-(--text-muted) uppercase tracking-wide mb-2">Préférences</p>
+            <div class="flex items-center gap-2">
+              <LanguageSelector />
+              <CurrencySelector />
+              <ThemeToggle />
+            </div>
+          </div>
+        </nav>
+      </div>
+    </Transition>
+
+    <!-- Notifications Dropdown -->
+    <Transition
+      enter-active-class="transition-all duration-200 ease-out"
+      enter-from-class="opacity-0 scale-95 -translate-y-2"
+      enter-to-class="opacity-100 scale-100 translate-y-0"
+      leave-active-class="transition-all duration-150 ease-in"
+      leave-from-class="opacity-100 scale-100 translate-y-0"
+      leave-to-class="opacity-0 scale-95 -translate-y-2"
+    >
+      <div
+        v-if="showNotifications"
+        ref="notificationsMenu"
+        class="fixed top-20 right-4 w-96 max-w-[calc(100vw-2rem)] bg-(--bg-primary) rounded-xl shadow-2xl border border-(--border-light) overflow-hidden z-50"
+      >
+        <div class="flex items-center justify-between p-4 border-b border-(--border-light) bg-(--bg-secondary)">
+          <h3 class="font-semibold text-(--text-primary)">Notifications</h3>
+          <button
+            @click="showNotifications = false"
+            class="p-1 rounded-lg hover:bg-(--bg-hover) transition-smooth"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+        
+        <div class="max-h-96 overflow-y-auto scrollbar-hidden">
+          <div
+            v-for="notification in notificationsStore.notifications"
+            :key="notification.id"
+            class="p-4 border-b border-(--border-light) hover:bg-(--bg-hover) transition-smooth cursor-pointer"
+            :class="{ '!bg-(--color-primary-50)': !notification.read }"
+          >
+            <h4 class="font-medium text-(--text-primary) text-sm">{{ notification.title }}</h4>
+            <p class="text-sm text-(--text-secondary) mt-1">{{ notification.message }}</p>
+            <p class="text-xs text-(--text-muted) mt-2">{{ formatDate(notification.createdAt) }}</p>
+          </div>
+          
+          <div v-if="notificationsStore.notifications.length === 0" class="p-8 text-center">
+            <Bell class="w-12 h-12 mx-auto text-(--text-muted) mb-2" />
+            <p class="text-(--text-muted)">Aucune notification</p>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Main Content -->
-    <main class="app-main">
+    <main class="flex-1">
       <router-view />
     </main>
   </div>
@@ -221,626 +345,109 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useI18n } from './composables/useI18n'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 import { useCartStore } from './stores/cart'
 import { useWishlistStore } from './stores/wishlist'
 import { useNotificationsStore } from './stores/notifications'
-import { useRouter } from 'vue-router'
+import { useI18n } from './composables/useI18n'
+import Button from './components/ui/Button.vue'
+import Badge from './components/ui/Badge.vue'
+import Avatar from './components/ui/Avatar.vue'
 import LanguageSelector from './components/ui/LanguageSelector.vue'
+import CurrencySelector from './components/ui/CurrencySelector.vue'
 import ThemeToggle from './components/ui/ThemeToggle.vue'
+import {
+  Home,
+  Package,
+  ShoppingCart,
+  Heart,
+  Bell,
+  User,
+  ShoppingBag,
+  LogOut,
+  Menu,
+  X,
+  ChevronDown,
+  LogIn,
+  UserPlus,
+} from 'lucide-vue-next'
 
-const { t } = useI18n()
-
+const router = useRouter()
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
 const notificationsStore = useNotificationsStore()
-const router = useRouter()
-const mobileMenuOpen = ref(false)
+const { t } = useI18n()
+
+const showMobileMenu = ref(false)
+const showUserMenu = ref(false)
 const showNotifications = ref(false)
 const showUserMenu = ref(false)
 
-const handleLogout = async () => {
-  await authStore.logout()
-  router.push('/login')
-}
+const userMenu = ref<HTMLElement>()
+const notificationsMenu = ref<HTMLElement>()
 
-const toggleNotifications = () => {
-  showNotifications.value = !showNotifications.value
-  if (showNotifications.value) {
-    // Mark all as read when opening
-    notificationsStore.markAllAsRead()
+const toggleMobileMenu = () => {
+  showMobileMenu.value = !showMobileMenu.value
+  if (showMobileMenu.value) {
+    showUserMenu.value = false
+    showNotifications.value = false
   }
 }
 
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value
-  // Close notifications dropdown when opening user menu
   if (showUserMenu.value) {
+    showMobileMenu.value = false
     showNotifications.value = false
   }
 }
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'short',
+const toggleNotifications = () => {
+  showNotifications.value = !showNotifications.value
+  if (showNotifications.value) {
+    showMobileMenu.value = false
+    showUserMenu.value = false
+  }
+}
+
+const handleLogout = async () => {
+  await authStore.logout()
+  showUserMenu.value = false
+  router.push('/login')
+}
+
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString('fr-FR', {
     day: 'numeric',
+    month: 'short',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 
-onMounted(async () => {
-  if (authStore.isAuthenticated) {
-    await notificationsStore.fetchNotifications()
+// Handle click outside for dropdowns
+const handleClickOutside = (event: Event) => {
+  const target = event.target as Node
+
+  // Close user menu if clicked outside
+  if (userMenu.value && !userMenu.value.contains(target)) {
+    showUserMenu.value = false
   }
 
-  // Close dropdowns when clicking outside
-  const handleClickOutside = (event: Event) => {
-    const target = event.target as HTMLElement
-    const notificationsDropdown = document.querySelector('.notifications-dropdown')
-    const userDropdown = document.querySelector('.user-dropdown')
-
-    if (notificationsDropdown && !notificationsDropdown.contains(target) &&
-        !target.closest('.notifications-btn')) {
-      showNotifications.value = false
-    }
-
-    if (userDropdown && !userDropdown.contains(target) &&
-        !target.closest('.user-menu-btn')) {
-      showUserMenu.value = false
-    }
+  // Close notifications if clicked outside
+  if (notificationsMenu.value && !notificationsMenu.value.contains(target)) {
+    showNotifications.value = false
   }
+}
 
+// Add click outside listener
+onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+})
 
-  // Cleanup on unmount
-  onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside)
-  })
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
-
-<style>
-@import './styles/design-system.css';
-
-/* === APP LAYOUT === */
-
-#app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* === HEADER === */
-
-.app-header {
-  background-color: var(--color-bg-primary);
-  border-bottom: var(--border-width) solid var(--color-border-light);
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
-  box-shadow: var(--shadow-sm);
-}
-
-.header-container {
-  max-width: var(--max-width-2xl);
-  margin: 0 auto;
-  padding: var(--spacing-4) var(--container-padding);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-6);
-}
-
-/* Brand */
-.header-brand {
-  flex-shrink: 0;
-}
-
-.brand-link {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  text-decoration: none;
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-xl);
-  transition: color var(--transition-fast);
-}
-
-.brand-link:hover {
-  color: var(--color-primary);
-}
-
-.brand-logo {
-  width: 58px;
-  height: 48px;
-  object-fit: contain;
-}
-
-.brand-text {
-  display: none;
-}
-
-@media (min-width: 640px) {
-  .brand-text {
-    display: inline;
-  }
-}
-
-/* Desktop Navigation */
-.desktop-nav {
-  display: none;
-  gap: var(--spacing-2);
-}
-
-@media (min-width: 768px) {
-  .desktop-nav {
-    display: flex;
-  }
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-4);
-  border-radius: var(--border-radius-md);
-  text-decoration: none;
-  color: var(--color-text-secondary);
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-sm);
-  transition: all var(--transition-fast);
-}
-
-.nav-link:hover {
-  background-color: var(--color-bg-hover);
-  color: var(--color-primary);
-}
-
-.nav-link.router-link-active {
-  background-color: var(--color-primary-lighter);
-  color: var(--color-primary-dark);
-}
-
-.nav-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-
-.nav-badge {
-  background-color: var(--color-error);
-  color: var(--color-text-inverse);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  padding: 2px 6px;
-  border-radius: var(--border-radius-full);
-  margin-left: var(--spacing-1);
-  min-width: 18px;
-  text-align: center;
-}
-
-/* Header Right Section */
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-}
-
-/* User Actions */
-.user-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-}
-
-/* Auth Links */
-.auth-links {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-}
-
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--spacing-2) var(--spacing-4);
-  border-radius: var(--border-radius-md);
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
-  text-decoration: none;
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-sm);
-  transition: all var(--transition-fast);
-}
-
-.btn-primary:hover {
-  background-color: var(--color-primary-dark);
-  color: var(--color-text-inverse);
-}
-
-/* Global Actions */
-.global-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-}
-
-/* User Menu */
-.user-menu {
-  position: relative;
-}
-
-.user-menu-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  padding: var(--spacing-2);
-  border: none;
-  border-radius: var(--border-radius-md);
-  background: transparent;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.user-menu-btn:hover {
-  background-color: var(--color-bg-hover);
-  color: var(--color-primary);
-}
-
-.user-menu-btn.active {
-  background-color: var(--color-primary-lighter);
-  color: var(--color-primary-dark);
-}
-
-.dropdown-icon {
-  width: 16px;
-  height: 16px;
-  transition: transform var(--transition-fast);
-}
-
-.user-menu-btn.active .dropdown-icon {
-  transform: rotate(180deg);
-}
-
-/* User Dropdown */
-.user-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  min-width: 200px;
-  background-color: var(--color-bg-primary);
-  border: var(--border-width) solid var(--color-border-light);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
-  z-index: var(--z-dropdown);
-  margin-top: var(--spacing-1);
-}
-
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  width: 100%;
-  padding: var(--spacing-3) var(--spacing-4);
-  border: none;
-  background: none;
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.dropdown-item:hover {
-  background-color: var(--color-bg-hover);
-  color: var(--color-text-primary);
-}
-
-.dropdown-item svg {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-
-.dropdown-divider {
-  margin: var(--spacing-2) 0;
-  border: none;
-  border-top: var(--border-width) solid var(--color-border-light);
-}
-
-.logout-item {
-  color: var(--color-error);
-}
-
-.logout-item:hover {
-  background-color: var(--color-error-lighter);
-  color: var(--color-error-dark);
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .header-right {
-    gap: var(--spacing-2);
-  }
-
-  .user-actions {
-    gap: 0;
-  }
-
-  .nav-link span {
-    display: none;
-  }
-
-  .nav-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-  }
-}
-
-@media (max-width: 768px) {
-  .header-container {
-    padding: var(--spacing-3) var(--container-padding);
-  }
-
-  .desktop-nav {
-    display: none !important;
-  }
-
-  .header-right {
-    gap: var(--spacing-1);
-  }
-
-  .global-actions {
-    display: none;
-  }
-
-  .user-dropdown {
-    min-width: 180px;
-  }
-}
-
-.btn-ghost {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-4);
-  border: none;
-  border-radius: var(--border-radius-md);
-  background: transparent;
-  color: var(--color-text-secondary);
-  font-family: var(--font-family);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.btn-ghost:hover {
-  background-color: var(--color-bg-hover);
-  color: var(--color-error);
-}
-
-.icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-
-.btn-text {
-  display: none;
-}
-
-@media (min-width: 1024px) {
-  .btn-text {
-    display: inline;
-  }
-}
-
-/* Mobile Menu Button */
-.mobile-menu-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-2);
-  border: none;
-  border-radius: var(--border-radius-md);
-  background: transparent;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.mobile-menu-btn:hover {
-  background-color: var(--color-bg-hover);
-}
-
-@media (min-width: 768px) {
-  .mobile-menu-btn {
-    display: none;
-  }
-}
-
-/* Mobile Navigation */
-.mobile-nav {
-  border-top: var(--border-width) solid var(--color-border-light);
-  padding: var(--spacing-4) var(--container-padding);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
-}
-
-.mobile-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
-}
-
-.mobile-section-title {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: var(--spacing-2);
-  padding: 0 var(--spacing-4);
-}
-
-.logout-mobile {
-  color: var(--color-error);
-  margin-top: var(--spacing-2);
-}
-
-.logout-mobile:hover {
-  background-color: var(--color-error-lighter);
-  color: var(--color-error-dark);
-}
-
-.mobile-nav-link {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-3) var(--spacing-4);
-  border-radius: var(--border-radius-md);
-  text-decoration: none;
-  color: var(--color-text-secondary);
-  font-weight: var(--font-weight-medium);
-  transition: all var(--transition-fast);
-}
-
-.mobile-nav-link:hover {
-  background-color: var(--color-bg-hover);
-  color: var(--color-primary);
-}
-
-.mobile-nav-link.router-link-active {
-  background-color: var(--color-primary-lighter);
-  color: var(--color-primary-dark);
-}
-
-.mobile-nav-badge {
-  background-color: var(--color-error);
-  color: var(--color-text-inverse);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  padding: 2px 6px;
-  border-radius: var(--border-radius-full);
-  margin-left: var(--spacing-2);
-  min-width: 18px;
-  text-align: center;
-}
-
-/* === NOTIFICATIONS === */
-
-.notifications-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 20px;
-  width: 350px;
-  max-height: 400px;
-  background-color: var(--color-bg-primary);
-  border: var(--border-width) solid var(--color-border-light);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
-  z-index: var(--z-dropdown);
-  overflow: hidden;
-}
-
-.notifications-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-4);
-  border-bottom: var(--border-width) solid var(--color-border-light);
-  background-color: var(--color-bg-secondary);
-}
-
-.notifications-header h3 {
-  margin: 0;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  padding: var(--spacing-1);
-  border-radius: var(--border-radius-md);
-  transition: background-color var(--transition-fast);
-}
-
-.close-btn:hover {
-  background-color: var(--color-bg-hover);
-}
-
-.close-btn svg {
-  width: 16px;
-  height: 16px;
-}
-
-.notifications-list {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.notification-item {
-  padding: var(--spacing-4);
-  border-bottom: var(--border-width) solid var(--color-border-light);
-  transition: background-color var(--transition-fast);
-}
-
-.notification-item:hover {
-  background-color: var(--color-bg-hover);
-}
-
-.notification-item.unread {
-  background-color: var(--color-primary-lighter);
-  border-left: 3px solid var(--color-primary);
-}
-
-.notification-content h4 {
-  margin: 0 0 var(--spacing-1) 0;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
-
-.notification-content p {
-  margin: 0 0 var(--spacing-2) 0;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  line-height: 1.4;
-}
-
-.notification-date {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
-}
-
-.no-notifications {
-  padding: var(--spacing-8);
-  text-align: center;
-  color: var(--color-text-secondary);
-}
-
-.notifications-btn.active {
-  background-color: var(--color-primary-lighter);
-  color: var(--color-primary-dark);
-}
-
-/* === MAIN CONTENT === */
-
-.app-main {
-  flex: 1;
-  width: 100%;
-}
-</style>

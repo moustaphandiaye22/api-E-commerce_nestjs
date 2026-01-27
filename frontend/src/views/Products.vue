@@ -921,7 +921,7 @@ watch([selectedCategories, priceRange, filters], () => {
 
 .skeleton-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: var(--spacing-6);
   width: 100%;
 }
@@ -1026,7 +1026,7 @@ watch([selectedCategories, priceRange, filters], () => {
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--spacing-6);
 }
 
@@ -1489,6 +1489,10 @@ watch([selectedCategories, priceRange, filters], () => {
   .products-main {
     order: 1;
   }
+
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
@@ -1511,7 +1515,7 @@ watch([selectedCategories, priceRange, filters], () => {
   }
 
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: 1fr;
     gap: var(--spacing-4);
   }
 
@@ -1540,12 +1544,6 @@ watch([selectedCategories, priceRange, filters], () => {
 
   .pagination-btn {
     padding: var(--spacing-2) var(--spacing-3);
-  }
-}
-
-@media (max-width: 640px) {
-  .products-grid {
-    grid-template-columns: 1fr;
   }
 
   .view-toggle {

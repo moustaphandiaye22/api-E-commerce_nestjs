@@ -6,6 +6,9 @@ import { useAuthStore } from './stores/auth'
 import { useLocaleStore } from './stores/locale'
 import { useThemeStore } from './stores/theme'
 
+// Import global styles
+import './styles/main.css'
+
 const app = createApp(App)
 const pinia = createPinia()
 

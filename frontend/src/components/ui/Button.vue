@@ -1,12 +1,13 @@
 <template>
   <button :class="buttonClasses" :disabled="disabled || loading" :type="type">
-    <span v-if="loading" class="spinner"></span>
+    <Spinner v-if="loading" size="sm" :color="variant === 'primary' ? 'white' : 'primary'" />
     <slot v-else />
   </button>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import Spinner from './Spinner.vue'
 
 interface Props {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
@@ -27,122 +28,26 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const buttonClasses = computed(() => [
-  'btn',
-  `btn-${props.variant}`,
-  `btn-${props.size}`,
-  { 'btn-full': props.fullWidth },
-  { 'btn-loading': props.loading }
+  'inline-flex items-center justify-center gap-2',
+  'font-medium text-center rounded-lg',
+  'transition-smooth cursor-pointer',
+  'focus:outline-hidden focus:ring-2 focus:ring-(--color-primary) focus:ring-offset-2',
+  'disabled:opacity-50 disabled:cursor-not-allowed',
+  {
+    // Size variants
+    'px-3 py-1.5 text-sm': props.size === 'sm',
+    'px-5 py-2.5 text-base': props.size === 'md',
+    'px-6 py-3 text-lg': props.size === 'lg',
+    
+    // Width
+    'w-full': props.fullWidth,
+    
+    // Variant styles
+    'bg-(--color-primary) text-white hover:bg-(--color-primary-700) shadow-sm hover:shadow-md': props.variant === 'primary',
+    'bg-(--bg-tertiary) text-(--text-primary) hover:bg-(--bg-hover)': props.variant === 'secondary',
+    'border border-(--border-medium) bg-transparent text-(--text-primary) hover:bg-(--bg-hover) hover:border-(--color-primary)': props.variant === 'outline',
+    'bg-transparent text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary)': props.variant === 'ghost',
+    'bg-(--color-error) text-white hover:bg-red-600 shadow-sm hover:shadow-md': props.variant === 'danger',
+  }
 ])
 </script>
-
-<style scoped>
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-2);
-  font-family: var(--font-family);
-  font-weight: var(--font-weight-medium);
-  text-align: center;
-  text-decoration: none;
-  border: var(--border-width) solid transparent;
-  border-radius: var(--border-radius-md);
-  cursor: pointer;
-  transition: all var(--transition-base);
-  white-space: nowrap;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Sizes */
-.btn-sm {
-  padding: var(--spacing-2) var(--spacing-3);
-  font-size: var(--font-size-sm);
-}
-
-.btn-md {
-  padding: var(--spacing-3) var(--spacing-5);
-  font-size: var(--font-size-base);
-}
-
-.btn-lg {
-  padding: var(--spacing-4) var(--spacing-6);
-  font-size: var(--font-size-lg);
-}
-
-/* Variants */
-.btn-primary {
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
-  box-shadow: var(--shadow-md);
-}
-
-.btn-secondary {
-  background-color: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: var(--color-bg-hover);
-}
-
-.btn-outline {
-  background-color: transparent;
-  border-color: var(--color-border-medium);
-  color: var(--color-text-primary);
-}
-
-.btn-outline:hover:not(:disabled) {
-  background-color: var(--color-bg-hover);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.btn-ghost {
-  background-color: transparent;
-  color: var(--color-text-secondary);
-}
-
-.btn-ghost:hover:not(:disabled) {
-  background-color: var(--color-bg-hover);
-  color: var(--color-text-primary);
-}
-
-.btn-danger {
-  background-color: var(--color-error);
-  color: var(--color-text-inverse);
-}
-
-.btn-danger:hover:not(:disabled) {
-  background-color: #DC2626;
-  box-shadow: var(--shadow-md);
-}
-
-/* Full width */
-.btn-full {
-  width: 100%;
-}
-
-/* Loading spinner */
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid currentColor;
-  border-right-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-</style>
