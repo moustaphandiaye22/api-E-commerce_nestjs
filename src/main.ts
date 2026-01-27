@@ -112,6 +112,27 @@ async function bootstrap() {
     },
   });
 
+  // Enable graceful shutdown hooks
+  app.enableShutdownHooks();
+
+  // Global error handlers
+  process.on('uncaughtException', (error) => {
+    Logger.error('Uncaught Exception:', error);
+    process.exit(1);
+  });
+
+  process.on('unhandledRejection', (reason, promise) => {
+    Logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
+  });
+
+  // Handle SIGTERM for graceful shutdown
+  process.on('SIGTERM', async () => {
+    Logger.log('SIGTERM received, shutting down gracefully');
+    await app.close();
+    process.exit(0);
+  });
+
   await app.listen(process.env.PORT ?? 3000);
   console.log(`Application running on: http://localhost:${process.env.PORT ?? 3000}`);
   console.log(`Swagger documentation: http://localhost:${process.env.PORT ?? 3000}/api`);

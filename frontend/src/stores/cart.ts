@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { cartsAPI } from '../api/carts'
 import { couponsAPI } from '../api/coupons'
 import { useApi } from '../composables/useApi'
-import type { Cart, CartItem, AddToCartDto, CouponValidationResult } from '../types/api'
+import type { Cart, AddToCartDto, CouponValidationResult } from '../types/api'
 
 /**
  * Store du panier

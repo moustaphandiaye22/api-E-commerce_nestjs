@@ -383,7 +383,6 @@ const { t } = useI18n()
 const showMobileMenu = ref(false)
 const showUserMenu = ref(false)
 const showNotifications = ref(false)
-const showUserMenu = ref(false)
 
 const userMenu = ref<HTMLElement>()
 const notificationsMenu = ref<HTMLElement>()

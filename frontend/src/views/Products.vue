@@ -400,7 +400,7 @@ import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
 import { formatPrice } from '../utils/formatters'
 import Button from '../components/ui/Button.vue'
-import type { Product, Category } from '../types/api'
+import type { Product } from '../types/api'
 
 // API base URL for images
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
@@ -583,12 +583,12 @@ const isInWishlist = (productId: string) => {
   return wishlistStore.isInWishlist(productId)
 }
 
-const isNewProduct = (product: Product) => {
+const isNewProduct = (_product: Product) => {
   // For now, randomly mark some products as new (in real app, check created date)
   return Math.random() > 0.8 // 20% chance of being "new"
 }
 
-const hasDiscount = (product: Product) => {
+const hasDiscount = (_product: Product) => {
   // For now, assume no discounts. In real app, check for discount field
   return false
 }

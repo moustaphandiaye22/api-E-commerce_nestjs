@@ -1,5 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
-import type { ApiResponse, ApiError } from '../types/api'
+import type { ApiError } from '../types/api'
 import { errorService } from '../services/error.service'
 
 /**
