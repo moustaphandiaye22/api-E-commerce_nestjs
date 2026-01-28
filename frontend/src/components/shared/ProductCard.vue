@@ -64,8 +64,6 @@
           </p>
           <p v-if="showStock" class="text-xs text-[var(--text-muted)]">
             Stock: {{ product.quantite_stock }}
-          <p v-if="showStock" class="text-xs text-(--text-muted)">
-            Stock: {{ product.stock }}
           </p>
         </div>
 
