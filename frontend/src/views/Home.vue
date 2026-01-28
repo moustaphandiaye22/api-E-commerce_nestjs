@@ -252,9 +252,9 @@ const addToCart = async (productId: string) => {
 
 const toggleWishlist = async (productId: string) => {
   if (wishlistStore.isInWishlist(productId)) {
-    await wishlistStore.removeItem(productId)
+    await wishlistStore.removeFromWishlist(productId)
   } else {
-    await wishlistStore.addItem(productId)
+    await wishlistStore.addToWishlist(productId)
   }
 }
 

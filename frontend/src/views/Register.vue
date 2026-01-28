@@ -74,6 +74,7 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { AxiosError } from 'axios'
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
 import { useI18n } from '../composables/useI18n'
@@ -106,7 +107,7 @@ const handleSubmit = async () => {
     setTimeout(() => {
       router.push('/login')
     }, 2000)
-  } catch (err) {
+  } catch (err: any) {
     error.value = err.response?.data?.message || 'Erreur lors de l\'inscription'
   } finally {
     loading.value = false

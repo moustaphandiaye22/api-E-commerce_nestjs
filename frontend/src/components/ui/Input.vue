@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useSlots } from 'vue'
 
 interface Props {
   modelValue?: string | number
@@ -86,6 +86,8 @@ const props = withDefaults(defineProps<Props>(), {
   type: 'text',
   size: 'md',
 })
+
+const slots = useSlots()
 
 const emit = defineEmits<{
   'update:modelValue': [value: string | number]
@@ -115,8 +117,8 @@ const inputClasses = computed(() => [
     'cursor-default bg-(--bg-tertiary)': props.readonly,
 
     // Icon padding
-    'pl-10': !!props.$slots?.leading,
-    'pr-10': !!props.$slots?.trailing,
+    'pl-10': !!slots?.leading,
+    'pr-10': !!slots?.trailing,
   }
 ])
 

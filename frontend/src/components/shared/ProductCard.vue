@@ -19,10 +19,10 @@
       </div>
 
       <!-- Badge Stock -->
-      <div v-if="product.quantite_stock <= 0" class="absolute top-3 left-3">
+      <div v-if="product.stock <= 0" class="absolute top-3 left-3">
         <Badge variant="error">Rupture de stock</Badge>
       </div>
-      <div v-else-if="product.quantite_stock < 10" class="absolute top-3 left-3">
+      <div v-else-if="product.stock < 10" class="absolute top-3 left-3">
         <Badge variant="warning">Stock limité</Badge>
       </div>
 
@@ -64,13 +64,15 @@
           </p>
           <p v-if="showStock" class="text-xs text-[var(--text-muted)]">
             Stock: {{ product.quantite_stock }}
+          <p v-if="showStock" class="text-xs text-(--text-muted)">
+            Stock: {{ product.stock }}
           </p>
         </div>
 
         <button
           v-if="showAddToCart"
           @click.stop="$emit('addToCart', product.id)"
-          :disabled="product.quantite_stock <= 0"
+          :disabled="product.stock <= 0"
           class="px-4 py-2 rounded-lg bg-(--color-primary) text-white hover:bg-(--color-primary-700) disabled:opacity-50 disabled:cursor-not-allowed transition-smooth flex items-center gap-2 text-sm font-medium"
         >
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

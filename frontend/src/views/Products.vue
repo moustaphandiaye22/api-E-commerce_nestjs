@@ -332,6 +332,10 @@ import {
   ShoppingCart,
 } from 'lucide-vue-next'
 import type { Product } from '../types/api'
+import type { Product } from '../types/api'
+
+// API base URL for images
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 const router = useRouter()
 const productsStore = useProductsStore()
@@ -486,6 +490,39 @@ const toggleWishlist = async (productId: string) => {
 
 const redirectToLogin = () => {
   router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
+}
+
+const isInWishlist = (productId: string) => {
+  return wishlistStore.isInWishlist(productId)
+}
+
+const isNewProduct = (_product: Product) => {
+  // For now, randomly mark some products as new (in real app, check created date)
+  return Math.random() > 0.8 // 20% chance of being "new"
+}
+
+const hasDiscount = (_product: Product) => {
+  // For now, assume no discounts. In real app, check for discount field
+  return false
+}
+
+const getOriginalPrice = (product: Product) => {
+  // Return original price if there's a discount
+  return product.prix
+}
+
+const averageRating = (product: Product) => {
+  if (!product.avis || product.avis.length === 0) return 0
+  const total = product.avis.reduce((sum, review) => sum + review.note, 0)
+  return Math.round(total / product.avis.length)
+}
+
+const showQuickView = (product: Product) => {
+  quickViewProduct.value = product
+}
+
+const closeQuickView = () => {
+  quickViewProduct.value = null
 }
 
 const retryLoad = () => {
