@@ -1,188 +1,321 @@
 <template>
-  <div class="product-detail">
-    <button @click="goBack" class="back-btn">← Retour</button>
-
-    <div v-if="productsStore.loading" class="loading">
-      Chargement du produit...
+  <div class="min-h-screen bg-(--bg-secondary)">
+    <!-- Breadcrumb -->
+    <div class="bg-(--bg-primary) border-b border-(--border-light)">
+      <div class="container mx-auto px-4 py-4">
+        <Breadcrumb :items="breadcrumbItems" />
+      </div>
     </div>
 
-    <div v-else-if="productsStore.error" class="error-message">
-      {{ productsStore.error }}
+    <!-- Loading State -->
+    <div v-if="productsStore.loading" class="container mx-auto px-4 py-12">
+      <div class="grid md:grid-cols-2 gap-12 animate-pulse">
+        <div class="aspect-square bg-(--bg-tertiary) rounded-2xl"></div>
+        <div class="space-y-4">
+          <div class="h-8 bg-(--bg-tertiary) rounded w-3/4"></div>
+          <div class="h-6 bg-(--bg-tertiary) rounded w-1/4"></div>
+          <div class="h-12 bg-(--bg-tertiary) rounded w-1/3"></div>
+          <div class="h-32 bg-(--bg-tertiary) rounded"></div>
+        </div>
+      </div>
     </div>
 
-    <div v-else-if="product" class="product-content">
-      <div class="product-images">
-        <img
-          v-if="product.images_produits && product.images_produits.length > 0"
-          :src="getImageUrl(product.images_produits.find(img => img.est_principale)?.url_image || product.images_produits[0]?.url_image)"
-          :alt="product.nom"
-          class="main-image"
-        />
-        <div v-else class="no-image">Pas d'image disponible</div>
+    <!-- Error State -->
+    <div v-else-if="productsStore.error" class="container mx-auto px-4 py-12">
+      <Alert variant="error" :title="'Erreur de chargement'" closeable>
+        <p>{{ productsStore.error }}</p>
+        <Button variant="outline" size="sm" class="mt-3" @click="$router.back()">
+          Retour
+        </Button>
+      </Alert>
+    </div>
+
+    <!-- Product Content -->
+    <div v-else-if="product" class="container mx-auto px-4 py-12">
+      <div class="grid md:grid-cols-2 gap-12 mb-16">
+        <!-- Product Images -->
+        <div class="space-y-4">
+          <div class="aspect-square bg-(--bg-tertiary) rounded-2xl overflow-hidden group">
+            <img
+              v-if="product.images_produits && product.images_produits.length > 0"
+              :src="getImageUrl(product.images_produits.find(img => img.est_principale)?.url_image || product.images_produits[0]?.url_image)"
+              :alt="product.nom"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div v-else class="flex items-center justify-center w-full h-full text-[var(--text-muted)]">
+              <ImageOff class="w-24 h-24" />
+            </div>
+          </div>
+
+          <!-- Thumbnail Gallery (if multiple images) -->
+          <div v-if="product.images_produits && product.images_produits.length > 1" class="grid grid-cols-4 gap-3">
+            <button
+              v-for="(image, index) in product.images_produits.slice(0, 4)"
+              :key="index"
+              class="aspect-square bg-(--bg-tertiary) rounded-lg overflow-hidden border-2 border-transparent hover:border-(--color-primary) transition-smooth"
+            >
+              <img
+                :src="getImageUrl(image.url_image)"
+                :alt="`${product.nom} - Image ${index + 1}`"
+                class="w-full h-full object-cover"
+              />
+            </button>
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="space-y-6">
+          <!-- Category -->
+          <div v-if="product.categorie">
+            <Badge variant="secondary">{{ product.categorie.nom }}</Badge>
+          </div>
+
+          <!-- Title -->
+          <h1 class="text-4xl font-bold text-[var(--text-primary)]">
+            {{ product.nom }}
+          </h1>
+
+          <!-- Rating -->
+          <div v-if="product.avis && product.avis.length > 0" class="flex items-center gap-4">
+            <Rating :rating="averageRating" :count="product.avis.length" show-count show-value />
+          </div>
+
+          <!-- Price -->
+          <div class="flex items-baseline gap-4">
+            <p class="text-5xl font-bold text-[var(--color-primary)]">
+              {{ formatPrice(product.prix) }}
+            </p>
+          </div>
+
+          <!-- Stock Status -->
+          <div>
+            <Badge v-if="product.quantite_stock > 0" variant="success" size="lg">
+              <CheckCircle class="w-4 h-4" />
+              En stock ({{ product.quantite_stock }} disponible{{ product.quantite_stock > 1 ? 's' : '' }})
+            </Badge>
+            <Badge v-else variant="error" size="lg">
+              <XCircle class="w-4 h-4" />
+              Rupture de stock
+            </Badge>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex flex-col sm:flex-row gap-3">
+            <Button
+              v-if="authStore.isAuthenticated"
+              @click="addToCart"
+              :disabled="!product.est_actif || product.quantite_stock === 0"
+              variant="primary"
+              size="lg"
+              class="flex-1"
+            >
+              <ShoppingCart class="w-5 h-5" />
+              Ajouter au panier
+            </Button>
+            <Button
+              v-else
+              @click="redirectToLogin"
+              variant="primary"
+              size="lg"
+              class="flex-1"
+            >
+              Se connecter pour acheter
+            </Button>
+
+            <Button
+              v-if="authStore.isAuthenticated"
+              @click="toggleWishlist"
+              :variant="isInWishlist ? 'secondary' : 'outline'"
+              size="lg"
+            >
+              <Heart :fill="isInWishlist ? 'currentColor' : 'none'" class="w-5 h-5" />
+            </Button>
+            <Button
+              v-else
+              @click="redirectToLogin"
+              variant="outline"
+              size="lg"
+            >
+              <Heart class="w-5 h-5" />
+            </Button>
+          </div>
+
+          <!-- Description -->
+          <div class="pt-6 border-t border-(--border-light)">
+            <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-3">Description</h3>
+            <p class="text-[var(--text-secondary)] leading-relaxed">
+              {{ product.description || 'Aucune description disponible pour ce produit.' }}
+            </p>
+          </div>
+
+          <!-- Variants -->
+          <div v-if="product.variantes && product.variantes.length > 0" class="pt-6 border-t border-(--border-light)">
+            <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-4">Variantes disponibles</h3>
+            <div class="space-y-3">
+              <div
+                v-for="variant in product.variantes"
+                :key="variant.id"
+                class="flex items-center justify-between p-4 bg-(--bg-secondary) rounded-lg border border-(--border-light)"
+              >
+                <span class="font-medium text-[var(--text-primary)]">{{ variant.nom }}</span>
+                <Badge variant="primary">+{{ formatPrice(variant.prix_supplementaire) }}</Badge>
+              </div>
+            </div>
+          </div>
+
+          <!-- Features -->
+          <div class="pt-6 border-t border-(--border-light)">
+            <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-4">Avantages</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-(--color-primary-100) flex items-center justify-center flex-shrink-0">
+                  <Truck class="w-5 h-5 text-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <p class="font-medium text-[var(--text-primary)]">Livraison rapide</p>
+                  <p class="text-sm text-[var(--text-muted)]">Sous 24-48h</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-(--color-primary-100) flex items-center justify-center flex-shrink-0">
+                  <Shield class="w-5 h-5 text-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <p class="font-medium text-[var(--text-primary)]">Paiement sécurisé</p>
+                  <p class="text-sm text-[var(--text-muted)]">100% sécurisé</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-(--color-primary-100) flex items-center justify-center flex-shrink-0">
+                  <RotateCcw class="w-5 h-5 text-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <p class="font-medium text-[var(--text-primary)]">Retour facile</p>
+                  <p class="text-sm text-[var(--text-muted)]">14 jours</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-(--color-primary-100) flex items-center justify-center flex-shrink-0">
+                  <Headphones class="w-5 h-5 text-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <p class="font-medium text-[var(--text-primary)]">Support 24/7</p>
+                  <p class="text-sm text-[var(--text-muted)]">À votre écoute</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="product-details">
-        <h1>{{ product.nom }}</h1>
-        
-        <p class="category" v-if="product.categorie">
-          Catégorie: {{ product.categorie.nom }}
-        </p>
-
-        <p class="price">{{ formatPrice(product.prix) }} €</p>
-
-        <div class="description">
-          <h3>Description</h3>
-          <p>{{ product.description || 'Pas de description disponible' }}</p>
+      <!-- Reviews Section -->
+      <div class="max-w-4xl">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-3xl font-bold text-[var(--text-primary)]">Avis clients</h2>
+          <Badge variant="secondary" size="lg">
+            {{ reviewsStore.reviews.length }} avis
+          </Badge>
         </div>
 
-        <div v-if="product.variantes && product.variantes.length > 0" class="variants">
-          <h3>Variantes disponibles</h3>
-          <div class="variant-list">
-            <div v-for="variant in product.variantes" :key="variant.id" class="variant-item">
-              <span>{{ variant.nom }}</span>
-              <span>+{{ formatPrice(variant.prix_supplementaire) }} €</span>
+        <!-- Add Review (Authenticated users) -->
+        <div v-if="authStore.isAuthenticated" class="bg-(--bg-primary) rounded-xl border border-(--border-light) p-6 mb-8">
+          <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-4">Donner votre avis</h3>
+          <form @submit.prevent="submitReview" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-[var(--text-primary)] mb-2">Note</label>
+              <Rating
+                v-model:rating="newReview.note"
+                :interactive="true"
+                size="lg"
+              />
             </div>
-          </div>
-        </div>
 
-        <div class="product-actions">
-          <button
-            v-if="authStore.isAuthenticated"
-            @click="toggleWishlist"
-            class="wishlist-btn"
-            :class="{ active: isInWishlist }"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            {{ isInWishlist ? 'Retirer des favoris' : 'Ajouter aux favoris' }}
-          </button>
-          <button
-            v-else
-            @click="toggleWishlist"
-            class="wishlist-btn"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            Se connecter pour ajouter aux favoris
-          </button>
+            <Input
+              v-model="newReview.titre"
+              label="Titre (optionnel)"
+              placeholder="Résumez votre avis..."
+            />
 
-          <button
-            v-if="authStore.isAuthenticated"
-            @click="addToCart"
-            class="add-to-cart-btn"
-            :disabled="!product.est_actif || product.stock === 0"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            {{ product.est_actif && product.stock > 0 ? 'Ajouter au panier' : 'Produit indisponible' }}
-          </button>
-          <button
-            v-else
-            @click="addToCart"
-            class="add-to-cart-btn"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            Se connecter pour acheter
-          </button>
-        </div>
+            <div>
+              <label for="review-comment" class="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                Commentaire *
+              </label>
+              <textarea
+                id="review-comment"
+                v-model="newReview.commentaire"
+                placeholder="Partagez votre expérience avec ce produit..."
+                required
+                rows="4"
+                class="w-full px-4 py-3 bg-(--bg-secondary) border border-(--border-light) rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-(--color-primary) focus:border-transparent transition-smooth resize-none"
+              ></textarea>
+            </div>
 
-        <!-- Reviews Section -->
-        <div class="reviews-section">
-          <h3>Avis clients</h3>
-
-          <!-- Add Review Form (for authenticated users) -->
-          <div v-if="authStore.isAuthenticated" class="add-review">
-            <h4>Donner votre avis</h4>
-            <form @submit.prevent="submitReview" class="review-form">
-              <div class="rating-input">
-                <label>Note:</label>
-                <div class="stars">
-                  <span
-                    v-for="star in 5"
-                    :key="star"
-                    @click="newReview.note = star"
-                    :class="{ active: star <= newReview.note }"
-                    class="star"
-                  >
-                    ★
-                  </span>
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="review-title">Titre (optionnel):</label>
-                <input
-                  id="review-title"
-                  v-model="newReview.titre"
-                  type="text"
-                  placeholder="Titre de votre avis"
-                />
-              </div>
-              <div class="form-group">
-                <label for="review-comment">Commentaire:</label>
-                <textarea
-                  id="review-comment"
-                  v-model="newReview.commentaire"
-                  placeholder="Partagez votre expérience..."
-                  required
-                ></textarea>
-              </div>
-              <button type="submit" :disabled="reviewsStore.loading" class="btn-submit">
-                Publier l'avis
-              </button>
-            </form>
-          </div>
-
-          <!-- Reviews List -->
-          <div v-if="reviewsStore.loading" class="loading">
-            Chargement des avis...
-          </div>
-
-          <div v-else-if="reviewsStore.error" class="error-message">
-            {{ reviewsStore.error }}
-          </div>
-
-          <div v-else-if="reviewsStore.reviews.length > 0" class="reviews-list">
-            <div
-              v-for="review in reviewsStore.reviews"
-              :key="review.id"
-              class="review-item"
+            <Button
+              type="submit"
+              variant="primary"
+              :loading="reviewsStore.loading"
+              :disabled="!newReview.commentaire"
             >
-              <div class="review-header">
-                <div class="review-author">
-                  <strong>{{ review.utilisateur?.prenom }} {{ review.utilisateur?.nom }}</strong>
-                  <span v-if="review.est_verifie" class="verified-badge">✓ Vérifié</span>
-                </div>
-                <div class="review-rating">
-                  <div class="stars">
-                    <span
-                      v-for="star in 5"
-                      :key="star"
-                      :class="{ active: star <= review.note }"
-                      class="star"
-                    >
-                      ★
-                    </span>
-                  </div>
-                  <span class="review-date">{{ formatDate(review.cree_le) }}</span>
-                </div>
-              </div>
-              <div v-if="review.titre" class="review-title">
-                {{ review.titre }}
-              </div>
-              <div class="review-comment">
-                {{ review.commentaire }}
-              </div>
-            </div>
-          </div>
+              Publier l'avis
+            </Button>
+          </form>
+        </div>
 
-          <div v-else class="no-reviews">
-            <p>Soyez le premier à donner votre avis sur ce produit !</p>
+        <!-- Reviews List -->
+        <div v-if="reviewsStore.loading" class="space-y-4">
+          <div v-for="n in 3" :key="n" class="animate-pulse bg-(--bg-primary) rounded-xl p-6 border border-(--border-light)">
+            <div class="h-4 bg-(--bg-tertiary) rounded w-1/4 mb-4"></div>
+            <div class="h-4 bg-(--bg-tertiary) rounded w-3/4 mb-2"></div>
+            <div class="h-4 bg-(--bg-tertiary) rounded w-1/2"></div>
           </div>
+        </div>
+
+        <div v-else-if="reviewsStore.error" class="text-center py-8">
+          <Alert variant="error">{{ reviewsStore.error }}</Alert>
+        </div>
+
+        <div v-else-if="reviewsStore.reviews.length > 0" class="space-y-4">
+          <div
+            v-for="review in reviewsStore.reviews"
+            :key="review.id"
+            class="bg-(--bg-primary) rounded-xl border border-(--border-light) p-6 hover:shadow-md transition-smooth"
+          >
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-start gap-3">
+                <Avatar
+                  :name="`${review.utilisateur?.prenom} ${review.utilisateur?.nom}`"
+                  size="md"
+                />
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h4 class="font-semibold text-[var(--text-primary)]">
+                      {{ review.utilisateur?.prenom }} {{ review.utilisateur?.nom }}
+                    </h4>
+                    <Badge v-if="review.est_verifie" variant="success" size="sm">
+                      <CheckCircle class="w-3 h-3" />
+                      Vérifié
+                    </Badge>
+                  </div>
+                  <p class="text-sm text-[var(--text-muted)]">{{ formatDate(review.cree_le) }}</p>
+                </div>
+              </div>
+              <Rating :rating="review.note" size="sm" />
+            </div>
+
+            <h5 v-if="review.titre" class="font-semibold text-[var(--text-primary)] mb-2">
+              {{ review.titre }}
+            </h5>
+
+            <p class="text-[var(--text-secondary)] leading-relaxed">
+              {{ review.commentaire }}
+            </p>
+          </div>
+        </div>
+
+        <div v-else class="text-center py-16 bg-(--bg-primary) rounded-xl border border-(--border-light)">
+          <MessageSquare class="w-16 h-16 mx-auto text-[var(--text-muted)] mb-4" />
+          <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-2">Aucun avis pour le moment</h3>
+          <p class="text-[var(--text-secondary)] mb-6">Soyez le premier à donner votre avis sur ce produit !</p>
         </div>
       </div>
     </div>
@@ -190,51 +323,74 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useProductsStore } from '../stores/products'
 import { useCartStore } from '../stores/cart'
 import { useWishlistStore } from '../stores/wishlist'
 import { useReviewsStore } from '../stores/reviews'
 import { useAuthStore } from '../stores/auth'
-import { useRouter, useRoute } from 'vue-router'
 import { formatPrice } from '../utils/formatters'
+import Breadcrumb from '../components/ui/Breadcrumb.vue'
+import Button from '../components/ui/Button.vue'
+import Badge from '../components/ui/Badge.vue'
+import Alert from '../components/ui/Alert.vue'
+import Avatar from '../components/ui/Avatar.vue'
+import Rating from '../components/ui/Rating.vue'
+import Input from '../components/ui/Input.vue'
+import {
+  ImageOff,
+  ShoppingCart,
+  Heart,
+  CheckCircle,
+  XCircle,
+  Truck,
+  Shield,
+  RotateCcw,
+  Headphones,
+  MessageSquare,
+} from 'lucide-vue-next'
 
-// API base URL for images
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-
+const router = useRouter()
+const route = useRoute()
 const productsStore = useProductsStore()
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
 const reviewsStore = useReviewsStore()
 const authStore = useAuthStore()
-const router = useRouter()
-const route = useRoute()
 
 const product = computed(() => productsStore.currentProduct)
 const isInWishlist = computed(() => {
   return product.value ? wishlistStore.isInWishlist(product.value.id) : false
 })
 
-// New review form data
+const breadcrumbItems = computed(() => [
+  { label: 'Accueil', to: '/' },
+  { label: 'Produits', to: '/products' },
+  { label: product.value?.nom || 'Détail', to: `/products/${route.params.id}` },
+])
+
+const averageRating = computed(() => {
+  if (!product.value?.avis || product.value.avis.length === 0) return 0
+  const total = product.value.avis.reduce((sum, review) => sum + review.note, 0)
+  return total / product.value.avis.length
+})
+
+// New review form
 const newReview = ref({
   note: 5,
   titre: '',
-  commentaire: ''
+  commentaire: '',
 })
 
 onMounted(async () => {
   const productId = route.params.id as string
 
-  // Parallel API calls for better performance
   await Promise.all([
     productsStore.fetchProductById(productId),
-    reviewsStore.fetchReviewsByProduct(productId)
+    reviewsStore.fetchReviewsByProduct(productId),
   ])
 })
-
-const goBack = () => {
-  router.back()
-}
 
 const addToCart = async () => {
   if (!authStore.isAuthenticated) {
@@ -244,6 +400,7 @@ const addToCart = async () => {
 
   if (product.value) {
     await cartStore.addItem({ produit_id: product.value.id, quantite: 1 })
+    // TODO: Show toast notification
   }
 }
 
@@ -258,6 +415,10 @@ const toggleWishlist = async () => {
   }
 }
 
+const redirectToLogin = () => {
+  router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
+}
+
 const submitReview = async () => {
   if (!product.value) return
 
@@ -266,409 +427,45 @@ const submitReview = async () => {
       produit_id: product.value.id,
       note: newReview.value.note,
       titre: newReview.value.titre || undefined,
-      commentaire: newReview.value.commentaire
+      commentaire: newReview.value.commentaire,
     })
 
     // Reset form
     newReview.value = { note: 5, titre: '', commentaire: '' }
+    
+    // TODO: Show success toast
   } catch (error) {
     console.error('Error submitting review:', error)
+    // TODO: Show error toast
   }
 }
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('fr-FR', {
     year: 'numeric',
-    month: 'short',
-    day: 'numeric'
+    month: 'long',
+    day: 'numeric',
   })
 }
 
-const getImageUrl = (url: string) => {
+const getImageUrl = (url?: string) => {
+  if (!url) return ''
   if (url.startsWith('http')) return url
-  return `${API_BASE_URL}${url}`
+  return `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`
 }
 </script>
 
 <style scoped>
-@import '../styles/design-system.css';
-
-.product-detail {
-  max-width: var(--max-width-2xl);
-  margin: 0 auto;
-  padding: var(--spacing-8) var(--container-padding);
-}
-
-.back-btn {
-  background: none;
-  border: none;
-  color: var(--color-primary);
-  font-size: var(--font-size-base);
-  cursor: pointer;
-  margin-bottom: var(--spacing-6);
-  padding: var(--spacing-2);
-  border-radius: var(--border-radius-md);
-  transition: background-color var(--transition-fast);
-}
-
-.back-btn:hover {
-  background-color: var(--color-bg-hover);
-}
-
-.loading, .error-message {
-  text-align: center;
-  padding: var(--spacing-12);
-  font-size: var(--font-size-lg);
-}
-
-.error-message {
-  background-color: var(--color-error-light);
-  color: var(--color-error);
-  border-radius: var(--border-radius-md);
-  margin-bottom: var(--spacing-6);
-}
-
-.product-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-12);
-}
-
-.product-images {
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--border-radius-lg);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 350px;
-  box-shadow: var(--shadow-sm);
-}
-
-.main-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  max-width: 100%;
-  max-height: 100%;
-}
-
-.no-image {
-  color: var(--color-text-tertiary);
-  font-size: var(--font-size-lg);
-}
-
-.product-details h1 {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-4);
-}
-
-.category {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-base);
-  margin-bottom: var(--spacing-4);
-}
-
-.price {
-  font-size: var(--font-size-4xl);
-  color: var(--color-primary);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--spacing-6);
-}
-
-.description, .variants {
-  margin-bottom: var(--spacing-8);
-}
-
-.description h3, .variants h3 {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-3);
-}
-
-.description p {
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-relaxed);
-}
-
-.variant-list {
-  display: grid;
-  gap: var(--spacing-2);
-}
-
-.variant-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-3);
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--border-radius-md);
-  border: var(--border-width) solid var(--color-border-light);
-}
-
-.product-actions {
-  display: grid;
-  gap: var(--spacing-3);
-  margin-top: var(--spacing-8);
-}
-
-.wishlist-btn, .add-to-cart-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-4);
-  border: var(--border-width) solid var(--color-primary);
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.wishlist-btn:hover, .add-to-cart-btn:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
-  border-color: var(--color-primary-dark);
-}
-
-.wishlist-btn.active {
-  background-color: var(--color-error);
-  border-color: var(--color-error);
-}
-
-.wishlist-btn.active:hover {
-  background-color: var(--color-error);
-  opacity: 0.9;
-}
-
-.wishlist-btn {
-  background-color: transparent;
-  color: var(--color-primary);
-}
-
-.wishlist-btn:hover {
-  background-color: var(--color-primary-lighter);
-}
-
-.wishlist-btn.active {
-  background-color: var(--color-error);
-  color: var(--color-text-inverse);
-}
-
-.add-to-cart-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.wishlist-btn svg, .add-to-cart-btn svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-/* === REVIEWS SECTION === */
-.reviews-section {
-  margin-top: var(--spacing-12);
-  padding-top: var(--spacing-8);
-  border-top: var(--border-width) solid var(--color-border-light);
-}
-
-.reviews-section h3 {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-6);
-}
-
-.add-review {
-  background-color: var(--color-bg-secondary);
-  padding: var(--spacing-6);
-  border-radius: var(--border-radius-lg);
-  margin-bottom: var(--spacing-8);
-}
-
-.add-review h4 {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-4);
-}
-
-.review-form {
-  display: grid;
-  gap: var(--spacing-4);
-}
-
-.rating-input {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-}
-
-.rating-input label {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
-
-.stars {
-  display: flex;
-  gap: var(--spacing-1);
-}
-
-.star {
-  font-size: var(--font-size-xl);
-  color: var(--color-text-tertiary);
-  cursor: pointer;
-  transition: color var(--transition-fast);
-}
-
-.star.active {
-  color: var(--color-warning);
-}
-
-.star:hover {
-  color: var(--color-warning);
-}
-
-.form-group {
-  display: grid;
-  gap: var(--spacing-2);
-}
-
-.form-group label {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
-
-.form-group input,
-.form-group textarea {
-  padding: var(--spacing-3);
-  border: var(--border-width) solid var(--color-border-medium);
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-base);
-  transition: border-color var(--transition-fast);
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.btn-submit {
-  padding: var(--spacing-3) var(--spacing-6);
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
-  border: none;
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-  justify-self: start;
-}
-
-.btn-submit:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
-}
-
-.btn-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.reviews-list {
-  display: grid;
-  gap: var(--spacing-6);
-}
-
-.review-item {
-  background-color: var(--color-bg-primary);
-  padding: var(--spacing-6);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.review-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-3);
-}
-
-.review-author {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-}
-
-.verified-badge {
-  background-color: var(--color-success-light);
-  color: var(--color-success);
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-}
-
-.review-rating {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--spacing-1);
-}
-
-.review-date {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.review-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-2);
-}
-
-.review-comment {
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-relaxed);
-}
-
-.no-reviews {
-  text-align: center;
-  padding: var(--spacing-8);
-  color: var(--color-text-secondary);
-}
-
-@media (max-width: 768px) {
-  .product-content {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-8);
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
   }
-
-  .product-actions {
-    grid-template-columns: 1fr;
+  50% {
+    opacity: 0.5;
   }
+}
 
-  .review-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-2);
-  }
-
-  .review-rating {
-    align-items: flex-start;
-  }
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 </style>

@@ -6,19 +6,19 @@
 
       <div class="container mx-auto px-4 py-16 md:py-24 relative">
         <div class="max-w-4xl mx-auto text-center space-y-8">
-          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-(--color-primary-100) text-(--color-primary-800) text-sm font-medium mb-4">
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-(--color-primary-100) text-[var(--color-primary-800)] text-sm font-medium mb-4">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
             <span>Mon espace personnel</span>
           </div>
 
-          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-(--text-primary) leading-tight">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--text-primary)] leading-tight">
             Bienvenue,
             <span class="gradient-text">{{ authStore.user?.prenom || 'Utilisateur' }}</span>
           </h1>
 
-          <p class="text-lg md:text-xl text-(--text-secondary) max-w-2xl mx-auto">
+          <p class="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto">
             Gérez vos informations personnelles, vos adresses et consultez votre historique de commandes.
           </p>
         </div>
@@ -39,11 +39,11 @@
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-lg bg-(--color-primary-100) flex items-center justify-center">
-                    <svg class="w-5 h-5 text-(--color-primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg class="w-5 h-5 text-[var(--color-primary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
-                  <h2 class="text-xl font-semibold text-(--text-primary)">Informations personnelles</h2>
+                  <h2 class="text-xl font-semibold text-[var(--text-primary)]">Informations personnelles</h2>
                 </div>
                 <Button v-if="!isEditing" @click="startEditing" variant="outline" size="sm">
                   Modifier
@@ -54,7 +54,7 @@
             <form v-if="isEditing" @submit.prevent="saveProfile" class="p-6 space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label for="prenom" class="block text-sm font-medium text-(--text-primary)">Prénom *</label>
+                  <label for="prenom" class="block text-sm font-medium text-[var(--text-primary)]">Prénom *</label>
                   <input
                     id="prenom"
                     v-model="editForm.prenom"
@@ -64,7 +64,7 @@
                   />
                 </div>
                 <div class="space-y-2">
-                  <label for="nom" class="block text-sm font-medium text-(--text-primary)">Nom *</label>
+                  <label for="nom" class="block text-sm font-medium text-[var(--text-primary)]">Nom *</label>
                   <input
                     id="nom"
                     v-model="editForm.nom"
@@ -75,7 +75,7 @@
                 </div>
               </div>
               <div class="space-y-2">
-                <label for="email" class="block text-sm font-medium text-(--text-primary)">Email *</label>
+                <label for="email" class="block text-sm font-medium text-[var(--text-primary)]">Email *</label>
                 <input
                   id="email"
                   v-model="editForm.email"
@@ -97,21 +97,21 @@
             <div v-else class="p-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="flex justify-between items-center py-3 border-b border-(--border-light)">
-                  <span class="text-sm font-medium text-(--text-secondary)">Prénom:</span>
-                  <span class="text-(--text-primary)">{{ authStore.user.prenom }}</span>
+                  <span class="text-sm font-medium text-[var(--text-secondary)]">Prénom:</span>
+                  <span class="text-[var(--text-primary)]">{{ authStore.user.prenom }}</span>
                 </div>
                 <div class="flex justify-between items-center py-3 border-b border-(--border-light)">
-                  <span class="text-sm font-medium text-(--text-secondary)">Nom:</span>
-                  <span class="text-(--text-primary)">{{ authStore.user.nom }}</span>
+                  <span class="text-sm font-medium text-[var(--text-secondary)]">Nom:</span>
+                  <span class="text-[var(--text-primary)]">{{ authStore.user.nom }}</span>
                 </div>
                 <div class="flex justify-between items-center py-3 border-b border-(--border-light)">
-                  <span class="text-sm font-medium text-(--text-secondary)">Email:</span>
-                  <span class="text-(--text-primary)">{{ authStore.user.email }}</span>
+                  <span class="text-sm font-medium text-[var(--text-secondary)]">Email:</span>
+                  <span class="text-[var(--text-primary)]">{{ authStore.user.email }}</span>
                 </div>
                 <div class="flex justify-between items-center py-3 border-b border-(--border-light)">
-                  <span class="text-sm font-medium text-(--text-secondary)">Rôle:</span>
+                  <span class="text-sm font-medium text-[var(--text-secondary)]">Rôle:</span>
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                        :class="authStore.user.role === 'ADMIN' ? 'bg-(--color-primary-100) text-(--color-primary-800)' : 'bg-(--color-gray-100) text-(--color-gray-800)'">
+                        :class="authStore.user.role === 'ADMIN' ? 'bg-(--color-primary-100) text-[var(--color-primary-800)]' : 'bg-(--color-gray-100) text-[var(--color-gray-800)]'">
                     {{ authStore.user.role }}
                   </span>
                 </div>
@@ -125,12 +125,12 @@
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-lg bg-(--color-primary-100) flex items-center justify-center">
-                    <svg class="w-5 h-5 text-(--color-primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg class="w-5 h-5 text-[var(--color-primary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                   </div>
-                  <h2 class="text-xl font-semibold text-(--text-primary)">Mes adresses</h2>
+                  <h2 class="text-xl font-semibold text-[var(--text-primary)]">Mes adresses</h2>
                 </div>
                 <Button @click="showAddAddress = true" variant="primary" size="sm">
                   Ajouter une adresse
@@ -144,14 +144,14 @@
                      class="p-4 border border-(--border-light) rounded-lg hover:border-(--color-primary) transition-colors">
                   <div class="flex items-start justify-between mb-3">
                     <div class="flex items-center gap-2">
-                      <h3 class="font-medium text-(--text-primary)">{{ getAddressTypeText(address.type_adresse) }}</h3>
+                      <h3 class="font-medium text-[var(--text-primary)]">{{ getAddressTypeText(address.type_adresse) }}</h3>
                       <span v-if="address.est_par_defaut"
                             class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-(--color-success) text-white">
                         Par défaut
                       </span>
                     </div>
                   </div>
-                  <div class="space-y-1 text-sm text-(--text-secondary)">
+                  <div class="space-y-1 text-sm text-[var(--text-secondary)]">
                     <p>{{ address.rue }}</p>
                     <p>{{ address.code_postal }} {{ address.ville }}</p>
                     <p>{{ address.pays }}</p>
@@ -168,18 +168,17 @@
               </div>
 
               <div v-else class="text-center py-12">
-                <svg class="w-16 h-16 mx-auto text-(--text-muted) mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="w-16 h-16 mx-auto text-[var(--text-muted)] mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <p class="text-(--text-secondary)">Vous n'avez pas encore d'adresse enregistrée.</p>
+                <p class="text-[var(--text-secondary)]">Vous n'avez pas encore d'adresse enregistrée.</p>
               </div>
             </div>
           </div>
         </div>
       </div>
     </section>
-    </div>
 
     <!-- Add/Edit Address Modal -->
     <div v-if="showAddAddress || editingAddress"
@@ -188,12 +187,12 @@
       <div class="bg-(--bg-primary) rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden" @click.stop>
         <div class="p-6 border-b border-(--border-light)">
           <div class="flex items-center justify-between">
-            <h2 class="text-xl font-semibold text-(--text-primary)">
+            <h2 class="text-xl font-semibold text-[var(--text-primary)]">
               {{ editingAddress ? 'Modifier l\'adresse' : 'Ajouter une adresse' }}
             </h2>
             <button @click="closeAddressModal"
                     class="p-2 rounded-lg hover:bg-(--bg-hover) transition-colors">
-              <svg class="w-5 h-5 text-(--text-secondary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg class="w-5 h-5 text-[var(--text-secondary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -202,7 +201,7 @@
 
         <form @submit.prevent="saveAddress" class="p-6 space-y-4">
           <div class="space-y-2">
-            <label for="address-type" class="block text-sm font-medium text-(--text-primary)">Type d'adresse *</label>
+            <label for="address-type" class="block text-sm font-medium text-[var(--text-primary)]">Type d'adresse *</label>
             <select id="address-type" v-model="addressForm.type_adresse" required
                     class="w-full px-3 py-2 border border-(--border-medium) rounded-lg focus:ring-2 focus:ring-(--color-primary) focus:border-transparent transition-colors">
               <option value="LIVRAISON">Adresse de livraison</option>
@@ -210,7 +209,7 @@
             </select>
           </div>
           <div class="space-y-2">
-            <label for="address-street" class="block text-sm font-medium text-(--text-primary)">Rue *</label>
+            <label for="address-street" class="block text-sm font-medium text-[var(--text-primary)]">Rue *</label>
             <input
               id="address-street"
               v-model="addressForm.rue"
@@ -221,7 +220,7 @@
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-2">
-              <label for="address-postal" class="block text-sm font-medium text-(--text-primary)">Code postal *</label>
+              <label for="address-postal" class="block text-sm font-medium text-[var(--text-primary)]">Code postal *</label>
               <input
                 id="address-postal"
                 v-model="addressForm.code_postal"
@@ -231,7 +230,7 @@
               />
             </div>
             <div class="space-y-2">
-              <label for="address-city" class="block text-sm font-medium text-(--text-primary)">Ville *</label>
+              <label for="address-city" class="block text-sm font-medium text-[var(--text-primary)]">Ville *</label>
               <input
                 id="address-city"
                 v-model="addressForm.ville"
@@ -242,7 +241,7 @@
             </div>
           </div>
           <div class="space-y-2">
-            <label for="address-country" class="block text-sm font-medium text-(--text-primary)">Pays *</label>
+            <label for="address-country" class="block text-sm font-medium text-[var(--text-primary)]">Pays *</label>
             <select id="address-country" v-model="addressForm.pays" required
                     class="w-full px-3 py-2 border border-(--border-medium) rounded-lg focus:ring-2 focus:ring-(--color-primary) focus:border-transparent transition-colors">
               <option value="France">France</option>
@@ -255,9 +254,9 @@
               id="address-default"
               v-model="addressForm.est_par_defaut"
               type="checkbox"
-              class="rounded border-(--border-medium) text-(--color-primary) focus:ring-(--color-primary)"
+              class="rounded border-(--border-medium) text-[var(--color-primary)] focus:ring-(--color-primary)"
             />
-            <label for="address-default" class="text-sm text-(--text-secondary)">Définir comme adresse par défaut</label>
+            <label for="address-default" class="text-sm text-[var(--text-secondary)]">Définir comme adresse par défaut</label>
           </div>
           <div class="flex flex-col sm:flex-row gap-3 pt-4">
             <Button type="submit" :disabled="savingAddress" variant="primary" class="flex-1">

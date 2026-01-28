@@ -3,17 +3,17 @@
     <label
       v-if="label"
       :for="id"
-      class="block text-sm font-medium text-(--text-primary) mb-2"
+      class="block text-sm font-medium text-[var(--text-primary)] mb-2"
     >
       {{ label }}
-      <span v-if="required" class="text-(--color-error) ml-1">*</span>
+      <span v-if="required" class="text-[var(--color-error)] ml-1">*</span>
     </label>
     
     <div class="relative">
       <!-- Leading Icon -->
       <div
         v-if="$slots.leading"
-        class="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-tertiary)"
+        class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]"
       >
         <slot name="leading" />
       </div>
@@ -36,7 +36,7 @@
       <!-- Trailing Icon -->
       <div
         v-if="$slots.trailing"
-        class="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-tertiary)"
+        class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]"
       >
         <slot name="trailing" />
       </div>
@@ -45,7 +45,7 @@
     <!-- Helper Text -->
     <p
       v-if="helperText && !error"
-      class="mt-2 text-xs text-(--text-muted)"
+      class="mt-2 text-xs text-[var(--text-muted)]"
     >
       {{ helperText }}
     </p>
@@ -53,7 +53,7 @@
     <!-- Error Message -->
     <p
       v-if="error"
-      class="mt-2 text-xs text-(--color-error) flex items-center gap-1"
+      class="mt-2 text-xs text-[var(--color-error)] flex items-center gap-1"
     >
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10"/>
@@ -99,21 +99,21 @@ defineOptions({
 
 const inputClasses = computed(() => [
   'w-full rounded-lg border transition-smooth',
-  'bg-(--bg-primary) text-(--text-primary)',
+  'bg-(--bg-primary) text-[var(--text-primary)]',
   'focus:outline-hidden focus:ring-2 focus:ring-(--color-primary) focus:border-(--color-primary)',
-  'placeholder:text-(--text-muted)',
+  'placeholder:text-[var(--text-muted)]',
   {
     // Size variants
     'px-3 py-2 text-sm': props.size === 'sm',
     'px-4 py-2.5 text-base': props.size === 'md',
     'px-5 py-3 text-lg': props.size === 'lg',
-    
+
     // State variants
     'border-(--border-light) hover:border-(--border-medium)': !props.error && !props.disabled,
     'border-(--color-error) hover:border-(--color-error)': props.error,
     'opacity-60 cursor-not-allowed bg-(--bg-tertiary)': props.disabled,
     'cursor-default bg-(--bg-tertiary)': props.readonly,
-    
+
     // Icon padding
     'pl-10': !!props.$slots?.leading,
     'pr-10': !!props.$slots?.trailing,

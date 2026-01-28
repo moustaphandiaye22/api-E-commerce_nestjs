@@ -12,7 +12,7 @@
         loading="lazy"
         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
-      <div v-else class="flex items-center justify-center w-full h-full text-(--text-muted)">
+      <div v-else class="flex items-center justify-center w-full h-full text-[var(--text-muted)]">
         <svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
@@ -31,7 +31,7 @@
         v-if="showWishlist"
         @click.stop="$emit('toggleWishlist', product.id)"
         class="absolute top-3 right-3 p-2 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800 transition-smooth shadow-md"
-        :class="isInWishlist ? 'text-red-500' : 'text-(--text-tertiary)'"
+        :class="wishlistButtonClass"
       >
         <svg class="w-5 h-5" viewBox="0 0 24 24" :fill="isInWishlist ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -42,27 +42,27 @@
     <!-- Content -->
     <div class="p-4 space-y-2">
       <!-- Category -->
-      <p v-if="product.categorie" class="text-xs text-(--text-muted) uppercase tracking-wide">
+      <p v-if="product.categorie" class="text-xs text-[var(--text-muted)] uppercase tracking-wide">
         {{ product.categorie.nom }}
       </p>
 
       <!-- Title -->
-      <h3 class="text-base font-semibold text-(--text-primary) line-clamp-2 min-h-[3rem]">
+      <h3 class="text-base font-semibold text-[var(--text-primary)] line-clamp-2 min-h-[3rem]">
         {{ product.nom }}
       </h3>
 
       <!-- Description -->
-      <p v-if="showDescription && product.description" class="text-sm text-(--text-secondary) line-clamp-2">
+      <p v-if="showDescription && product.description" class="text-sm text-[var(--text-secondary)] line-clamp-2">
         {{ product.description }}
       </p>
 
       <!-- Price & Action -->
       <div class="flex items-center justify-between pt-2">
         <div class="space-y-1">
-          <p class="text-xl font-bold text-(--color-primary)">
+          <p class="text-xl font-bold text-[var(--color-primary)]">
             {{ formatPrice(product.prix) }}
           </p>
-          <p v-if="showStock" class="text-xs text-(--text-muted)">
+          <p v-if="showStock" class="text-xs text-[var(--text-muted)]">
             Stock: {{ product.quantite_stock }}
           </p>
         </div>
@@ -115,6 +115,11 @@ const cardClasses = computed(() => [
   'group cursor-pointer bg-(--bg-primary) rounded-xl overflow-hidden transition-smooth',
   'border border-(--border-light) hover:border-(--color-primary)',
   'hover:shadow-lg hover:-translate-y-1',
+])
+
+const wishlistButtonClass = computed(() => [
+  'absolute top-3 right-3 p-2 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800 transition-smooth shadow-md',
+  isInWishlist ? 'text-red-500' : 'text-gray-400'
 ])
 
 const getImageUrl = (url?: string) => {

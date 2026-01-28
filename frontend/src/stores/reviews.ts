@@ -34,6 +34,7 @@ export const useReviewsStore = defineStore('reviews', () => {
     note: number
     titre?: string
     commentaire?: string
+    commande_id?: string
   }) {
     return execute(
       async () => {

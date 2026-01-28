@@ -110,7 +110,7 @@ model AVIS {
   id            String   @id @default(uuid()) @db.Uuid
   produit_id    String   @db.Uuid
   utilisateur_id String  @db.Uuid
-  commande_id   String   @db.Uuid
+  commande_id   String?  @db.Uuid
   note          Int
   titre         String
   commentaire   String
@@ -120,7 +120,7 @@ model AVIS {
 
   produit     PRODUITS     @relation(fields: [produit_id], references: [id], onDelete: Cascade)
   utilisateur UTILISATEURS @relation(fields: [utilisateur_id], references: [id], onDelete: Cascade)
-  commande    COMMANDES    @relation(fields: [commande_id], references: [id], onDelete: Cascade)
+  commande    COMMANDES?   @relation(fields: [commande_id], references: [id], onDelete: Cascade)
 
   @@map("avis")
 }

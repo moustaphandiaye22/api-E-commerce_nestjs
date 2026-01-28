@@ -64,11 +64,11 @@ export class ReviewsService {
         data: {
           produit_id: data.produit_id,
           utilisateur_id: userId,
-          commande_id: '', // Empty string for commande_id
+          commande_id: data.commande_id || null, // Use provided commande_id or null
           note: data.note,
-          titre: data.titre,
+          titre: data.titre || '',
           commentaire: data.commentaire,
-          est_verifie: false, // Not verified without order
+          est_verifie: !!data.commande_id, // Verified if order provided
           est_approuve: true, // Auto-approve for now
         },
         include: {

@@ -8,10 +8,10 @@
           <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-bg flex items-center justify-center">
             <LogIn class="w-8 h-8 text-white" />
           </div>
-          <h2 class="text-2xl font-bold text-(--text-primary) mb-2">
+          <h2 class="text-2xl font-bold text-[var(--text-primary)] mb-2">
             {{ t('auth.login.title') }}
           </h2>
-          <p class="text-sm text-(--text-secondary)">
+          <p class="text-sm text-[var(--text-secondary)]">
             Connectez-vous pour accéder à votre compte
           </p>
         </div>
@@ -41,6 +41,7 @@
             :placeholder="'••••••••'"
             required
             :error="errors.password"
+            autocomplete="current-password"
             @blur="validatePassword"
           >
             <template #leading>
@@ -50,7 +51,7 @@
               <button
                 type="button"
                 @click="showPassword = !showPassword"
-                class="text-(--text-muted) hover:text-(--text-primary) transition-smooth"
+                class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-smooth"
               >
                 <Eye v-if="!showPassword" class="w-5 h-5" />
                 <EyeOff v-else class="w-5 h-5" />
@@ -64,11 +65,11 @@
               <input
                 v-model="rememberMe"
                 type="checkbox"
-                class="w-4 h-4 rounded border-(--border-medium) text-(--color-primary) focus:ring-(--color-primary) focus:ring-2 focus:ring-offset-2"
+                class="w-4 h-4 rounded border-(--border-medium) text-[var(--color-primary)] focus:ring-(--color-primary) focus:ring-2 focus:ring-offset-2"
               />
-              <span class="text-sm text-(--text-secondary)">Se souvenir de moi</span>
+              <span class="text-sm text-[var(--text-secondary)]">Se souvenir de moi</span>
             </label>
-            <a href="#" class="text-sm text-(--color-primary) hover:text-(--color-primary-700) font-medium">
+            <a href="#" class="text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-700)] font-medium">
               Mot de passe oublié ?
             </a>
           </div>
@@ -101,7 +102,7 @@
               <div class="w-full border-t border-(--border-light)"></div>
             </div>
             <div class="relative flex justify-center text-sm">
-              <span class="px-4 bg-(--bg-primary) text-(--text-muted)">
+              <span class="px-4 bg-(--bg-primary) text-[var(--text-muted)]">
                 Ou continuer avec
               </span>
             </div>
@@ -119,7 +120,7 @@
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              <span class="text-sm font-medium text-(--text-primary)">Google</span>
+              <span class="text-sm font-medium text-[var(--text-primary)]">Google</span>
             </button>
             <button
               type="button"
@@ -128,18 +129,18 @@
               <svg class="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
               </svg>
-              <span class="text-sm font-medium text-(--text-primary)">Facebook</span>
+              <span class="text-sm font-medium text-[var(--text-primary)]">Facebook</span>
             </button>
           </div>
         </form>
 
         <!-- Footer -->
         <div class="px-8 py-6 bg-(--bg-secondary) border-t border-(--border-light) text-center">
-          <p class="text-sm text-(--text-secondary)">
+          <p class="text-sm text-[var(--text-secondary)]">
             {{ t('auth.login.noAccount') }}
             <router-link
               to="/register"
-              class="text-(--color-primary) hover:text-(--color-primary-700) font-semibold"
+              class="text-[var(--color-primary)] hover:text-[var(--color-primary-700)] font-semibold"
             >
               {{ t('auth.login.registerLink') }}
             </router-link>
@@ -151,7 +152,7 @@
       <div class="mt-8 text-center space-y-2">
         <router-link
           to="/"
-          class="inline-flex items-center gap-2 text-sm text-(--text-secondary) hover:text-(--color-primary) transition-smooth"
+          class="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--color-primary)] transition-smooth"
         >
           <ArrowLeft class="w-4 h-4" />
           <span>Retour à l'accueil</span>
