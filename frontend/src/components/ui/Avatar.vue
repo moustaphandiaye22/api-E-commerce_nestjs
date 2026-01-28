@@ -12,7 +12,7 @@
     </div>
     <svg
       v-else
-      class="w-full h-full p-1 text-(--text-tertiary)"
+      class="w-full h-full p-1 text-[var(--text-tertiary)]"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -59,7 +59,7 @@ const initials = computed(() => {
 })
 
 const avatarClasses = computed(() => [
-  'relative inline-flex items-center justify-center overflow-hidden bg-(--bg-tertiary) text-(--text-primary)',
+  'relative inline-flex items-center justify-center overflow-hidden bg-(--bg-tertiary) text-[var(--text-primary)]',
   {
     // Size variants
     'w-6 h-6 text-xs': props.size === 'xs',

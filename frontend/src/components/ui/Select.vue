@@ -3,10 +3,10 @@
     <label
       v-if="label"
       :for="id"
-      class="block text-sm font-medium text-(--text-primary) mb-2"
+      class="block text-sm font-medium text-[var(--text-primary)] mb-2"
     >
       {{ label }}
-      <span v-if="required" class="text-(--color-error) ml-1">*</span>
+      <span v-if="required" class="text-[var(--color-error)] ml-1">*</span>
     </label>
     
     <div class="relative">
@@ -26,7 +26,7 @@
       </select>
 
       <!-- Arrow Icon -->
-      <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-(--text-tertiary)">
+      <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
@@ -36,7 +36,7 @@
     <!-- Helper Text -->
     <p
       v-if="helperText && !error"
-      class="mt-2 text-xs text-(--text-muted)"
+      class="mt-2 text-xs text-[var(--text-muted)]"
     >
       {{ helperText }}
     </p>
@@ -44,7 +44,7 @@
     <!-- Error Message -->
     <p
       v-if="error"
-      class="mt-2 text-xs text-(--color-error) flex items-center gap-1"
+      class="mt-2 text-xs text-[var(--color-error)] flex items-center gap-1"
     >
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10"/>
@@ -87,7 +87,7 @@ defineOptions({
 
 const selectClasses = computed(() => [
   'w-full rounded-lg border transition-smooth appearance-none',
-  'bg-(--bg-primary) text-(--text-primary)',
+  'bg-(--bg-primary) text-[var(--text-primary)]',
   'focus:outline-hidden focus:ring-2 focus:ring-(--color-primary) focus:border-(--color-primary)',
   'cursor-pointer',
   {

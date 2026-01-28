@@ -44,9 +44,9 @@ const buttonClasses = computed(() => [
     
     // Variant styles
     'bg-(--color-primary) text-white hover:bg-(--color-primary-700) shadow-sm hover:shadow-md': props.variant === 'primary',
-    'bg-(--bg-tertiary) text-(--text-primary) hover:bg-(--bg-hover)': props.variant === 'secondary',
-    'border border-(--border-medium) bg-transparent text-(--text-primary) hover:bg-(--bg-hover) hover:border-(--color-primary)': props.variant === 'outline',
-    'bg-transparent text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary)': props.variant === 'ghost',
+    'bg-(--bg-tertiary) text-[var(--text-primary)] hover:bg-(--bg-hover)': props.variant === 'secondary',
+    'border border-(--border-medium) bg-transparent text-[var(--text-primary)] hover:bg-(--bg-hover) hover:border-(--color-primary)': props.variant === 'outline',
+    'bg-transparent text-[var(--text-secondary)] hover:bg-(--bg-hover) hover:text-[var(--text-primary)]': props.variant === 'ghost',
     'bg-(--color-error) text-white hover:bg-red-600 shadow-sm hover:shadow-md': props.variant === 'danger',
   }
 ])

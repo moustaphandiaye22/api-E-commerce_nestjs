@@ -6,19 +6,19 @@
       
       <div class="container mx-auto px-4 py-16 md:py-24 relative">
         <div class="max-w-4xl mx-auto text-center space-y-8">
-          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-(--color-primary-100) text-(--color-primary-800) text-sm font-medium mb-4">
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-(--color-primary-100) text-[var(--color-primary-800)] text-sm font-medium mb-4">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
             </svg>
             <span>Découvrez nos nouveautés</span>
           </div>
           
-          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-(--text-primary) leading-tight">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--text-primary)] leading-tight">
             Bienvenue sur
             <span class="gradient-text">Baobab Market</span>
           </h1>
           
-          <p class="text-lg md:text-xl text-(--text-secondary) max-w-2xl mx-auto">
+          <p class="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto">
             Découvrez notre sélection de produits africains authentiques. 
             Qualité premium, livraison rapide et paiement sécurisé.
           </p>
@@ -45,16 +45,16 @@
           <!-- Stats -->
           <div class="grid grid-cols-3 gap-8 pt-12 max-w-2xl mx-auto">
             <div class="space-y-2">
-              <p class="text-3xl md:text-4xl font-bold text-(--color-primary)">500+</p>
-              <p class="text-sm text-(--text-muted)">Produits</p>
+              <p class="text-3xl md:text-4xl font-bold text-[var(--color-primary)]">500+</p>
+              <p class="text-sm text-[var(--text-muted)]">Produits</p>
             </div>
             <div class="space-y-2">
-              <p class="text-3xl md:text-4xl font-bold text-(--color-primary)">5000+</p>
-              <p class="text-sm text-(--text-muted)">Clients</p>
+              <p class="text-3xl md:text-4xl font-bold text-[var(--color-primary)]">5000+</p>
+              <p class="text-sm text-[var(--text-muted)]">Clients</p>
             </div>
             <div class="space-y-2">
-              <p class="text-3xl md:text-4xl font-bold text-(--color-primary)">98%</p>
-              <p class="text-sm text-(--text-muted)">Satisfaits</p>
+              <p class="text-3xl md:text-4xl font-bold text-[var(--color-primary)]">98%</p>
+              <p class="text-sm text-[var(--text-muted)]">Satisfaits</p>
             </div>
           </div>
         </div>
@@ -66,10 +66,10 @@
       <div class="container mx-auto px-4">
         <div class="flex items-center justify-between mb-12">
           <div>
-            <h2 class="text-3xl md:text-4xl font-bold text-(--text-primary) mb-3">
+            <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-3">
               Produits populaires
             </h2>
-            <p class="text-(--text-secondary)">Découvrez nos meilleures ventes</p>
+            <p class="text-[var(--text-secondary)]">Découvrez nos meilleures ventes</p>
           </div>
           <Button
             variant="outline"
@@ -119,8 +119,8 @@
 
         <!-- Empty State -->
         <div v-else class="text-center py-16">
-          <Package class="w-16 h-16 mx-auto text-(--text-muted) mb-4" />
-          <p class="text-(--text-secondary)">Aucun produit disponible pour le moment</p>
+          <Package class="w-16 h-16 mx-auto text-[var(--text-muted)] mb-4" />
+          <p class="text-[var(--text-secondary)]">Aucun produit disponible pour le moment</p>
         </div>
 
         <!-- View All Button Mobile -->
@@ -141,35 +141,35 @@
     <section class="py-16 md:py-24 bg-(--bg-secondary)">
       <div class="container mx-auto px-4">
         <div class="text-center mb-12">
-          <h2 class="text-3xl md:text-4xl font-bold text-(--text-primary) mb-3">
+          <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-3">
             Pourquoi choisir Baobab Market ?
           </h2>
-          <p class="text-(--text-secondary)">Une expérience d'achat exceptionnelle</p>
+          <p class="text-[var(--text-secondary)]">Une expérience d'achat exceptionnelle</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           <div class="group p-6 bg-(--bg-primary) rounded-xl border border-(--border-light) hover:border-(--color-primary) hover:shadow-lg transition-smooth">
             <div class="w-12 h-12 rounded-lg bg-(--color-primary-100) flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Truck class="w-6 h-6 text-(--color-primary)" />
+              <Truck class="w-6 h-6 text-[var(--color-primary)]" />
             </div>
-            <h3 class="text-xl font-semibold text-(--text-primary) mb-2">Livraison rapide</h3>
-            <p class="text-(--text-secondary)">Livraison en 24-48h dans toute l'Europe</p>
+            <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-2">Livraison rapide</h3>
+            <p class="text-[var(--text-secondary)]">Livraison en 24-48h dans toute l'Europe</p>
           </div>
 
           <div class="group p-6 bg-(--bg-primary) rounded-xl border border-(--border-light) hover:border-(--color-primary) hover:shadow-lg transition-smooth">
             <div class="w-12 h-12 rounded-lg bg-(--color-primary-100) flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Shield class="w-6 h-6 text-(--color-primary)" />
+              <Shield class="w-6 h-6 text-[var(--color-primary)]" />
             </div>
-            <h3 class="text-xl font-semibold text-(--text-primary) mb-2">Paiement sécurisé</h3>
-            <p class="text-(--text-secondary)">Transactions 100% sécurisées et cryptées</p>
+            <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-2">Paiement sécurisé</h3>
+            <p class="text-[var(--text-secondary)]">Transactions 100% sécurisées et cryptées</p>
           </div>
 
           <div class="group p-6 bg-(--bg-primary) rounded-xl border border-(--border-light) hover:border-(--color-primary) hover:shadow-lg transition-smooth">
             <div class="w-12 h-12 rounded-lg bg-(--color-primary-100) flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Headphones class="w-6 h-6 text-(--color-primary)" />
+              <Headphones class="w-6 h-6 text-[var(--color-primary)]" />
             </div>
-            <h3 class="text-xl font-semibold text-(--text-primary) mb-2">Support 24/7</h3>
-            <p class="text-(--text-secondary)">Notre équipe à votre service 7j/7</p>
+            <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-2">Support 24/7</h3>
+            <p class="text-[var(--text-secondary)]">Notre équipe à votre service 7j/7</p>
           </div>
         </div>
       </div>

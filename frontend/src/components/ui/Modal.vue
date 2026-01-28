@@ -28,7 +28,7 @@
           >
             <!-- Header -->
             <div v-if="title || $slots.header" class="flex items-center justify-between p-6 border-b border-(--border-light)">
-              <h3 v-if="title" class="text-xl font-semibold text-(--text-primary)">
+              <h3 v-if="title" class="text-xl font-semibold text-[var(--text-primary)]">
                 {{ title }}
               </h3>
               <slot v-else name="header" />
@@ -36,7 +36,7 @@
               <button
                 v-if="closeable"
                 @click="handleClose"
-                class="p-1 rounded-lg hover:bg-(--bg-hover) transition-smooth text-(--text-tertiary) hover:text-(--text-primary)"
+                class="p-1 rounded-lg hover:bg-(--bg-hover) transition-smooth text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
               >
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

@@ -37,8 +37,8 @@ const badgeClasses = computed(() => [
     'w-2 h-2 p-0': props.dot,
     
     // Color variants
-    'bg-(--color-primary-100) text-(--color-primary-800)': props.variant === 'primary',
-    'bg-(--bg-tertiary) text-(--text-primary)': props.variant === 'secondary',
+    'bg-(--color-primary-100) text-[var(--color-primary-800)]': props.variant === 'primary',
+    'bg-(--bg-tertiary) text-[var(--text-primary)]': props.variant === 'secondary',
     'bg-(--color-success-light) text-green-800': props.variant === 'success',
     'bg-(--color-warning-light) text-yellow-800': props.variant === 'warning',
     'bg-(--color-error-light) text-red-800': props.variant === 'error',

@@ -14,16 +14,16 @@
           <nav class="hidden md:flex items-center gap-1">
             <router-link
               to="/"
-              class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
-              active-class="!text-(--color-primary) !bg-(--color-primary-100)"
+              class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
+              active-class="!text-[var(--color-primary)] !bg-(--color-primary-100)"
             >
               <Home class="w-4 h-4" />
               <span>{{ t('nav.home') }}</span>
             </router-link>
             <router-link
               to="/products"
-              class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
-              active-class="!text-(--color-primary) !bg-(--color-primary-100)"
+              class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
+              active-class="!text-[var(--color-primary)] !bg-(--color-primary-100)"
             >
               <Package class="w-4 h-4" />
               <span>{{ t('nav.products') }}</span>
@@ -35,7 +35,6 @@
             <!-- Global Actions -->
             <div class="hidden sm:flex items-center gap-1">
               <LanguageSelector />
-              <CurrencySelector />
               <ThemeToggle />
             </div>
 
@@ -44,7 +43,7 @@
               <!-- Cart -->
               <router-link
                 to="/cart"
-                class="relative p-2 rounded-lg text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
+                class="relative p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
               >
                 <ShoppingCart class="w-5 h-5" />
                 <Badge
@@ -61,7 +60,7 @@
               <!-- Wishlist -->
               <router-link
                 to="/wishlist"
-                class="relative p-2 rounded-lg text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
+                class="relative p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
               >
                 <Heart class="w-5 h-5" />
                 <Badge
@@ -77,9 +76,9 @@
 
               <!-- Notifications -->
               <button
-                @click="toggleNotifications"
-                class="relative p-2 rounded-lg text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
-                :class="{ '!bg-(--color-primary-100) !text-(--color-primary)': showNotifications }"
+                @click.stop="toggleNotifications"
+                class="relative p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
+                :class="{ '!bg-(--color-primary-100) !text-[var(--color-primary)]': showNotifications }"
               >
                 <Bell class="w-5 h-5" />
                 <Badge
@@ -93,9 +92,9 @@
               <!-- User Menu -->
               <div class="relative">
                 <button
-                  @click="toggleUserMenu"
-                  class="flex items-center gap-2 p-2 rounded-lg text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
-                  :class="{ '!bg-(--color-primary-100) !text-(--color-primary)': showUserMenu }"
+                  @click.stop="toggleUserMenu"
+                  class="flex items-center gap-2 p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
+                  :class="{ '!bg-(--color-primary-100) !text-[var(--color-primary)]': showUserMenu }"
                 >
                   <Avatar :name="authStore.user?.prenom" size="sm" />
                   <ChevronDown class="w-4 h-4 hidden sm:block" />
@@ -116,13 +115,13 @@
                     class="absolute right-0 mt-2 w-56 bg-(--bg-primary) rounded-xl shadow-xl border border-(--border-light) overflow-hidden"
                   >
                     <div class="p-3 border-b border-(--border-light) bg-(--bg-secondary)">
-                      <p class="font-semibold text-(--text-primary)">{{ authStore.user?.prenom }} {{ authStore.user?.nom }}</p>
-                      <p class="text-sm text-(--text-muted)">{{ authStore.user?.email }}</p>
+                      <p class="font-semibold text-[var(--text-primary)]">{{ authStore.user?.prenom }} {{ authStore.user?.nom }}</p>
+                      <p class="text-sm text-[var(--text-muted)]">{{ authStore.user?.email }}</p>
                     </div>
                     <div class="py-2">
                       <router-link
                         to="/orders"
-                        class="flex items-center gap-3 px-4 py-2 text-sm text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+                        class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-(--bg-hover) hover:text-[var(--color-primary)] transition-smooth"
                         @click="showUserMenu = false"
                       >
                         <ShoppingBag class="w-4 h-4" />
@@ -130,7 +129,7 @@
                       </router-link>
                       <router-link
                         to="/profile"
-                        class="flex items-center gap-3 px-4 py-2 text-sm text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+                        class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-(--bg-hover) hover:text-[var(--color-primary)] transition-smooth"
                         @click="showUserMenu = false"
                       >
                         <User class="w-4 h-4" />
@@ -154,7 +153,7 @@
             <div v-else class="flex items-center gap-2">
               <router-link
                 to="/login"
-                class="px-4 py-2 text-sm font-medium text-(--text-secondary) hover:text-(--color-primary) transition-smooth hidden sm:block"
+                class="px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--color-primary)] transition-smooth hidden sm:block"
               >
                 {{ t('nav.login') }}
               </router-link>
@@ -170,7 +169,7 @@
             <!-- Mobile Menu Button -->
             <button
               @click="toggleMobileMenu"
-              class="md:hidden p-2 rounded-lg text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--bg-hover) transition-smooth"
+              class="md:hidden p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
             >
               <Menu v-if="!showMobileMenu" class="w-6 h-6" />
               <X v-else class="w-6 h-6" />
@@ -196,8 +195,8 @@
         <nav class="container mx-auto py-4 space-y-1">
           <router-link
             to="/"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
-            active-class="!bg-(--color-primary-100) !text-(--color-primary)"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg text-[var(--text-secondary)] hover:bg-(--bg-hover) hover:text-[var(--color-primary)] transition-smooth"
+            active-class="!bg-(--color-primary-100) !text-[var(--color-primary)]"
             @click="showMobileMenu = false"
           >
             <Home class="w-5 h-5" />
@@ -205,8 +204,8 @@
           </router-link>
           <router-link
             to="/products"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
-            active-class="!bg-(--color-primary-100) !text-(--color-primary)"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg text-[var(--text-secondary)] hover:bg-(--bg-hover) hover:text-[var(--color-primary)] transition-smooth"
+            active-class="!bg-(--color-primary-100) !text-[var(--color-primary)]"
             @click="showMobileMenu = false"
           >
             <Package class="w-5 h-5" />
@@ -217,7 +216,7 @@
             <hr class="my-2 border-(--border-light)" />
             <router-link
               to="/cart"
-              class="flex items-center justify-between px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+              class="flex items-center justify-between px-4 py-3 rounded-lg text-[var(--text-secondary)] hover:bg-(--bg-hover) hover:text-[var(--color-primary)] transition-smooth"
               @click="showMobileMenu = false"
             >
               <div class="flex items-center gap-3">
@@ -230,7 +229,7 @@
             </router-link>
             <router-link
               to="/wishlist"
-              class="flex items-center justify-between px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+              class="flex items-center justify-between px-4 py-3 rounded-lg text-[var(--text-secondary)] hover:bg-(--bg-hover) hover:text-[var(--color-primary)] transition-smooth"
               @click="showMobileMenu = false"
             >
               <div class="flex items-center gap-3">
@@ -243,7 +242,7 @@
             </router-link>
             <router-link
               to="/orders"
-              class="flex items-center gap-3 px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+              class="flex items-center gap-3 px-4 py-3 rounded-lg text-[var(--text-secondary)] hover:bg-(--bg-hover) hover:text-[var(--color-primary)] transition-smooth"
               @click="showMobileMenu = false"
             >
               <ShoppingBag class="w-5 h-5" />
@@ -251,7 +250,7 @@
             </router-link>
             <router-link
               to="/profile"
-              class="flex items-center gap-3 px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+              class="flex items-center gap-3 px-4 py-3 rounded-lg text-[var(--text-secondary)] hover:bg-(--bg-hover) hover:text-[var(--color-primary)] transition-smooth"
               @click="showMobileMenu = false"
             >
               <User class="w-5 h-5" />
@@ -263,7 +262,7 @@
             <hr class="my-2 border-(--border-light)" />
             <router-link
               to="/login"
-              class="flex items-center gap-3 px-4 py-3 rounded-lg text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--color-primary) transition-smooth"
+              class="flex items-center gap-3 px-4 py-3 rounded-lg text-[var(--text-secondary)] hover:bg-(--bg-hover) hover:text-[var(--color-primary)] transition-smooth"
               @click="showMobileMenu = false"
             >
               <LogIn class="w-5 h-5" />
@@ -281,10 +280,9 @@
 
           <hr class="my-2 border-(--border-light)" />
           <div class="px-4 py-2 space-y-2">
-            <p class="text-xs text-(--text-muted) uppercase tracking-wide mb-2">Préférences</p>
+            <p class="text-xs text-[var(--text-muted)] uppercase tracking-wide mb-2">Préférences</p>
             <div class="flex items-center gap-2">
               <LanguageSelector />
-              <CurrencySelector />
               <ThemeToggle />
             </div>
           </div>
@@ -307,7 +305,7 @@
         class="fixed top-20 right-4 w-96 max-w-[calc(100vw-2rem)] bg-(--bg-primary) rounded-xl shadow-2xl border border-(--border-light) overflow-hidden z-50"
       >
         <div class="flex items-center justify-between p-4 border-b border-(--border-light) bg-(--bg-secondary)">
-          <h3 class="font-semibold text-(--text-primary)">Notifications</h3>
+          <h3 class="font-semibold text-[var(--text-primary)]">Notifications</h3>
           <button
             @click="showNotifications = false"
             class="p-1 rounded-lg hover:bg-(--bg-hover) transition-smooth"
@@ -323,14 +321,14 @@
             class="p-4 border-b border-(--border-light) hover:bg-(--bg-hover) transition-smooth cursor-pointer"
             :class="{ '!bg-(--color-primary-50)': !notification.read }"
           >
-            <h4 class="font-medium text-(--text-primary) text-sm">{{ notification.title }}</h4>
-            <p class="text-sm text-(--text-secondary) mt-1">{{ notification.message }}</p>
-            <p class="text-xs text-(--text-muted) mt-2">{{ formatDate(notification.createdAt) }}</p>
+            <h4 class="font-medium text-[var(--text-primary)] text-sm">{{ notification.title }}</h4>
+            <p class="text-sm text-[var(--text-secondary)] mt-1">{{ notification.message }}</p>
+            <p class="text-xs text-[var(--text-muted)] mt-2">{{ formatDate(notification.createdAt) }}</p>
           </div>
           
           <div v-if="notificationsStore.notifications.length === 0" class="p-8 text-center">
-            <Bell class="w-12 h-12 mx-auto text-(--text-muted) mb-2" />
-            <p class="text-(--text-muted)">Aucune notification</p>
+            <Bell class="w-12 h-12 mx-auto text-[var(--text-muted)] mb-2" />
+            <p class="text-[var(--text-muted)]">Aucune notification</p>
           </div>
         </div>
       </div>
