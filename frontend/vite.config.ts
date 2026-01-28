@@ -13,6 +13,14 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  optimizeDeps: {
+    include: ['axios']
+  },
+  build: {
+    commonjsOptions: {
+      include: [/axios/]
+    }
+  },
   server: {
     proxy: {
       '/api': {
