@@ -332,10 +332,8 @@ import {
   ShoppingCart,
 } from 'lucide-vue-next'
 import type { Product } from '../types/api'
-import type { Product } from '../types/api'
 
 // API base URL for images
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 const router = useRouter()
 const productsStore = useProductsStore()
