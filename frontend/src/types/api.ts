@@ -121,6 +121,8 @@ export interface RegisterDto {
   password: string
   prenom: string
   nom: string
+  telephone?: string
+  confirmPassword?: string // Pour la validation frontend uniquement
 }
 
 export interface LoginDto {

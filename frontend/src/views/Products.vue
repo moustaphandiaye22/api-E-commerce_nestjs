@@ -199,7 +199,6 @@
               @click="goToProduct"
               @add-to-cart="addToCart"
               @toggle-wishlist="toggleWishlist"
-              :class="viewMode === 'list' ? 'flex-row' : ''"
             />
           </div>
 

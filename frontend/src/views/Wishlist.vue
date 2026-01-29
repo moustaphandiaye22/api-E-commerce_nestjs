@@ -1,92 +1,151 @@
 <template>
-  <div class="wishlist-page">
-    <div class="container">
-      <h1>Ma Liste de Souhaits</h1>
+  <div class="min-h-screen bg-(--bg-secondary)">
+    <!-- Breadcrumb -->
+    <div class="bg-(--bg-primary) border-b border-(--border-light)">
+      <div class="container mx-auto px-4 py-4">
+        <Breadcrumb :items="breadcrumbItems" />
+      </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-(--text-primary)">Ma Liste de Souhaits</h1>
+          <p v-if="!wishlistStore.loading && wishlistStore.wishlist.length > 0" class="text-sm text-(--text-muted) mt-1">
+            {{ wishlistStore.wishlist.length }} produit{{ wishlistStore.wishlist.length > 1 ? 's' : '' }}
+          </p>
+        </div>
+
+        <Button
+          v-if="wishlistStore.wishlist.length > 0"
+          variant="outline"
+          size="sm"
+          @click="addAllToCart"
+          :loading="cartStore.loading"
+        >
+          <ShoppingCart class="w-4 h-4" />
+          Tout ajouter au panier
+        </Button>
+      </div>
 
       <!-- Loading State -->
-      <div v-if="wishlistStore.loading" class="loading">
-        Chargement de la liste de souhaits...
+      <div v-if="wishlistStore.loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div v-for="n in 4" :key="n" class="animate-pulse">
+          <div class="bg-(--bg-tertiary) aspect-square rounded-xl mb-4"></div>
+          <div class="h-4 bg-(--bg-tertiary) rounded mb-2"></div>
+          <div class="h-4 bg-(--bg-tertiary) rounded w-2/3"></div>
+        </div>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="wishlistStore.error" class="error-message">
-        {{ wishlistStore.error }}
-        <button @click="wishlistStore.fetchWishlist()" class="btn-retry">
+      <Alert
+        v-else-if="wishlistStore.error"
+        variant="error"
+        :title="'Erreur de chargement'"
+        closeable
+        @close="wishlistStore.error = null"
+      >
+        <p>{{ wishlistStore.error }}</p>
+        <Button variant="outline" size="sm" class="mt-3" @click="wishlistStore.fetchWishlist()">
           Réessayer
-        </button>
-      </div>
+        </Button>
+      </Alert>
 
       <!-- Empty Wishlist -->
-      <div v-else-if="wishlistStore.wishlist.length === 0" class="empty-wishlist">
-        <div class="empty-wishlist-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
+      <div v-else-if="wishlistStore.wishlist.length === 0" class="text-center py-16">
+        <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-(--bg-tertiary) flex items-center justify-center">
+          <Heart class="w-12 h-12 text-(--text-muted)" />
         </div>
-        <h2>Votre liste de souhaits est vide</h2>
-        <p>Découvrez nos produits et ajoutez-les à votre liste de souhaits</p>
-        <router-link to="/products" class="btn-primary">
-          Voir les produits
-        </router-link>
+        <h2 class="text-2xl font-semibold text-(--text-primary) mb-2">Votre liste de souhaits est vide</h2>
+        <p class="text-(--text-secondary) mb-6">Découvrez nos produits et ajoutez-les à votre liste de souhaits</p>
+        <Button variant="primary" @click="$router.push('/products')">
+          <Package class="w-5 h-5" />
+          Découvrir les produits
+        </Button>
       </div>
 
       <!-- Wishlist Items -->
-      <div v-else class="wishlist-content">
-        <div class="wishlist-grid">
-          <div
-            v-for="item in wishlistStore.wishlist"
-            :key="item.id"
-            class="wishlist-item"
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div
+          v-for="item in wishlistStore.wishlist"
+          :key="item.id"
+          class="relative group"
+        >
+          <!-- Remove Button -->
+          <button
+            @click="removeFromWishlist(item.produit.id)"
+            class="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-red-500 hover:text-white transition-smooth shadow-md"
+            title="Retirer des favoris"
           >
-            <div class="item-image">
+            <Trash2 class="w-4 h-4" />
+          </button>
+
+          <!-- Product Card -->
+          <div
+            class="cursor-pointer bg-(--bg-primary) rounded-xl overflow-hidden transition-smooth border border-(--border-light) hover:border-(--color-primary) hover:shadow-lg hover:-translate-y-1"
+            @click="goToProduct(item.produit.id)"
+          >
+            <!-- Image -->
+            <div class="relative aspect-square overflow-hidden bg-(--bg-tertiary)">
               <img
                 v-if="item.produit.images_produits && item.produit.images_produits.length > 0"
                 :src="getImageUrl(item.produit.images_produits.find(img => img.est_principale)?.url_image || item.produit.images_produits[0]?.url_image)"
                 :alt="item.produit.nom"
+                loading="lazy"
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
-              <div v-else class="no-image">Pas d'image</div>
+              <div v-else class="flex items-center justify-center w-full h-full text-(--text-muted)">
+                <ImageOff class="w-16 h-16" />
+              </div>
+
+              <!-- Badge Stock -->
+              <div v-if="item.produit.quantite_stock <= 0" class="absolute top-3 left-3">
+                <Badge variant="error">Rupture de stock</Badge>
+              </div>
+              <div v-else-if="item.produit.quantite_stock < 10" class="absolute top-3 left-3">
+                <Badge variant="warning">Stock limité</Badge>
+              </div>
             </div>
 
-            <div class="item-details">
-              <h3 class="item-title">{{ item.produit.nom }}</h3>
-              <p class="item-price">{{ formatPrice(item.produit.prix) }} €</p>
-              <div class="item-category" v-if="item.produit.categorie">
+            <!-- Content -->
+            <div class="p-4 space-y-3">
+              <!-- Category -->
+              <p v-if="item.produit.categorie" class="text-xs text-(--text-muted) uppercase tracking-wide">
                 {{ item.produit.categorie.nom }}
-              </div>
-              <div class="item-stock" :class="{ 'out-of-stock': !item.produit.est_actif || item.produit.stock === 0 }">
-                {{ item.produit.est_actif && item.produit.stock > 0 ? `${item.produit.stock} en stock` : 'Rupture de stock' }}
-              </div>
-            </div>
+              </p>
 
-            <div class="item-actions">
-              <button
-                v-if="item.produit.est_actif && item.produit.stock > 0"
-                @click="addToCart(item.produit.id)"
-                class="btn-add-cart"
-                :disabled="cartStore.loading"
+              <!-- Title -->
+              <h3 class="text-base font-semibold text-(--text-primary) line-clamp-2 min-h-[3rem]">
+                {{ item.produit.nom }}
+              </h3>
+
+              <!-- Price -->
+              <p class="text-xl font-bold text-(--color-primary)">
+                {{ formatPrice(item.produit.prix) }}
+              </p>
+
+              <!-- Actions -->
+              <Button
+                v-if="item.produit.est_actif && item.produit.quantite_stock > 0"
+                @click.stop="addToCart(item.produit.id)"
+                variant="primary"
+                size="sm"
+                full-width
+                :loading="cartStore.loading"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
+                <ShoppingCart class="w-4 h-4" />
                 Ajouter au panier
-              </button>
-
-              <button
-                @click="goToProduct(item.produit.id)"
-                class="btn-view-product"
+              </Button>
+              <Button
+                v-else
+                variant="outline"
+                size="sm"
+                full-width
+                disabled
               >
-                Voir le produit
-              </button>
-
-              <button
-                @click="removeFromWishlist(item.produit.id)"
-                class="btn-remove"
-                title="Retirer de la liste de souhaits"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
+                Indisponible
+              </Button>
             </div>
           </div>
         </div>
@@ -101,20 +160,51 @@ import { useRouter } from 'vue-router'
 import { useWishlistStore } from '../stores/wishlist'
 import { useCartStore } from '../stores/cart'
 import { formatPrice } from '../utils/formatters'
-
-// API base URL for images
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+import Breadcrumb from '../components/ui/Breadcrumb.vue'
+import Button from '../components/ui/Button.vue'
+import Badge from '../components/ui/Badge.vue'
+import Alert from '../components/ui/Alert.vue'
+import {
+  Heart,
+  Package,
+  ShoppingCart,
+  Trash2,
+  ImageOff,
+} from 'lucide-vue-next'
 
 const wishlistStore = useWishlistStore()
 const cartStore = useCartStore()
 const router = useRouter()
+
+const breadcrumbItems = [
+  { label: 'Accueil', to: '/' },
+  { label: 'Ma liste de souhaits', to: '/wishlist' },
+]
 
 onMounted(() => {
   wishlistStore.fetchWishlist()
 })
 
 const addToCart = async (productId: string) => {
-  await cartStore.addItem({ produit_id: productId, quantite: 1 })
+  try {
+    await cartStore.addItem({ produit_id: productId, quantite: 1 })
+    // TODO: Show success toast
+  } catch (error) {
+    console.error('Error adding to cart:', error)
+  }
+}
+
+const addAllToCart = async () => {
+  try {
+    for (const item of wishlistStore.wishlist) {
+      if (item.produit.est_actif && item.produit.quantite_stock > 0) {
+        await cartStore.addItem({ produit_id: item.produit.id, quantite: 1 })
+      }
+    }
+    // TODO: Show success toast
+  } catch (error) {
+    console.error('Error adding all to cart:', error)
+  }
 }
 
 const goToProduct = (productId: string) => {
@@ -122,269 +212,31 @@ const goToProduct = (productId: string) => {
 }
 
 const removeFromWishlist = async (productId: string) => {
-  await wishlistStore.removeFromWishlist(productId)
+  try {
+    await wishlistStore.removeFromWishlist(productId)
+    // TODO: Show success toast
+  } catch (error) {
+    console.error('Error removing from wishlist:', error)
+  }
 }
 
 const getImageUrl = (url: string) => {
   if (url.startsWith('http')) return url
-  return `${API_BASE_URL}${url}`
+  return `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`
 }
 </script>
 
 <style scoped>
-@import '../styles/design-system.css';
-
-.wishlist-page {
-  min-height: 100vh;
-  background-color: var(--color-bg-secondary);
-  padding: var(--spacing-4) 0;
-}
-
-.container {
-  max-width: var(--max-width-2xl);
-  margin: 0 auto;
-  padding: 0 var(--container-padding);
-}
-
-.wishlist-page h1 {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-8);
-  text-align: center;
-}
-
-.loading, .error-message {
-  text-align: center;
-  padding: var(--spacing-12);
-  font-size: var(--font-size-lg);
-}
-
-.error-message {
-  background-color: var(--color-error-light);
-  color: var(--color-error);
-  border-radius: var(--border-radius-md);
-  margin-bottom: var(--spacing-6);
-}
-
-.btn-retry {
-  margin-top: var(--spacing-4);
-  padding: var(--spacing-2) var(--spacing-4);
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
-  border: none;
-  border-radius: var(--border-radius-md);
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  transition: background-color var(--transition-fast);
-}
-
-.btn-retry:hover {
-  background-color: var(--color-primary-dark);
-}
-
-.empty-wishlist {
-  text-align: center;
-  padding: var(--spacing-16) var(--spacing-4);
-}
-
-.empty-wishlist-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto var(--spacing-6);
-  color: var(--color-text-tertiary);
-}
-
-.empty-wishlist-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.empty-wishlist h2 {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-2);
-}
-
-.empty-wishlist p {
-  color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-6);
-}
-
-.btn-primary {
-  display: inline-block;
-  padding: var(--spacing-3) var(--spacing-6);
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
-  text-decoration: none;
-  border-radius: var(--border-radius-md);
-  font-weight: var(--font-weight-medium);
-  transition: background-color var(--transition-fast);
-}
-
-.btn-primary:hover {
-  background-color: var(--color-primary-dark);
-}
-
-.wishlist-content {
-  background-color: var(--color-bg-primary);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
-  padding: var(--spacing-6);
-}
-
-.wishlist-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--spacing-6);
-}
-
-.wishlist-item {
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-4);
-  position: relative;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.wishlist-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.item-image {
-  width: 100%;
-  height: 200px;
-  background-color: var(--color-bg-primary);
-  border-radius: var(--border-radius-md);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: var(--spacing-4);
-}
-
-.item-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.no-image {
-  color: var(--color-text-tertiary);
-  font-size: var(--font-size-sm);
-}
-
-.item-details {
-  margin-bottom: var(--spacing-4);
-}
-
-.item-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-2);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.item-price {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
-  margin-bottom: var(--spacing-1);
-}
-
-.item-category {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--spacing-1);
-}
-
-.item-stock {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-}
-
-.item-stock.out-of-stock {
-  color: var(--color-error);
-}
-
-.item-actions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
-}
-
-.btn-add-cart, .btn-view-product {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-4);
-  border: var(--border-width) solid var(--color-primary);
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.btn-add-cart:hover:not(:disabled), .btn-view-product:hover {
-  background-color: var(--color-primary-dark);
-  border-color: var(--color-primary-dark);
-}
-
-.btn-add-cart:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-view-product {
-  background-color: transparent;
-  color: var(--color-primary);
-}
-
-.btn-view-product:hover {
-  background-color: var(--color-primary-lighter);
-  color: var(--color-primary-dark);
-}
-
-.btn-remove {
-  position: absolute;
-  top: var(--spacing-2);
-  right: var(--spacing-2);
-  width: 32px;
-  height: 32px;
-  border: none;
-  background-color: var(--color-error);
-  color: var(--color-text-inverse);
-  border-radius: var(--border-radius-full);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color var(--transition-fast);
-}
-
-.btn-remove:hover {
-  background-color: var(--color-error);
-  opacity: 0.9;
-}
-
-.btn-remove svg {
-  width: 16px;
-  height: 16px;
-}
-
-@media (max-width: 768px) {
-  .wishlist-grid {
-    grid-template-columns: 1fr;
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
   }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 </style>

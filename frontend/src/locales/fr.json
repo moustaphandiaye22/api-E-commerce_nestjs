@@ -48,6 +48,7 @@
       "email": "Email",
       "password": "Mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
+      "phone": "Téléphone",
       "submit": "S'inscrire",
       "hasAccount": "Déjà un compte ?",
       "loginLink": "Se connecter"

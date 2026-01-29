@@ -338,6 +338,9 @@
     <main class="flex-1">
       <router-view />
     </main>
+
+    <!-- Footer -->
+    <Footer />
   </div>
 </template>
 
@@ -355,6 +358,7 @@ import Avatar from './components/ui/Avatar.vue'
 import LanguageSelector from './components/ui/LanguageSelector.vue'
 import CurrencySelector from './components/ui/CurrencySelector.vue'
 import ThemeToggle from './components/ui/ThemeToggle.vue'
+import Footer from './components/shared/Footer.vue'
 import {
   Home,
   Package,

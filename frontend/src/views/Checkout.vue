@@ -1,215 +1,287 @@
 <template>
-  <div class="checkout-page">
-    <div class="container">
-      <h1>Finaliser ma commande</h1>
+  <div class="min-h-screen bg-(--bg-secondary)">
+    <!-- Breadcrumb -->
+    <div class="bg-(--bg-primary) border-b border-(--border-light)">
+      <div class="container mx-auto px-4 py-4">
+        <Breadcrumb :items="breadcrumbItems" />
+      </div>
+    </div>
 
-      <div v-if="cartStore.loading" class="loading">
-        Chargement du panier...
+    <div class="container mx-auto px-4 py-8">
+      <!-- Header -->
+      <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-(--text-primary) mb-2">Finaliser ma commande</h1>
+        <p class="text-(--text-muted)">Complétez vos informations pour valider votre achat</p>
       </div>
 
-      <div v-else-if="!cartStore.cart || cartStore.cart.articles_panier.length === 0" class="empty-cart">
-        <p>Votre panier est vide. <router-link to="/products">Continuer vos achats</router-link></p>
+      <!-- Loading State -->
+      <div v-if="cartStore.loading" class="flex justify-center py-12">
+        <Spinner size="lg" />
       </div>
 
-      <div v-else class="checkout-content">
-        <form @submit.prevent="handleSubmit" class="checkout-form">
+      <!-- Empty Cart -->
+      <div v-else-if="!cartStore.cart || cartStore.cart.articles_panier.length === 0" class="text-center py-16">
+        <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-(--bg-tertiary) flex items-center justify-center">
+          <ShoppingCart class="w-12 h-12 text-(--text-muted)" />
+        </div>
+        <h2 class="text-2xl font-semibold text-(--text-primary) mb-2">Votre panier est vide</h2>
+        <p class="text-(--text-secondary) mb-6">Ajoutez des produits pour continuer</p>
+        <Button variant="primary" @click="$router.push('/products')">
+          <Package class="w-5 h-5" />
+          Continuer vos achats
+        </Button>
+      </div>
+
+      <!-- Checkout Content -->
+      <form v-else @submit.prevent="handleSubmit" class="grid lg:grid-cols-3 gap-8">
+        <!-- Left Column - Forms -->
+        <div class="lg:col-span-2 space-y-6">
           <!-- Shipping Address -->
-          <div class="form-section">
-            <h2>Adresse de livraison</h2>
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="shipping-firstname">Prénom *</label>
-                <input
-                  id="shipping-firstname"
-                  v-model="shippingAddress.prenom"
-                  type="text"
-                  required
-                />
+          <div class="bg-(--bg-primary) rounded-xl border border-(--border-light) p-6">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 rounded-full bg-(--color-primary-100) flex items-center justify-center">
+                <Truck class="w-5 h-5 text-(--color-primary)" />
               </div>
-              <div class="form-group">
-                <label for="shipping-lastname">Nom *</label>
-                <input
-                  id="shipping-lastname"
-                  v-model="shippingAddress.nom"
-                  type="text"
-                  required
-                />
-              </div>
-              <div class="form-group full-width">
-                <label for="shipping-street">Rue *</label>
-                <input
-                  id="shipping-street"
+              <h2 class="text-xl font-semibold text-(--text-primary)">Adresse de livraison</h2>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <Input
+                v-model="shippingAddress.prenom"
+                label="Prénom"
+                placeholder="Jean"
+                required
+              />
+              <Input
+                v-model="shippingAddress.nom"
+                label="Nom"
+                placeholder="Dupont"
+                required
+              />
+              <div class="sm:col-span-2">
+                <Input
                   v-model="shippingAddress.rue"
-                  type="text"
+                  label="Adresse"
+                  placeholder="123 Rue de la Paix"
                   required
                 />
               </div>
-              <div class="form-group">
-                <label for="shipping-postal">Code postal *</label>
-                <input
-                  id="shipping-postal"
-                  v-model="shippingAddress.code_postal"
-                  type="text"
+              <Input
+                v-model="shippingAddress.code_postal"
+                label="Code postal"
+                placeholder="75001"
+                required
+              />
+              <Input
+                v-model="shippingAddress.ville"
+                label="Ville"
+                placeholder="Paris"
+                required
+              />
+              <div class="sm:col-span-2">
+                <Select
+                  v-model="shippingAddress.pays"
+                  label="Pays"
                   required
-                />
-              </div>
-              <div class="form-group">
-                <label for="shipping-city">Ville *</label>
-                <input
-                  id="shipping-city"
-                  v-model="shippingAddress.ville"
-                  type="text"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="shipping-country">Pays *</label>
-                <select id="shipping-country" v-model="shippingAddress.pays" required>
+                >
                   <option value="France">France</option>
                   <option value="Belgique">Belgique</option>
                   <option value="Suisse">Suisse</option>
-                </select>
+                  <option value="Luxembourg">Luxembourg</option>
+                </Select>
               </div>
             </div>
           </div>
 
           <!-- Billing Address -->
-          <div class="form-section">
-            <div class="checkbox-group">
-              <input
-                id="same-address"
-                v-model="sameAddress"
-                type="checkbox"
-                @change="toggleSameAddress"
-              />
-              <label for="same-address">Adresse de facturation identique</label>
+          <div class="bg-(--bg-primary) rounded-xl border border-(--border-light) p-6">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 rounded-full bg-(--color-primary-100) flex items-center justify-center">
+                <FileText class="w-5 h-5 text-(--color-primary)" />
+              </div>
+              <h2 class="text-xl font-semibold text-(--text-primary)">Adresse de facturation</h2>
             </div>
 
-            <div v-if="!sameAddress">
-              <h2>Adresse de facturation</h2>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label for="billing-firstname">Prénom *</label>
-                  <input
-                    id="billing-firstname"
-                    v-model="billingAddress.prenom"
-                    type="text"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="billing-lastname">Nom *</label>
-                  <input
-                    id="billing-lastname"
-                    v-model="billingAddress.nom"
-                    type="text"
-                    required
-                  />
-                </div>
-                <div class="form-group full-width">
-                  <label for="billing-street">Rue *</label>
-                  <input
-                    id="billing-street"
-                    v-model="billingAddress.rue"
-                    type="text"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="billing-postal">Code postal *</label>
-                  <input
-                    id="billing-postal"
-                    v-model="billingAddress.code_postal"
-                    type="text"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="billing-city">Ville *</label>
-                  <input
-                    id="billing-city"
-                    v-model="billingAddress.ville"
-                    type="text"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="billing-country">Pays *</label>
-                  <select id="billing-country" v-model="billingAddress.pays" required>
-                    <option value="France">France</option>
-                    <option value="Belgique">Belgique</option>
-                    <option value="Suisse">Suisse</option>
-                  </select>
-                </div>
+            <label class="flex items-center gap-3 mb-6 cursor-pointer group">
+              <input
+                type="checkbox"
+                v-model="sameAddress"
+                @change="toggleSameAddress"
+                class="w-5 h-5 rounded border-(--border-medium) text-(--color-primary) focus:ring-2 focus:ring-(--color-primary) focus:ring-offset-0"
+              />
+              <span class="text-(--text-secondary) group-hover:text-(--text-primary) transition-smooth">
+                Identique à l'adresse de livraison
+              </span>
+            </label>
+
+            <div v-if="!sameAddress" class="grid sm:grid-cols-2 gap-4">
+              <Input
+                v-model="billingAddress.prenom"
+                label="Prénom"
+                placeholder="Jean"
+                required
+              />
+              <Input
+                v-model="billingAddress.nom"
+                label="Nom"
+                placeholder="Dupont"
+                required
+              />
+              <div class="sm:col-span-2">
+                <Input
+                  v-model="billingAddress.rue"
+                  label="Adresse"
+                  placeholder="123 Rue de la Paix"
+                  required
+                />
+              </div>
+              <Input
+                v-model="billingAddress.code_postal"
+                label="Code postal"
+                placeholder="75001"
+                required
+              />
+              <Input
+                v-model="billingAddress.ville"
+                label="Ville"
+                placeholder="Paris"
+                required
+              />
+              <div class="sm:col-span-2">
+                <Select
+                  v-model="billingAddress.pays"
+                  label="Pays"
+                  required
+                >
+                  <option value="France">France</option>
+                  <option value="Belgique">Belgique</option>
+                  <option value="Suisse">Suisse</option>
+                  <option value="Luxembourg">Luxembourg</option>
+                </Select>
               </div>
             </div>
           </div>
 
           <!-- Payment Method -->
-          <div class="form-section">
-            <h2>Méthode de paiement</h2>
-            <div class="payment-methods">
-              <div class="payment-method">
-                <input
-                  id="stripe"
-                  v-model="paymentMethod"
-                  type="radio"
-                  value="stripe"
-                  required
-                />
-                <label for="stripe">
-                  <div class="payment-info">
-                    <div class="payment-name">Carte bancaire</div>
-                    <div class="payment-description">Visa, MasterCard, American Express</div>
-                  </div>
-                </label>
+          <div class="bg-(--bg-primary) rounded-xl border border-(--border-light) p-6">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 rounded-full bg-(--color-primary-100) flex items-center justify-center">
+                <CreditCard class="w-5 h-5 text-(--color-primary)" />
               </div>
+              <h2 class="text-xl font-semibold text-(--text-primary)">Méthode de paiement</h2>
             </div>
-          </div>
 
-          <!-- Order Summary -->
-          <div class="order-summary">
-            <h2>Résumé de la commande</h2>
-            <div class="summary-items">
+            <label class="flex items-start gap-4 p-4 border-2 border-(--border-light) rounded-lg cursor-pointer hover:border-(--color-primary) transition-smooth">
+              <input
+                type="radio"
+                v-model="paymentMethod"
+                value="stripe"
+                required
+                class="mt-1 w-5 h-5 text-(--color-primary) focus:ring-2 focus:ring-(--color-primary) focus:ring-offset-0"
+              />
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <CreditCard class="w-5 h-5 text-(--color-primary)" />
+                  <span class="font-medium text-(--text-primary)">Carte bancaire</span>
+                </div>
+                <p class="text-sm text-(--text-muted)">Visa, MasterCard, American Express</p>
+                <div class="flex items-center gap-2 mt-2">
+                  <Shield class="w-4 h-4 text-green-600" />
+                  <span class="text-xs text-green-600">Paiement 100% sécurisé</span>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Right Column - Order Summary -->
+        <div class="lg:col-span-1">
+          <div class="bg-(--bg-primary) rounded-xl border border-(--border-light) p-6 sticky top-24">
+            <h2 class="text-xl font-semibold text-(--text-primary) mb-6">Résumé de la commande</h2>
+
+            <!-- Items -->
+            <div class="space-y-4 mb-6 max-h-64 overflow-y-auto scrollbar-hidden">
               <div
                 v-for="item in cartStore.cart.articles_panier"
                 :key="item.id"
-                class="summary-item"
+                class="flex items-center gap-3"
               >
-                <div class="item-info">
-                  <span class="item-name">{{ item.produit.nom }}</span>
-                  <span class="item-quantity">x{{ item.quantite }}</span>
+                <div class="w-16 h-16 rounded-lg overflow-hidden bg-(--bg-tertiary) flex-shrink-0">
+                  <img
+                    v-if="item.produit.images_produits && item.produit.images_produits.length > 0"
+                    :src="getImageUrl(item.produit.images_produits.find(img => img.est_principale)?.url_image || item.produit.images_produits[0]?.url_image)"
+                    :alt="item.produit.nom"
+                    class="w-full h-full object-cover"
+                  />
+                  <div v-else class="flex items-center justify-center w-full h-full">
+                    <ImageOff class="w-6 h-6 text-(--text-muted)" />
+                  </div>
                 </div>
-                <span class="item-price">{{ formatPrice(parseFloat(item.prix_unitaire) * item.quantite) }} €</span>
+
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-medium text-(--text-primary) text-sm truncate">
+                    {{ item.produit.nom }}
+                  </h4>
+                  <p class="text-xs text-(--text-muted)">
+                    Qté: {{ item.quantite }}
+                  </p>
+                </div>
+
+                <p class="font-semibold text-(--text-primary) text-sm">
+                  {{ formatPrice(parseFloat(item.prix_unitaire) * item.quantite) }}
+                </p>
               </div>
             </div>
-            <div class="summary-divider"></div>
-            <div class="summary-row">
-              <span>Sous-total</span>
-              <span>{{ formatPrice(cartStore.totalAmount) }} €</span>
-            </div>
-            <div class="summary-row">
-              <span>Livraison</span>
-              <span>{{ formatPrice(shippingCost) }} €</span>
-            </div>
-            <div class="summary-row total">
-              <span>Total</span>
-              <span>{{ formatPrice(totalAmount) }} €</span>
-            </div>
-          </div>
 
-          <!-- Submit Button -->
-          <div class="form-actions">
-            <button
+            <div class="border-t border-(--border-light) pt-4 space-y-3">
+              <div class="flex justify-between text-(--text-secondary)">
+                <span>Sous-total</span>
+                <span>{{ formatPrice(cartStore.totalAmount) }}</span>
+              </div>
+              <div class="flex justify-between text-(--text-secondary)">
+                <span>Livraison</span>
+                <span>{{ formatPrice(shippingCost) }}</span>
+              </div>
+              <div v-if="cartStore.discountAmount > 0" class="flex justify-between text-green-600">
+                <span>Réduction</span>
+                <span>-{{ formatPrice(cartStore.discountAmount) }}</span>
+              </div>
+              <div class="border-t border-(--border-light) pt-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-lg font-semibold text-(--text-primary)">Total</span>
+                  <span class="text-2xl font-bold text-(--color-primary)">
+                    {{ formatPrice(totalAmount) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <Button
               type="submit"
-              :disabled="ordersStore.loading"
-              class="btn-submit"
+              variant="primary"
+              size="lg"
+              full-width
+              class="mt-6"
+              :loading="ordersStore.loading"
             >
-              {{ ordersStore.loading ? 'Traitement...' : `Payer ${formatPrice(totalAmount)} €` }}
-            </button>
+              <Lock class="w-5 h-5" />
+              Payer {{ formatPrice(totalAmount) }}
+            </Button>
+
+            <!-- Security Info -->
+            <div class="mt-4 p-3 bg-(--bg-secondary) rounded-lg">
+              <div class="flex items-start gap-2">
+                <Shield class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p class="text-xs font-medium text-(--text-primary) mb-1">Paiement sécurisé</p>
+                  <p class="text-xs text-(--text-muted)">Vos informations sont protégées par un cryptage SSL</p>
+                </div>
+              </div>
+            </div>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   </div>
 </template>
@@ -220,10 +292,31 @@ import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 import { useOrdersStore } from '../stores/orders'
 import { formatPrice } from '../utils/formatters'
+import Breadcrumb from '../components/ui/Breadcrumb.vue'
+import Button from '../components/ui/Button.vue'
+import Input from '../components/ui/Input.vue'
+import Select from '../components/ui/Select.vue'
+import Spinner from '../components/ui/Spinner.vue'
+import {
+  ShoppingCart,
+  Package,
+  Truck,
+  FileText,
+  CreditCard,
+  Shield,
+  Lock,
+  ImageOff,
+} from 'lucide-vue-next'
 
 const cartStore = useCartStore()
 const ordersStore = useOrdersStore()
 const router = useRouter()
+
+const breadcrumbItems = [
+  { label: 'Accueil', to: '/' },
+  { label: 'Panier', to: '/cart' },
+  { label: 'Paiement', to: '/checkout' },
+]
 
 // Form data
 const shippingAddress = ref({
@@ -232,7 +325,7 @@ const shippingAddress = ref({
   rue: '',
   code_postal: '',
   ville: '',
-  pays: 'France'
+  pays: 'France',
 })
 
 const billingAddress = ref({
@@ -241,7 +334,7 @@ const billingAddress = ref({
   rue: '',
   code_postal: '',
   ville: '',
-  pays: 'France'
+  pays: 'France',
 })
 
 const sameAddress = ref(true)
@@ -250,7 +343,10 @@ const paymentMethod = ref('stripe')
 // Constants
 const shippingCost = 5.99
 
-const totalAmount = computed(() => cartStore.finalAmount + shippingCost)
+const totalAmount = computed(() => {
+  const subtotal = cartStore.finalAmount || cartStore.totalAmount
+  return subtotal + shippingCost
+})
 
 const toggleSameAddress = () => {
   if (sameAddress.value) {
@@ -262,7 +358,7 @@ const handleSubmit = async () => {
   try {
     const orderData = {
       shippingAddress: shippingAddress.value,
-      billingAddress: sameAddress.value ? shippingAddress.value : billingAddress.value
+      billingAddress: sameAddress.value ? shippingAddress.value : billingAddress.value,
     }
 
     const order = await ordersStore.createOrder(orderData)
@@ -272,10 +368,17 @@ const handleSubmit = async () => {
       // For now, just clear cart and redirect to orders
       await cartStore.clearCart()
       router.push('/orders')
+      // TODO: Show success toast
     }
   } catch (error) {
     console.error('Error creating order:', error)
+    // TODO: Show error toast
   }
+}
+
+const getImageUrl = (url: string) => {
+  if (url.startsWith('http')) return url
+  return `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`
 }
 
 onMounted(() => {
@@ -286,272 +389,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import '../styles/design-system.css';
-
-.checkout-page {
-  min-height: 100vh;
-  background-color: var(--color-bg-secondary);
-  padding: var(--spacing-4) 0;
+.scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 var(--container-padding);
-}
-
-.checkout-page h1 {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-8);
-  text-align: center;
-}
-
-.loading, .empty-cart {
-  text-align: center;
-  padding: var(--spacing-12);
-  font-size: var(--font-size-lg);
-}
-
-.checkout-content {
-  display: grid;
-  grid-template-columns: 1fr 350px;
-  gap: var(--spacing-8);
-  align-items: start;
-}
-
-.checkout-form {
-  display: grid;
-  gap: var(--spacing-8);
-}
-
-.form-section {
-  background-color: var(--color-bg-primary);
-  padding: var(--spacing-6);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.form-section h2 {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-6);
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-4);
-}
-
-.form-group {
-  display: grid;
-  gap: var(--spacing-2);
-}
-
-.form-group.full-width {
-  grid-column: 1 / -1;
-}
-
-.form-group label {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-}
-
-.form-group input,
-.form-group select {
-  padding: var(--spacing-3);
-  border: var(--border-width) solid var(--color-border-medium);
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-base);
-  transition: border-color var(--transition-fast);
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-.checkbox-group {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  margin-bottom: var(--spacing-6);
-}
-
-.checkbox-group input {
-  width: auto;
-  margin: 0;
-}
-
-.payment-methods {
-  display: grid;
-  gap: var(--spacing-3);
-}
-
-.payment-method {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-4);
-  border: var(--border-width) solid var(--color-border-light);
-  border-radius: var(--border-radius-md);
-  cursor: pointer;
-  transition: border-color var(--transition-fast);
-}
-
-.payment-method:hover {
-  border-color: var(--color-primary);
-}
-
-.payment-method input {
-  width: auto;
-  margin: 0;
-}
-
-.payment-info {
-  flex: 1;
-}
-
-.payment-name {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
-
-.payment-description {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.order-summary {
-  background-color: var(--color-bg-primary);
-  padding: var(--spacing-6);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
-  position: sticky;
-  top: var(--spacing-4);
-}
-
-.order-summary h2 {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-6);
-}
-
-.summary-items {
-  margin-bottom: var(--spacing-4);
-}
-
-.summary-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-2) 0;
-  border-bottom: var(--border-width) solid var(--color-border-light);
-}
-
-.summary-item:last-child {
-  border-bottom: none;
-}
-
-.item-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
-}
-
-.item-name {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
-
-.item-quantity {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
-
-.item-price {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
-
-.summary-divider {
-  height: var(--border-width);
-  background-color: var(--color-border-light);
-  margin: var(--spacing-4) 0;
-}
-
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-2) 0;
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
-}
-
-.summary-row.total {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  padding-top: var(--spacing-4);
-  border-top: var(--border-width) solid var(--color-border-light);
-}
-
-.form-actions {
-  background-color: var(--color-bg-primary);
-  padding: var(--spacing-6);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-submit {
-  width: 100%;
-  padding: var(--spacing-4);
-  background-color: var(--color-success);
-  color: var(--color-text-inverse);
-  border: none;
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-}
-
-.btn-submit:hover:not(:disabled) {
-  background-color: var(--color-success);
-  opacity: 0.9;
-}
-
-.btn-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-@media (max-width: 1024px) {
-  .checkout-content {
-    grid-template-columns: 1fr;
-  }
-
-  .order-summary {
-    position: static;
-  }
-}
-
-@media (max-width: 768px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .form-group.full-width {
-    grid-column: auto;
-  }
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
 }
 </style>
