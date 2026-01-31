@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { authAPI } from '../api/auth'
 import { usersAPI } from '../api/users'
 import { useApi } from '../composables/useApi'
@@ -8,15 +8,26 @@ import type { User, LoginDto, RegisterDto } from '../types/api'
 /**
  * Store d'authentification
  * Principe: Single Responsibility - Gère uniquement l'authentification
+ * Note: Les getters sont des fonctions pour éviter les problèmes de réactivité avec Pinia
  */
 export const useAuthStore = defineStore('auth', () => {
   // État
   const user = ref<User | null>(null)
   const { loading, error, execute } = useApi<User>()
 
-  // Getters
-  const isAuthenticated = computed(() => !!user.value)
-  const isAdmin = computed(() => user.value?.role === 'ADMIN')
+  // Getters - Utilisation de fonctions au lieu de computed pour meilleure réactivité
+  function isAuthenticated(): boolean {
+    return !!user.value
+  }
+  
+  function isAdmin(): boolean {
+    return user.value?.role === 'ADMIN'
+  }
+  
+  // Exposer user directement pour l'accès reactif
+  function getUser(): User | null {
+    return user.value
+  }
 
   /**
    * Inscription d'un nouvel utilisateur
@@ -42,7 +53,10 @@ export const useAuthStore = defineStore('auth', () => {
     return execute(
       async () => {
         const response = await authAPI.login(credentials)
-        const { access_token, refresh_token, user: userData } = response.data!
+        // L'API retourne ApiResponse<{ access_token, refresh_token, user }>
+        // response.data contient directement les tokens et utilisateur
+        const loginData = response.data
+        const { access_token, refresh_token, user: userData } = loginData
 
         // Sauvegarder les tokens
         localStorage.setItem('access_token', access_token)
@@ -50,12 +64,15 @@ export const useAuthStore = defineStore('auth', () => {
 
         // Sauvegarder l'utilisateur
         user.value = userData
+        console.log('DEBUG: User set after login:', user.value)
+        console.log('DEBUG: isAuthenticated after login:', isAuthenticated())
 
-        return response.data!
+        return response
       },
       {
         onSuccess: () => {
-          // Connexion réussie
+          console.log('DEBUG: Login success callback - user:', user.value)
+          console.log('DEBUG: Login success callback - isAuthenticated:', isAuthenticated())
         },
       }
     )

@@ -176,7 +176,7 @@
     </section>
 
     <!-- CTA Section -->
-    <section v-if="!authStore.isAuthenticated" class="py-16 md:py-24 bg-(--bg-primary)">
+    <section v-if="!authStore.isAuthenticated()" class="py-16 md:py-24 bg-(--bg-primary)">
       <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto text-center gradient-bg rounded-2xl p-12 text-white">
           <h2 class="text-3xl md:text-4xl font-bold mb-4">

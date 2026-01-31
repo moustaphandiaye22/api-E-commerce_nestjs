@@ -39,7 +39,7 @@
             </div>
 
             <!-- User Actions -->
-            <div v-if="authStore.isAuthenticated" class="flex items-center gap-1">
+            <div v-if="authStore.isAuthenticated()" class="flex items-center gap-1">
               <!-- Cart -->
               <router-link
                 to="/cart"
@@ -212,7 +212,7 @@
             <span class="font-medium">{{ t('nav.products') }}</span>
           </router-link>
 
-          <template v-if="authStore.isAuthenticated">
+          <template v-if="authStore.isAuthenticated()">
             <hr class="my-2 border-(--border-light)" />
             <router-link
               to="/cart"

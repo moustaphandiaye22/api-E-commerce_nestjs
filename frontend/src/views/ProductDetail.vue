@@ -102,7 +102,7 @@
           <!-- Actions -->
           <div class="flex flex-col sm:flex-row gap-3">
             <Button
-              v-if="authStore.isAuthenticated"
+              v-if="authStore.isAuthenticated()"
               @click="addToCart"
               :disabled="!product.est_actif || product.quantite_stock === 0"
               variant="primary"
@@ -123,7 +123,7 @@
             </Button>
 
             <Button
-              v-if="authStore.isAuthenticated"
+              v-if="authStore.isAuthenticated()"
               @click="toggleWishlist"
               :variant="isInWishlist ? 'secondary' : 'outline'"
               size="lg"
@@ -218,7 +218,7 @@
         </div>
 
         <!-- Add Review (Authenticated users) -->
-        <div v-if="authStore.isAuthenticated" class="bg-(--bg-primary) rounded-xl border border-(--border-light) p-6 mb-8">
+        <div v-if="authStore.isAuthenticated()" class="bg-(--bg-primary) rounded-xl border border-(--border-light) p-6 mb-8">
           <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-4">Donner votre avis</h3>
           <form @submit.prevent="submitReview" class="space-y-4">
             <div>
@@ -393,7 +393,7 @@ onMounted(async () => {
 })
 
 const addToCart = async () => {
-  if (!authStore.isAuthenticated) {
+  if (!authStore.isAuthenticated()) {
     router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
     return
   }
@@ -405,7 +405,7 @@ const addToCart = async () => {
 }
 
 const toggleWishlist = async () => {
-  if (!authStore.isAuthenticated) {
+  if (!authStore.isAuthenticated()) {
     router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
     return
   }
