@@ -128,7 +128,7 @@ export class CouponsService {
     return updatedOrder;
   }
 
-  async deactivateCoupon(id: string) {
+async deactivateCoupon(id: string) {
     const coupon = await this.prisma.cOUPONS.findUnique({
       where: { id },
     });
@@ -140,6 +140,32 @@ export class CouponsService {
     return this.prisma.cOUPONS.update({
       where: { id },
       data: { est_actif: false },
+    });
+  }
+
+async update(id: string, data: Partial<CreateCouponDto> & { est_actif?: boolean }) {
+    const coupon = await this.prisma.cOUPONS.findUnique({
+      where: { id },
+    });
+
+    if (!coupon) {
+      throw new NotFoundException('Coupon non trouvé');
+    }
+
+    return this.prisma.cOUPONS.update({
+      where: { id },
+      data: {
+        ...(data.code && { code: data.code }),
+        ...(data.description !== undefined && { description: data.description }),
+        ...(data.type_reduction && { type_reduction: data.type_reduction }),
+        ...(data.valeur_reduction !== undefined && { valeur_reduction: data.valeur_reduction.toString() }),
+        ...(data.montant_achat_min !== undefined && { montant_achat_min: data.montant_achat_min?.toString() }),
+        ...(data.montant_reduction_max !== undefined && { montant_reduction_max: data.montant_reduction_max?.toString() }),
+        ...(data.limite_utilisation !== undefined && { limite_utilisation: data.limite_utilisation }),
+        ...(data.date_debut && { date_debut: new Date(data.date_debut) }),
+        ...(data.date_fin && { date_fin: new Date(data.date_fin) }),
+        ...(data.est_actif !== undefined && { est_actif: data.est_actif }),
+      },
     });
   }
 }

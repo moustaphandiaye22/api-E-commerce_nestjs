@@ -1,6 +1,8 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/user.decorator';
 import { OrdersService } from './orders.service';
 
@@ -80,7 +82,7 @@ export class OrdersController {
     return this.ordersService.findOne(id, user.id);
   }
 
-  @Post()
+@Post()
   @ApiOperation({ summary: 'Créer une commande depuis le panier' })
   @ApiBearerAuth('JWT-auth')
   @ApiResponse({
@@ -106,5 +108,29 @@ export class OrdersController {
   @ApiResponse({ status: 400, description: 'Panier vide' })
   create(@Body() body: { shippingAddress: any; billingAddress: any }, @CurrentUser() user) {
     return this.ordersService.createOrderFromCart(user.id, body.shippingAddress, body.billingAddress);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Mettre à jour le statut d\'une commande (Admin)' })
+  @ApiParam({ name: 'id', description: 'ID de la commande', example: 'uuid' })
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @ApiResponse({
+    status: 200,
+    description: 'Statut mis à jour',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        statusCode: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Statut mis à jour avec succès' },
+        data: { type: 'object' },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Commande non trouvée' })
+  updateStatus(@Param('id') id: string, @Body() body: { statut: string }, @CurrentUser() user) {
+    return this.ordersService.updateStatus(id, body.statut as any);
   }
 }

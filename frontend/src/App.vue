@@ -119,6 +119,16 @@
                       <p class="text-sm text-[var(--text-muted)]">{{ authStore.user?.email }}</p>
                     </div>
                     <div class="py-2">
+                      <!-- Lien Admin si l'utilisateur est admin -->
+                      <router-link
+                        v-if="authStore.isAdmin()"
+                        to="/admin"
+                        class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-primary)] hover:bg-(--color-primary-50) transition-smooth"
+                        @click="showUserMenu = false"
+                      >
+                        <Settings class="w-4 h-4" />
+                        <span>Administration</span>
+                      </router-link>
                       <router-link
                         to="/orders"
                         class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-(--bg-hover) hover:text-[var(--color-primary)] transition-smooth"
@@ -373,6 +383,7 @@ import {
   ChevronDown,
   LogIn,
   UserPlus,
+  Settings,
 } from 'lucide-vue-next'
 
 const router = useRouter()

@@ -13,7 +13,18 @@ const Wishlist = () => import('../views/Wishlist.vue')
 const Orders = () => import('../views/Orders.vue')
 const Checkout = () => import('../views/Checkout.vue')
 
+// Admin components
+const AdminLayout = () => import('../views/admin/AdminLayout.vue')
+const AdminDashboard = () => import('../views/admin/AdminDashboard.vue')
+const AdminProducts = () => import('../views/admin/AdminProducts.vue')
+const AdminProductForm = () => import('../views/admin/AdminProductForm.vue')
+const AdminCategories = () => import('../views/admin/AdminCategories.vue')
+const AdminCoupons = () => import('../views/admin/AdminCoupons.vue')
+const AdminOrders = () => import('../views/admin/AdminOrders.vue')
+const AdminUsers = () => import('../views/admin/AdminUsers.vue')
+
 const routes: RouteRecordRaw[] = [
+  // Public routes
   {
     path: '/',
     name: 'Home',
@@ -39,6 +50,7 @@ const routes: RouteRecordRaw[] = [
     name: 'ProductDetail',
     component: ProductDetail,
   },
+  // Protected routes (require authentication)
   {
     path: '/profile',
     name: 'Profile',
@@ -69,6 +81,54 @@ const routes: RouteRecordRaw[] = [
     component: Checkout,
     meta: { requiresAuth: true },
   },
+  // Admin routes (require authentication + admin role)
+  {
+    path: '/admin',
+    component: AdminLayout,
+    meta: { requiresAuth: true, requiresAdmin: true },
+    children: [
+      {
+        path: '',
+        name: 'AdminDashboard',
+        component: AdminDashboard,
+      },
+      {
+        path: 'products',
+        name: 'AdminProducts',
+        component: AdminProducts,
+      },
+      {
+        path: 'products/new',
+        name: 'AdminProductNew',
+        component: AdminProductForm,
+      },
+      {
+        path: 'products/:id',
+        name: 'AdminProductEdit',
+        component: AdminProductForm,
+      },
+      {
+        path: 'categories',
+        name: 'AdminCategories',
+        component: AdminCategories,
+      },
+      {
+        path: 'coupons',
+        name: 'AdminCoupons',
+        component: AdminCoupons,
+      },
+      {
+        path: 'orders',
+        name: 'AdminOrders',
+        component: AdminOrders,
+      },
+      {
+        path: 'users',
+        name: 'AdminUsers',
+        component: AdminUsers,
+      },
+    ],
+  },
 ]
 
 const router = createRouter({
@@ -80,11 +140,41 @@ const router = createRouter({
 router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore()
 
+  // Vérifier l'authentification
   if (to.meta.requiresAuth && !authStore.isAuthenticated()) {
     next({ name: 'Login', query: { redirect: to.fullPath } })
-  } else {
-    next()
+    return
   }
+
+  // Vérifier le rôle admin
+  if (to.meta.requiresAdmin) {
+    // Si l'auth store n'est pas encore initialisé, attendre ou rediriger
+    if (!authStore.user) {
+      // Tentative de récupération du profil si token existe
+      const token = localStorage.getItem('access_token')
+      if (token) {
+        try {
+          await authStore.fetchProfile()
+        } catch {
+          next({ name: 'Login' })
+          return
+        }
+      } else {
+        next({ name: 'Login' })
+        return
+      }
+    }
+
+    // Vérifier si admin après mise à jour
+    if (authStore.user?.role !== 'ADMIN') {
+      // Rediriger vers la page d'accueil si pas admin
+      next({ name: 'Home' })
+      return
+    }
+  }
+
+  next()
 })
 
 export default router
+

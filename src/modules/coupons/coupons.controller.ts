@@ -83,7 +83,7 @@ export class CouponsController {
     return this.couponsService.create(body);
   }
 
-  @Post('validate')
+@Post('validate')
   @ApiOperation({ summary: 'Valider un coupon' })
   @ApiBearerAuth('JWT-auth')
   @ApiResponse({
@@ -110,5 +110,29 @@ export class CouponsController {
   @ApiResponse({ status: 400, description: 'Coupon invalide' })
   validate(@Body() body: { code: string; cartTotal: number }) {
     return this.couponsService.validateCoupon(body.code, body.cartTotal);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Mettre à jour un coupon (Admin)' })
+  @ApiParam({ name: 'id', description: 'ID du coupon', example: 'uuid' })
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @ApiResponse({
+    status: 200,
+    description: 'Coupon mis à jour',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        statusCode: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Coupon mis à jour avec succès' },
+        data: { type: 'object' },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Coupon non trouvé' })
+  update(@Param('id') id: string, @Body() body: any) {
+    return this.couponsService.update(id, body);
   }
 }

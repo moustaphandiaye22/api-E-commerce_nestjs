@@ -403,11 +403,11 @@ const applyFilters = () => {
     filterParams.category = selectedCategories.value.join(',')
   }
 
-  if (priceRange.value.min !== null) {
+if (priceRange.value.min !== null && priceRange.value.min !== undefined) {
     filterParams.minPrice = priceRange.value.min
   }
 
-  if (priceRange.value.max !== null) {
+  if (priceRange.value.max !== null && priceRange.value.max !== undefined) {
     filterParams.maxPrice = priceRange.value.max
   }
 

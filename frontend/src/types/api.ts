@@ -51,12 +51,16 @@ export interface Product {
   id: string
   nom: string
   description?: string
+  description_courte?: string
   prix: number
   stock: number
+  quantite_stock?: number
+  sku?: string
   est_actif: boolean
   categorie_id?: string
   slug?: string
   categorie?: Category
+  images?: Array<{ url_image: string; est_principale: boolean }>
   images_produits?: ProductImage[]
   variantes?: ProductVariant[]
   avis?: Review[]
