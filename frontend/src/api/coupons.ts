@@ -29,4 +29,20 @@ export const couponsAPI = {
   async validate(data: ValidateCouponDto): Promise<ApiResponse<CouponValidationResult>> {
     return apiClient.post('/coupons/validate', data)
   },
+
+  /**
+   * Mettre à jour un coupon (Admin)
+   * PUT /coupons/:id
+   */
+  async updateCoupon(id: string, couponData: Partial<Coupon>): Promise<ApiResponse<Coupon>> {
+    return apiClient.put(`/coupons/${id}`, couponData)
+  },
+
+  /**
+   * Supprimer un coupon (Admin)
+   * DELETE /coupons/:id
+   */
+  async delete(id: string): Promise<ApiResponse<void>> {
+    return apiClient.delete(`/coupons/${id}`)
+  },
 }

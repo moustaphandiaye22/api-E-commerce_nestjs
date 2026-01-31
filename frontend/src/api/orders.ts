@@ -22,11 +22,19 @@ export const ordersAPI = {
     return apiClient.get(`/orders/${id}`)
   },
 
-  /**
+/**
    * Créer une commande depuis le panier
    * POST /orders
    */
   async create(data: { shippingAddress: any; billingAddress: any }): Promise<ApiResponse<Order>> {
     return apiClient.post('/orders', data)
+  },
+
+  /**
+   * Mettre à jour le statut d'une commande (Admin)
+   * PUT /orders/:id
+   */
+  async updateOrder(id: string, data: { statut: string }): Promise<ApiResponse<Order>> {
+    return apiClient.put(`/orders/${id}`, data)
   },
 }

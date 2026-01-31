@@ -89,9 +89,9 @@
 
           <!-- Stock Status -->
           <div>
-            <Badge v-if="product.quantite_stock > 0" variant="success" size="lg">
+            <Badge v-if="(product.quantite_stock ?? product.stock) > 0" variant="success" size="lg">
               <CheckCircle class="w-4 h-4" />
-              En stock ({{ product.quantite_stock }} disponible{{ product.quantite_stock > 1 ? 's' : '' }})
+              En stock ({{ (product.quantite_stock ?? product.stock) }} disponible{{ (product.quantite_stock ?? product.stock) > 1 ? 's' : '' }})
             </Badge>
             <Badge v-else variant="error" size="lg">
               <XCircle class="w-4 h-4" />
@@ -104,7 +104,7 @@
             <Button
               v-if="authStore.isAuthenticated()"
               @click="addToCart"
-              :disabled="!product.est_actif || product.quantite_stock === 0"
+              :disabled="!product.est_actif || (product.quantite_stock ?? product.stock) === 0"
               variant="primary"
               size="lg"
               class="flex-1"

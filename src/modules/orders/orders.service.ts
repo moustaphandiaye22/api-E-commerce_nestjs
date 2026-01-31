@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { STATUT_COMMANDE } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
@@ -169,11 +170,26 @@ export class OrdersService {
       }
     }
 
-    // Clear cart
+// Clear cart
     await this.prisma.aRTICLES_PANIER.deleteMany({
       where: { panier_id: cart.id },
     });
 
     return order;
+  }
+
+async updateStatus(id: string, statut: STATUT_COMMANDE) {
+    const order = await this.prisma.cOMMANDES.findUnique({
+      where: { id },
+    });
+
+    if (!order) {
+      throw new Error('Commande non trouvée');
+    }
+
+    return this.prisma.cOMMANDES.update({
+      where: { id },
+      data: { statut },
+    });
   }
 }
