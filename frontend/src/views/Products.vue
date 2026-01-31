@@ -269,7 +269,7 @@
 
           <div class="flex flex-col gap-3 pt-4">
             <Button
-              v-if="authStore.isAuthenticated"
+              v-if="authStore.isAuthenticated()"
               @click="addToCart(quickViewProduct.id)"
               :disabled="quickViewProduct.quantite_stock <= 0"
               variant="primary"
@@ -459,7 +459,7 @@ const goToProduct = (product: any) => {
 }
 
 const addToCart = async (productId: string) => {
-  if (!authStore.isAuthenticated) {
+  if (!authStore.isAuthenticated()) {
     router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
     return
   }
@@ -473,7 +473,7 @@ const addToCart = async (productId: string) => {
 }
 
 const toggleWishlist = async (productId: string) => {
-  if (!authStore.isAuthenticated) {
+  if (!authStore.isAuthenticated()) {
     router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
     return
   }
