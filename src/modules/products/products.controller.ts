@@ -6,6 +6,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CreateProductDtoSchema } from './dto/create-product.dto';
+import { UpdateProductDtoSchema } from './dto/update-product.dto';
 
 @ApiTags('products')
 @Controller('products')
@@ -180,6 +181,7 @@ export class ProductsController {
   @ApiResponse({ status: 401, description: 'Token manquant ou invalide' })
   @ApiResponse({ status: 403, description: 'Accès interdit - Rôle insuffisant' })
   @ApiResponse({ status: 404, description: 'Produit non trouvé' })
+  @UsePipes(new ZodValidationPipe(UpdateProductDtoSchema))
   update(@Param('id') id: string, @Body() updateProductDto: any) {
     return this.productsService.update(id, updateProductDto);
   }
