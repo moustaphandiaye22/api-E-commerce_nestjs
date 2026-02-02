@@ -64,15 +64,13 @@ export const useAuthStore = defineStore('auth', () => {
 
         // Sauvegarder l'utilisateur
         user.value = userData
-        console.log('DEBUG: User set after login:', user.value)
-        console.log('DEBUG: isAuthenticated after login:', isAuthenticated())
+        
 
         return response
       },
       {
         onSuccess: () => {
-          console.log('DEBUG: Login success callback - user:', user.value)
-          console.log('DEBUG: Login success callback - isAuthenticated:', isAuthenticated())
+          
         },
       }
     )

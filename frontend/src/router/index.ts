@@ -118,6 +118,10 @@ const routes: RouteRecordRaw[] = [
         component: AdminCoupons,
       },
       {
+        path: 'coupons/new',
+        redirect: '/admin/coupons',
+      },
+      {
         path: 'orders',
         name: 'AdminOrders',
         component: AdminOrders,

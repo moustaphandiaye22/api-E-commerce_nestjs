@@ -73,6 +73,7 @@ export interface Category {
   slug: string
   description?: string
   parent_id?: string
+  couleur?: string
 }
 
 // Image produit

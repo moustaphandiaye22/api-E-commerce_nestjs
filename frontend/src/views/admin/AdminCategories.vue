@@ -44,7 +44,7 @@
     </div>
 
     <!-- Category Modal -->
-    <Modal v-if="showModal" @close="closeModal">
+    <Modal :model-value="showModal" @update:model-value="showModal = $event">
       <div class="modal-content">
         <h3>{{ editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}</h3>
         <form @submit.prevent="saveCategory">
@@ -154,9 +154,9 @@ const saveCategory = async () => {
   saving.value = true
   try {
     if (editingCategory.value) {
-      await categoriesAPI.updateCategory(editingCategory.value.id, form)
+      await categoriesAPI.update(editingCategory.value.id, form)
     } else {
-      await categoriesAPI.createCategory(form)
+      await categoriesAPI.create(form)
     }
     closeModal()
     loadCategories()
@@ -170,7 +170,7 @@ const saveCategory = async () => {
 const confirmDelete = async (category: Category) => {
   if (confirm(`Supprimer "${category.nom}" ?`)) {
     try {
-      await categoriesAPI.deleteCategory(category.id)
+      await categoriesAPI.delete(category.id)
       loadCategories()
     } catch (error) {
       console.error('Erreur:', error)

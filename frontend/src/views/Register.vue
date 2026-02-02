@@ -75,6 +75,7 @@
               :label="t('Telephone')"
               placeholder="+33 6 12 34 56 78"
               :error="errors.telephone"
+              autocomplete="tel"
             >
               <template #leading>
                 <Phone class="w-5 h-5" />

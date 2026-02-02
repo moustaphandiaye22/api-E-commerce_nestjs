@@ -3,11 +3,21 @@ import { z } from 'zod';
 export const CreateProductDtoSchema = z.object({
   nom: z.string().min(1, 'Nom requis'),
   description: z.string().min(1, 'Description requise'),
-  description_courte: z.string().optional(),
+  description_courte: z.string().min(1, 'Description courte requise'),
   sku: z.string().min(1, 'SKU requis'),
   prix: z.number().positive('Prix positif requis'),
   categorie_id: z.string().uuid('Catégorie invalide'),
   quantite_stock: z.number().int().min(0, 'Stock positif'),
+  seuil_stock_bas: z.number().int().min(0).default(5),
+  marque: z.string().optional(),
+  est_actif: z.boolean().default(true),
+  est_vedette: z.boolean().default(false),
+  prix_compare: z.number().positive().optional(),
+  prix_coutant: z.number().positive().optional(),
+  images: z.array(z.object({
+    url_image: z.string(),
+    est_principale: z.boolean().default(false),
+  })).optional(),
 });
 
 export type CreateProductDto = z.infer<typeof CreateProductDtoSchema>;
