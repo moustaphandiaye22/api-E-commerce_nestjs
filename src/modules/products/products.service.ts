@@ -135,18 +135,44 @@ export class ProductsService implements IProductsService {
 
   async update(id: string, data: any) {
     try {
-      if (data.nom) {
-        data.slug = SlugifyUtil.slugify(data.nom);
-      }
-      return await this.prisma.pRODUITS.update({
+      // Extract images from data before updating product
+      const { images, ...productData } = data;
+
+      // Update the product first
+      const product = await this.prisma.pRODUITS.update({
         where: { id },
-        data,
+        data: {
+          ...productData,
+          slug: data.nom ? SlugifyUtil.slugify(data.nom) : undefined,
+        },
         include: {
           categorie: true,
           images_produits: true,
         },
       });
+
+      // If images are provided, update them
+      if (images && images.length > 0) {
+        // Delete existing images
+        await this.prisma.iMAGES_PRODUITS.deleteMany({
+          where: { produit_id: id },
+        });
+
+        // Create new images
+        await this.prisma.iMAGES_PRODUITS.createMany({
+          data: images.map((img: any, index: number) => ({
+            produit_id: product.id,
+            url_image: img.url_image,
+            texte_alt: img.texte_alt || product.nom,
+            est_principale: img.est_principale || index === 0,
+            ordre_tri: index,
+          })),
+        });
+      }
+
+      return this.findOne(product.id);
     } catch (error) {
+      console.error('Error updating product:', error);
       throw new NotFoundException('Produit non trouvé');
     }
   }

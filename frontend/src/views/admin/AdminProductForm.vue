@@ -79,12 +79,11 @@
           <h2>Description</h2>
           
           <div class="form-group">
-            <label for="description_courte">Description courte *</label>
+            <label for="description_courte">Description courte</label>
             <textarea
               id="description_courte"
               v-model="form.description_courte"
               rows="3"
-              required
               placeholder="Bref description du produit"
             ></textarea>
           </div>
