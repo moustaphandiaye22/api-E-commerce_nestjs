@@ -84,6 +84,16 @@
               @input="form.code = form.code.toUpperCase()"
             />
           </div>
+          <div class="form-group">
+            <label for="description">Description *</label>
+            <textarea
+              id="description"
+              v-model="form.description"
+              rows="2"
+              required
+              placeholder="Description du coupon"
+            ></textarea>
+          </div>
           <div class="form-row">
             <div class="form-group">
               <label for="type">Type *</label>
@@ -106,6 +116,26 @@
           </div>
           <div class="form-row">
             <div class="form-group">
+              <label for="date_debut">Date de début *</label>
+              <input
+                id="date_debut"
+                v-model="form.date_debut"
+                type="date"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="date_fin">Date d'expiration *</label>
+              <input
+                id="date_fin"
+                v-model="form.date_fin"
+                type="date"
+                required
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
               <label for="utilisations_max">Utilisations max</label>
               <input
                 id="utilisations_max"
@@ -113,14 +143,6 @@
                 type="number"
                 min="0"
                 placeholder="Illimité"
-              />
-            </div>
-            <div class="form-group">
-              <label for="date_fin">Date d'expiration</label>
-              <input
-                id="date_fin"
-                v-model="form.date_fin"
-                type="date"
               />
             </div>
           </div>
@@ -159,9 +181,11 @@ const editingCoupon = ref<Coupon | null>(null)
 
 const form = reactive({
   code: '',
+  description: '',
   type_reduction: 'POURCENTAGE' as 'POURCENTAGE' | 'MONTANT_FIXE',
-  valeur_reduction: 0,
+  valeur_reduction: 10,
   limite_utilisation: null as number | null,
+  date_debut: '',
   date_fin: '',
   est_actif: true,
 })
@@ -188,15 +212,28 @@ const openModal = (coupon?: Coupon) => {
     editingCoupon.value = coupon
     Object.assign(form, {
       code: coupon.code,
+      description: coupon.description || '',
       type_reduction: coupon.type_reduction,
-      valeur_reduction: parseFloat(coupon.valeur_reduction) || 0,
+      valeur_reduction: parseFloat(coupon.valeur_reduction) || 10,
       limite_utilisation: coupon.limite_utilisation,
+      date_debut: coupon.date_debut?.split('T')[0] || '',
       date_fin: coupon.date_fin?.split('T')[0] || '',
       est_actif: coupon.est_actif,
     })
   } else {
     editingCoupon.value = null
-    Object.assign(form, { code: '', type_reduction: 'POURCENTAGE', valeur_reduction: 10, limite_utilisation: null, date_fin: '', est_actif: true })
+    const today = new Date().toISOString().split('T')[0]
+    const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    Object.assign(form, { 
+      code: '', 
+      description: '',
+      type_reduction: 'POURCENTAGE', 
+      valeur_reduction: 10, 
+      limite_utilisation: null, 
+      date_debut: today,
+      date_fin: nextMonth, 
+      est_actif: true 
+    })
   }
   showModal.value = true
 }
@@ -209,18 +246,24 @@ const closeModal = () => {
 const saveCoupon = async () => {
   saving.value = true
   try {
+    // Convertir les dates au format ISO datetime
+    const formatDateToISO = (dateStr: string) => {
+      if (!dateStr) return new Date().toISOString()
+      return new Date(dateStr).toISOString()
+    }
+    
     const data: Record<string, any> = {
       code: form.code,
+      description: form.description,
       type_reduction: form.type_reduction,
-      valeur_reduction: form.valeur_reduction.toString(),
+      valeur_reduction: Number(form.valeur_reduction),
       est_actif: form.est_actif,
+      date_debut: formatDateToISO(form.date_debut),
+      date_fin: formatDateToISO(form.date_fin),
     }
     
     if (form.limite_utilisation) {
       data.limite_utilisation = form.limite_utilisation
-    }
-    if (form.date_fin) {
-      data.date_fin = form.date_fin
     }
     
     if (editingCoupon.value) {

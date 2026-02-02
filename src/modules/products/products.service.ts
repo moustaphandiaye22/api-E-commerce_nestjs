@@ -41,7 +41,7 @@ export class ProductsService implements IProductsService {
       this.prisma.pRODUITS.findMany({
         where,
         include: {
-          // Removed categorie and avis includes for performance - not needed in list view
+          categorie: true,
           images_produits: true,
         },
         skip,
@@ -51,8 +51,14 @@ export class ProductsService implements IProductsService {
       this.prisma.pRODUITS.count({ where }),
     ]);
 
+    // Transform to include images in expected format
+    const transformedProducts = products.map(product => ({
+      ...product,
+      images: product.images_produits || [],
+    }));
+
     return {
-      data: products,
+      data: transformedProducts,
       total,
       page,
       limit,
@@ -84,18 +90,43 @@ export class ProductsService implements IProductsService {
   async create(data: any) {
     try {
       const slug = SlugifyUtil.slugify(data.nom);
-      return await this.prisma.pRODUITS.create({
+      
+      // Extract images from data before creating product
+      const { images, ...productData } = data;
+      
+      // Create the product first
+      const product = await this.prisma.pRODUITS.create({
         data: {
-          ...data,
+          ...productData,
           slug,
           est_actif: data.est_actif !== undefined ? data.est_actif : true,
           est_vedette: data.est_vedette !== undefined ? data.est_vedette : false,
+          seuil_stock_bas: data.seuil_stock_bas || 5,
+          description_courte: data.description_courte || '',
+          prix_compare: data.prix_compare,
+          prix_coutant: data.prix_coutant,
         },
         include: {
           categorie: true,
           images_produits: true,
         },
       });
+
+      // Then create the images if they exist
+      if (images && images.length > 0) {
+        await this.prisma.iMAGES_PRODUITS.createMany({
+          data: images.map((img: any, index: number) => ({
+            produit_id: product.id,
+            url_image: img.url_image,
+            texte_alt: img.texte_alt || product.nom,
+            est_principale: img.est_principale || index === 0,
+            ordre_tri: index,
+          })),
+        });
+      }
+
+      // Return the product with images
+      return this.findOne(product.id);
     } catch (error) {
       console.error('Error creating product:', error);
       throw error;

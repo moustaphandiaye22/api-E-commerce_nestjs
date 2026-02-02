@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { STATUT_COMMANDE } from '@prisma/client';
 
@@ -184,7 +184,7 @@ async updateStatus(id: string, statut: STATUT_COMMANDE) {
     });
 
     if (!order) {
-      throw new Error('Commande non trouvée');
+      throw new NotFoundException('Commande non trouvée');
     }
 
     return this.prisma.cOMMANDES.update({

@@ -53,6 +53,9 @@ async function bootstrap() {
     noSniff: true,
     xssFilter: true,
     referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    frameguard: {
+      action: 'deny',
+    },
   }));
 
   // Configuration CORS pour le frontend

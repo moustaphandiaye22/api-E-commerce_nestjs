@@ -26,6 +26,7 @@
             :placeholder="'exemple@email.com'"
             required
             :error="errors.email"
+            autocomplete="username"
             @blur="validateEmail"
           >
             <template #leading>

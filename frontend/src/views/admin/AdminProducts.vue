@@ -67,9 +67,10 @@
           <tr v-for="product in products" :key="product.id">
             <td>
               <div class="product-image">
+                <!-- Support both 'images' (transformed) and 'images_produits' (raw) -->
                 <img
-                  v-if="product.images?.[0]?.url_image"
-                  :src="product.images[0].url_image"
+                  v-if="(product.images?.[0]?.url_image || product.images_produits?.[0]?.url_image)"
+                  :src="product.images?.[0]?.url_image || product.images_produits?.[0]?.url_image"
                   :alt="product.nom"
                 />
                 <div v-else class="image-placeholder">
@@ -94,12 +95,12 @@
               <span
                 class="stock-badge"
                 :class="{
-                  'in-stock': product.quantite_stock > 10,
-                  'low-stock': product.quantite_stock <= 10 && product.quantite_stock > 0,
-                  'out-of-stock': product.quantite_stock === 0,
+                  'in-stock': (product.quantite_stock ?? 0) > 10,
+                  'low-stock': (product.quantite_stock ?? 0) <= 10 && (product.quantite_stock ?? 0) > 0,
+                  'out-of-stock': (product.quantite_stock ?? 0) === 0,
                 }"
               >
-                {{ product.quantite_stock }}
+                {{ product.quantite_stock ?? 0 }}
               </span>
             </td>
             <td>
@@ -139,7 +140,7 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <Modal v-if="showDeleteModal" @close="showDeleteModal = false">
+    <Modal :model-value="showDeleteModal" @update:model-value="showDeleteModal = $event">
       <div class="modal-content">
         <h3>Confirmer la suppression</h3>
         <p>Êtes-vous sûr de vouloir supprimer <strong>{{ productToDelete?.nom }}</strong> ?</p>
@@ -215,11 +216,17 @@ const loadProducts = async () => {
     if (selectedCategory.value) params.category = selectedCategory.value
 
     const response = await productsAPI.getAll(params)
-    products.value = response.data || []
     
-    // Extract pagination info if available
-    if (response.data?.pagination) {
-      pagination.value = response.data.pagination
+    // Handle the response format: { data: [...], total, page, limit }
+    if (Array.isArray(response.data)) {
+      products.value = response.data
+    } else if (response.data?.data) {
+      products.value = response.data.data
+      if (response.data.total) pagination.value.total = response.data.total
+      if (response.data.page) pagination.value.currentPage = response.data.page
+      if (response.data.limit) pagination.value.limit = response.data.limit
+    } else {
+      products.value = []
     }
   } catch (error) {
     console.error('Erreur lors du chargement des produits:', error)
@@ -252,7 +259,7 @@ const deleteProduct = async () => {
   
   deleting.value = true
   try {
-    await productsAPI.deleteProduct(productToDelete.value.id)
+    await productsAPI.delete(productToDelete.value.id)
     showDeleteModal.value = false
     productToDelete.value = null
     loadProducts()
