@@ -190,7 +190,7 @@ export interface Order {
   id: string
   utilisateur_id: string
   numero_commande: string
-  statut: 'EN_ATTENTE' | 'CONFIRMEE' | 'EN_PREPARATION' | 'EXPEDIEE' | 'LIVREE' | 'ANNULEE'
+  statut: 'EN_ATTENTE' | 'CONFIRME' | 'EXPEDIE' | 'LIVRE' | 'ANNULE'
   sous_total: string
   montant_taxe: string
   montant_livraison: string

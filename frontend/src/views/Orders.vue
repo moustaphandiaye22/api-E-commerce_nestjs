@@ -268,11 +268,10 @@ const formatDate = (dateString: string) => {
 const getStatusText = (status: string) => {
   const statusMap: Record<string, string> = {
     'EN_ATTENTE': 'En attente',
-    'CONFIRMEE': 'Confirmée',
-    'EN_PREPARATION': 'En préparation',
-    'EXPEDIEE': 'Expédiée',
-    'LIVREE': 'Livrée',
-    'ANNULEE': 'Annulée',
+    'CONFIRME': 'Confirmée',
+    'EXPEDIE': 'Expédiée',
+    'LIVRE': 'Livrée',
+    'ANNULE': 'Annulée',
   }
   return statusMap[status] || status
 }
@@ -280,11 +279,10 @@ const getStatusText = (status: string) => {
 const getStatusVariant = (status: string): 'warning' | 'info' | 'primary' | 'success' | 'error' | 'secondary' => {
   const variantMap: Record<string, 'warning' | 'info' | 'primary' | 'success' | 'error' | 'secondary'> = {
     'EN_ATTENTE': 'warning',
-    'CONFIRMEE': 'info',
-    'EN_PREPARATION': 'primary',
-    'EXPEDIEE': 'success',
-    'LIVREE': 'success',
-    'ANNULEE': 'error',
+    'CONFIRME': 'info',
+    'EXPEDIE': 'success',
+    'LIVRE': 'success',
+    'ANNULE': 'error',
   }
   return variantMap[status] || 'secondary'
 }
