@@ -116,9 +116,9 @@
             </div>
 
             <div class="upload-box" @click="triggerFileInput">
-              <Upload class="w-8 h-8 text-[var(--text-muted)]" />
+              <Upload class="w-8 h-8 text-(--text-muted)" />
               <p>Cliquez pour uploader une image</p>
-              <span class="text-sm text-[var(--text-muted)]">PNG, JPG jusqu'à 5MB</span>
+              <span class="text-sm text-(--text-muted)">PNG, JPG jusqu'à 5MB</span>
             </div>
             
             <input
@@ -161,6 +161,7 @@ const fileInput = ref<HTMLInputElement>()
 const saving = ref(false)
 const categories = ref<any[]>([])
 
+const originalProduct = ref<any>(null)
 const isEditing = computed(() => !!route.params.id)
 
 const form = reactive({
@@ -178,6 +179,7 @@ const loadProduct = async (id: string) => {
   try {
     const response = await productsAPI.getById(id)
     const product = response.data
+    if (!product) throw new Error('Produit non trouvé')
     Object.assign(form, {
       nom: product.nom,
       description: product.description,
@@ -188,6 +190,8 @@ const loadProduct = async (id: string) => {
       quantite_stock: Number(product.quantite_stock),
       images: product.images || product.images_produits || [],
     })
+    // Keep a copy of the original product to send only changed fields on update
+    originalProduct.value = product
   } catch (error) {
     console.error('Erreur lors du chargement du produit:', error)
   }
@@ -214,6 +218,7 @@ const handleImageUpload = async (event: Event) => {
   try {
     const response = await uploadAPI.uploadImage(file)
     const imageUrl = response.data?.url
+    if (!imageUrl) throw new Error('URL d\'image non retournée')
     
     form.images.push({
       url_image: imageUrl,
@@ -228,36 +233,67 @@ const removeImage = (index: number) => {
   form.images.splice(index, 1)
 }
 
+/**
+ * Helper to clean up images - remove entries with undefined/null url_image
+ */
+const cleanImages = (images: Array<any>) => {
+  return images.filter(img => img && img.url_image && typeof img.url_image === 'string')
+}
+
 const handleSubmit = async () => {
   saving.value = true
   try {
-    // Build complete product data with all fields
-    const productData: Record<string, any> = {
-      nom: form.nom || '',
-      description: form.description || '',
-      description_courte: form.description_courte || '',
-      sku: form.sku || '',
-      prix: Number(form.prix) || 0,
-      quantite_stock: Number(form.quantite_stock) || 0,
-      images: form.images && form.images.length > 0 ? form.images : [],
-    }
-
-    // Only add categorie_id if it has a valid value
-    if (form.categorie_id && form.categorie_id.trim() !== '') {
-      productData.categorie_id = form.categorie_id
-    } else {
-      // Pour création, on doit avoir une catégorie
-      if (!isEditing.value) {
-        throw new Error('Veuillez sélectionner une catégorie')
-      }
-      // Pour mise à jour, on peut omettre le champ
-    }
-
-    console.log('Données envoyées:', productData)
+    // Build productData depending on whether we're creating or updating
+    let productData: Record<string, any> = {}
 
     if (isEditing.value) {
+      if (!originalProduct.value) throw new Error('Produit introuvable pour la mise à jour')
+
+      if (form.nom !== originalProduct.value.nom) productData.nom = form.nom
+      if (form.description !== originalProduct.value.description) productData.description = form.description
+      if ((form.description_courte || '') !== (originalProduct.value.description_courte || '')) productData.description_courte = form.description_courte
+      if (form.sku !== originalProduct.value.sku) productData.sku = form.sku
+      if (Number(form.prix) !== Number(originalProduct.value.prix)) productData.prix = Number(form.prix)
+      if (Number(form.quantite_stock) !== Number(originalProduct.value.quantite_stock)) productData.quantite_stock = Number(form.quantite_stock)
+
+      const originalCategoryId = originalProduct.value.categorie_id || originalProduct.value.categorie?.id || ''
+      if (form.categorie_id && form.categorie_id.trim() !== '' && form.categorie_id !== originalCategoryId) {
+        productData.categorie_id = form.categorie_id
+      }
+
+      if (JSON.stringify(form.images || []) !== JSON.stringify(originalProduct.value.images || originalProduct.value.images_produits || [])) {
+        const cleanedImages = cleanImages(form.images || [])
+        if (cleanedImages.length > 0) {
+          productData.images = cleanedImages
+        }
+      }
+
+      // If nothing changed, avoid sending an empty PUT
+      if (Object.keys(productData).length === 0) {
+        alert('Aucune modification détectée.')
+        return
+      }
+
+      console.log('Données envoyées (update):', productData)
       await productsAPI.update(route.params.id as string, productData)
     } else {
+      // Creation: ensure required fields are present
+      if (!form.categorie_id || form.categorie_id.trim() === '') {
+        throw new Error('Veuillez sélectionner une catégorie')
+      }
+
+      productData = {
+        nom: form.nom || '',
+        description: form.description || '',
+        description_courte: form.description_courte || '',
+        sku: form.sku || '',
+        prix: Number(form.prix) || 0,
+        quantite_stock: Number(form.quantite_stock) || 0,
+        images: cleanImages(form.images || []),
+        categorie_id: form.categorie_id,
+      }
+
+      console.log('Données envoyées (create):', productData)
       await productsAPI.create(productData)
     }
 
