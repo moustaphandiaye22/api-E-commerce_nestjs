@@ -183,10 +183,10 @@ const loadProduct = async (id: string) => {
       description: product.description,
       description_courte: product.description_courte || '',
       sku: product.sku,
-      prix: product.prix,
+      prix: Number(product.prix),
       categorie_id: product.categorie_id || product.categorie?.id,
-      quantite_stock: product.quantite_stock,
-      images: product.images || [],
+      quantite_stock: Number(product.quantite_stock),
+      images: product.images || product.images_produits || [],
     })
   } catch (error) {
     console.error('Erreur lors du chargement du produit:', error)
@@ -231,16 +231,17 @@ const removeImage = (index: number) => {
 const handleSubmit = async () => {
   saving.value = true
   try {
-    const productData = {
-      nom: form.nom,
-      description: form.description,
-      description_courte: form.description_courte,
-      sku: form.sku,
-      prix: form.prix,
-      categorie_id: form.categorie_id,
-      quantite_stock: form.quantite_stock,
-      images: form.images,
-    }
+    // Only include fields with values for partial updates
+    const productData: Record<string, any> = {}
+    
+    if (form.nom) productData.nom = form.nom
+    if (form.description) productData.description = form.description
+    if (form.description_courte) productData.description_courte = form.description_courte
+    if (form.sku) productData.sku = form.sku
+    if (form.prix) productData.prix = form.prix
+    if (form.categorie_id) productData.categorie_id = form.categorie_id
+    if (form.quantite_stock) productData.quantite_stock = form.quantite_stock
+    if (form.images && form.images.length > 0) productData.images = form.images
 
 if (isEditing.value) {
       await productsAPI.update(route.params.id as string, productData)

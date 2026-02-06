@@ -5,6 +5,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/user.decorator';
 import { OrdersService } from './orders.service';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -129,8 +130,9 @@ export class OrdersController {
       },
     },
   })
+  @ApiResponse({ status: 400, description: 'Statut invalide' })
   @ApiResponse({ status: 404, description: 'Commande non trouvée' })
-  updateStatus(@Param('id') id: string, @Body() body: { statut: string }, @CurrentUser() user) {
-    return this.ordersService.updateStatus(id, body.statut as any);
+  updateStatus(@Param('id') id: string, @Body() body: UpdateOrderStatusDto, @CurrentUser() user) {
+    return this.ordersService.updateStatus(id, body.statut);
   }
 }

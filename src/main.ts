@@ -73,7 +73,14 @@ async function bootstrap() {
   });
 
   // Validation globale
-  app.useGlobalPipes(new ValidationPipe());
+  // Note: ZodValidationPipe handles specific routes, this is a fallback
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    transform: true,
+    transformOptions: {
+      enableImplicitConversion: true,
+    },
+  }));
 
   // Intercepteur global pour standardiser les réponses
   app.useGlobalInterceptors(new TransformInterceptor());

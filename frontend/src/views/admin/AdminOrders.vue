@@ -46,11 +46,10 @@
                 class="status-select"
               >
                 <option value="EN_ATTENTE">En attente</option>
-                <option value="CONFIRMEE">Confirmée</option>
-                <option value="EN_PREPARATION">En préparation</option>
-                <option value="EXPEDIEE">Expédiée</option>
-                <option value="LIVREE">Livrée</option>
-                <option value="ANNULEE">Annulée</option>
+                <option value="CONFIRME">Confirmée</option>
+                <option value="EXPEDIE">Expédiée</option>
+                <option value="LIVRE">Livrée</option>
+                <option value="ANNULE">Annulée</option>
               </select>
             </td>
             <td>{{ formatDate(order.cree_le) }}</td>

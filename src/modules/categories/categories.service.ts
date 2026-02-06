@@ -8,9 +8,8 @@ export class CategoriesService implements ICategoriesService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    // Simplified query to debug
+    // Return all categories for admin (both active and inactive)
     return this.prisma.cATEGORIES.findMany({
-      where: { est_active: true },
       orderBy: { nom: 'asc' },
     });
   }

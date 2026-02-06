@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SlugifyUtil } from '../../common/utils/slugify.util';
 import { IProductsService } from './interfaces/products.interface';
+import { ValidationException } from '../../common/exceptions/business.exception';
 
 @Injectable()
 export class ProductsService implements IProductsService {
@@ -138,6 +139,11 @@ export class ProductsService implements IProductsService {
       // Extract images from data before updating product
       const { images, ...productData } = data;
 
+      // Handle empty categorie_id (convert '' to undefined to avoid Prisma error)
+      if (productData.categorie_id === '') {
+        delete productData.categorie_id;
+      }
+
       // Update the product first
       const product = await this.prisma.pRODUITS.update({
         where: { id },
@@ -151,29 +157,47 @@ export class ProductsService implements IProductsService {
         },
       });
 
-      // If images are provided, update them
-      if (images && images.length > 0) {
+      // If images are provided (even an empty array means we want to update/clear them)
+      if (images && Array.isArray(images)) {
         // Delete existing images
         await this.prisma.iMAGES_PRODUITS.deleteMany({
           where: { produit_id: id },
         });
 
-        // Create new images
-        await this.prisma.iMAGES_PRODUITS.createMany({
-          data: images.map((img: any, index: number) => ({
-            produit_id: product.id,
-            url_image: img.url_image,
-            texte_alt: img.texte_alt || product.nom,
-            est_principale: img.est_principale || index === 0,
-            ordre_tri: index,
-          })),
-        });
+        // Create new images if there are any
+        if (images.length > 0) {
+          await this.prisma.iMAGES_PRODUITS.createMany({
+            data: images.map((img: any, index: number) => ({
+              produit_id: product.id,
+              url_image: img.url_image,
+              texte_alt: img.texte_alt || product.nom,
+              est_principale: img.est_principale || index === 0,
+              ordre_tri: index,
+            })),
+          });
+        }
       }
 
       return this.findOne(product.id);
     } catch (error) {
       console.error('Error updating product:', error);
-      throw new NotFoundException('Produit non trouvé');
+      
+      // Handle Prisma unique constraint error
+      if (error.code === 'P2002') {
+        const target = (error.meta?.target as string[]) || [];
+        if (target.includes('sku')) {
+          throw new ValidationException('Un produit avec ce SKU existe déjà');
+        }
+        if (target.includes('slug')) {
+          throw new ValidationException('Un produit avec ce nom existe déjà');
+        }
+      }
+      
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Produit non trouvé');
+      }
+
+      throw error;
     }
   }
 

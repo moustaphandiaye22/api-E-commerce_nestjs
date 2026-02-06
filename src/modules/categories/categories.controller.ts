@@ -6,6 +6,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CreateCategoryDtoSchema } from './dto/create-category.dto';
+import { UpdateCategoryDtoSchema } from './dto/update-category.dto';
 
 @ApiTags('categories')
 @Controller('categories')
@@ -159,6 +160,7 @@ export class CategoriesController {
   @ApiResponse({ status: 401, description: 'Token manquant ou invalide' })
   @ApiResponse({ status: 403, description: 'Accès interdit - Rôle insuffisant' })
   @ApiResponse({ status: 404, description: 'Catégorie non trouvée' })
+  @UsePipes(new ZodValidationPipe(UpdateCategoryDtoSchema))
   update(@Param('id') id: string, @Body() updateCategoryDto: any) {
     return this.categoriesService.update(id, updateCategoryDto);
   }
