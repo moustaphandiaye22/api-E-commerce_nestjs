@@ -1,0 +1,1 @@
+import{O as r}from"./index-De3o8WAW.js";const c={async getAll(t){return r.get("/products",{params:t})},async search(t){return r.get("/products/search",{params:{q:t}})},async getById(t){return r.get(`/products/${t}`)},async create(t){return r.post("/products",t)},async update(t,e){return r.put(`/products/${t}`,e)},async delete(t){return r.delete(`/products/${t}`)}};export{c as p};
