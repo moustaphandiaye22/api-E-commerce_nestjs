@@ -231,27 +231,42 @@ const removeImage = (index: number) => {
 const handleSubmit = async () => {
   saving.value = true
   try {
-    // Only include fields with values for partial updates
-    const productData: Record<string, any> = {}
-    
-    if (form.nom) productData.nom = form.nom
-    if (form.description) productData.description = form.description
-    if (form.description_courte) productData.description_courte = form.description_courte
-    if (form.sku) productData.sku = form.sku
-    if (form.prix) productData.prix = form.prix
-    if (form.categorie_id) productData.categorie_id = form.categorie_id
-    if (form.quantite_stock) productData.quantite_stock = form.quantite_stock
-    if (form.images && form.images.length > 0) productData.images = form.images
+    // Build complete product data with all fields
+    const productData: Record<string, any> = {
+      nom: form.nom || '',
+      description: form.description || '',
+      description_courte: form.description_courte || '',
+      sku: form.sku || '',
+      prix: Number(form.prix) || 0,
+      quantite_stock: Number(form.quantite_stock) || 0,
+      images: form.images && form.images.length > 0 ? form.images : [],
+    }
 
-if (isEditing.value) {
+    // Only add categorie_id if it has a valid value
+    if (form.categorie_id && form.categorie_id.trim() !== '') {
+      productData.categorie_id = form.categorie_id
+    } else {
+      // Pour création, on doit avoir une catégorie
+      if (!isEditing.value) {
+        throw new Error('Veuillez sélectionner une catégorie')
+      }
+      // Pour mise à jour, on peut omettre le champ
+    }
+
+    console.log('Données envoyées:', productData)
+
+    if (isEditing.value) {
       await productsAPI.update(route.params.id as string, productData)
     } else {
       await productsAPI.create(productData)
     }
 
     router.push('/admin/products')
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erreur lors de l\'enregistrement:', error)
+    // Show user-friendly error message
+    const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de l\'enregistrement du produit'
+    alert(`Erreur: ${errorMessage}`)
   } finally {
     saving.value = false
   }
