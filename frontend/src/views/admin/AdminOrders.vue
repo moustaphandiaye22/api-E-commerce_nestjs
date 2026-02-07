@@ -297,5 +297,56 @@ onMounted(loadOrders)
   text-align: center;
   padding: 3rem !important;
 }
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .page-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .orders-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    min-width: 800px;
+  }
+
+  .modal-content {
+    min-width: auto;
+    width: 100%;
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-header h1 {
+    font-size: 1.125rem;
+  }
+
+  .admin-orders {
+    max-width: 100%;
+  }
+
+  .modal-content {
+    max-width: 100%;
+    padding: 1rem;
+  }
+
+  .order-item {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .detail-total {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
 </style>
 

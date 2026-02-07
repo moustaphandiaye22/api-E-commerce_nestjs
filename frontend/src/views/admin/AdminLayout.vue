@@ -1,12 +1,22 @@
 <template>
   <div class="admin-layout">
+    <!-- Mobile Overlay -->
+    <div 
+      v-if="sidebarOpen" 
+      class="sidebar-overlay" 
+      @click="closeSidebar"
+    ></div>
+
     <!-- Admin Sidebar -->
-    <aside class="admin-sidebar">
+    <aside class="admin-sidebar" :class="{ 'sidebar-open': sidebarOpen }">
       <div class="sidebar-header">
         <router-link to="/admin" class="admin-logo">
           <img src="/images/logos.png" alt="Baobab Market" class="h-8 w-8" />
           <span class="font-bold text-lg">Baobab Admin</span>
         </router-link>
+        <button class="sidebar-close" @click="closeSidebar">
+          <X class="w-5 h-5" />
+        </button>
       </div>
 
       <nav class="sidebar-nav">
@@ -16,6 +26,7 @@
             to="/admin"
             class="nav-item"
             :class="{ active: currentRoute === 'AdminDashboard' }"
+            @click="closeSidebar"
           >
             <LayoutDashboard class="w-5 h-5" />
             <span>Dashboard</span>
@@ -28,6 +39,7 @@
             to="/admin/products"
             class="nav-item"
             :class="{ active: currentRoute === 'AdminProducts' }"
+            @click="closeSidebar"
           >
             <Package class="w-5 h-5" />
             <span>Produits</span>
@@ -36,6 +48,7 @@
             to="/admin/categories"
             class="nav-item"
             :class="{ active: currentRoute === 'AdminCategories' }"
+            @click="closeSidebar"
           >
             <FolderTree class="w-5 h-5" />
             <span>Catégories</span>
@@ -48,6 +61,7 @@
             to="/admin/orders"
             class="nav-item"
             :class="{ active: currentRoute === 'AdminOrders' }"
+            @click="closeSidebar"
           >
             <ShoppingBag class="w-5 h-5" />
             <span>Commandes</span>
@@ -56,6 +70,7 @@
             to="/admin/coupons"
             class="nav-item"
             :class="{ active: currentRoute === 'AdminCoupons' }"
+            @click="closeSidebar"
           >
             <Tag class="w-5 h-5" />
             <span>Coupons</span>
@@ -68,6 +83,7 @@
             to="/admin/users"
             class="nav-item"
             :class="{ active: currentRoute === 'AdminUsers' }"
+            @click="closeSidebar"
           >
             <Users class="w-5 h-5" />
             <span>Utilisateurs</span>
@@ -76,7 +92,7 @@
       </nav>
 
       <div class="sidebar-footer">
-        <router-link to="/" class="nav-item">
+        <router-link to="/" class="nav-item" @click="closeSidebar">
           <ArrowLeft class="w-5 h-5" />
           <span>Retour au site</span>
         </router-link>
@@ -88,11 +104,14 @@
       <!-- Top Bar -->
       <header class="admin-header">
         <div class="header-left">
+          <button class="menu-toggle" @click="toggleSidebar">
+            <Menu class="w-6 h-6" />
+          </button>
           <h1 class="page-title">{{ pageTitle }}</h1>
         </div>
         <div class="header-right">
           <div class="flex items-center gap-4">
-            <span class="text-sm text-[var(--text-muted)]">
+            <span class="text-sm text-[var(--text-muted)] hidden-mobile">
               Connecté en tant que <strong>{{ authStore.user?.prenom }}</strong>
             </span>
             <Avatar :name="authStore.user?.prenom" size="sm" />
@@ -109,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import Avatar from '../../components/ui/Avatar.vue'
@@ -121,10 +140,23 @@ import {
   Tag,
   Users,
   ArrowLeft,
+  Menu,
+  X,
 } from 'lucide-vue-next'
 
 const route = useRoute()
 const authStore = useAuthStore()
+
+// Mobile sidebar state
+const sidebarOpen = ref(false)
+
+const toggleSidebar = () => {
+  sidebarOpen.value = !sidebarOpen.value
+}
+
+const closeSidebar = () => {
+  sidebarOpen.value = false
+}
 
 const currentRoute = computed(() => route.name)
 
@@ -156,6 +188,7 @@ onMounted(() => {
   background: var(--bg-secondary);
 }
 
+/* Sidebar base styles */
 .admin-sidebar {
   width: 260px;
   background: var(--bg-primary);
@@ -165,11 +198,15 @@ onMounted(() => {
   position: fixed;
   height: 100vh;
   z-index: 50;
+  transition: transform 0.3s ease;
 }
 
 .sidebar-header {
   padding: 1.5rem;
   border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .admin-logo {
@@ -178,6 +215,15 @@ onMounted(() => {
   gap: 0.75rem;
   color: var(--text-primary);
   text-decoration: none;
+}
+
+.sidebar-close {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.5rem;
 }
 
 .sidebar-nav {
@@ -227,11 +273,13 @@ onMounted(() => {
   border-top: 1px solid var(--border-light);
 }
 
+/* Main content */
 .admin-main {
   flex: 1;
   margin-left: 260px;
   display: flex;
   flex-direction: column;
+  transition: margin-left 0.3s ease;
 }
 
 .admin-header {
@@ -246,6 +294,21 @@ onMounted(() => {
   z-index: 40;
 }
 
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-right: 0.75rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
 .page-title {
   font-size: 1.5rem;
   font-weight: 700;
@@ -256,5 +319,68 @@ onMounted(() => {
   flex: 1;
   padding: 2rem;
 }
-</style>
 
+/* Mobile overlay */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+  }
+
+  .admin-sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-close {
+    display: block;
+  }
+
+  .admin-main {
+    margin-left: 0;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .hidden-mobile {
+    display: none;
+  }
+
+  .admin-content {
+    padding: 1rem;
+  }
+
+  .admin-header {
+    padding: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-content {
+    padding: 0.75rem;
+  }
+
+  .admin-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .page-title {
+    font-size: 1.125rem;
+  }
+}
+</style>

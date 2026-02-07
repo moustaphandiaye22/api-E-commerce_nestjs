@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import * as express from 'express';
 
 // Compression middleware (will be available after npm install)
 let compression: any;
@@ -16,6 +17,10 @@ try {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Serve uploaded files statically
+  app.use('/uploads', express.static('uploads'));
+  this.logger?.log('Static file serving enabled for /uploads');
 
   // Compression pour améliorer les performances
   if (compression) {

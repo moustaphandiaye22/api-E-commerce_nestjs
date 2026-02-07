@@ -4,37 +4,69 @@ import { formatPriceEur, formatPriceDual, convertEurToXaf, formatPriceXaf } from
 export type CurrencyDisplay = 'eur-only' | 'dual'
 
 /**
+ * Interface pour les options de devise
+ */
+interface CurrencyOptions {
+  /** Mode d'affichage */
+  displayMode: CurrencyDisplay
+}
+
+/**
  * Composable pour la gestion des devises
  * Permet de basculer entre affichage Euro seul ou Euro + CFA
+ * 
+ * Principes SOLID:
+ * - Single Responsibility: Gère uniquement l'affichage des devises
+ * - Open/Closed: Facile à étendre avec de nouvelles devises
+ * - Dependency Injection: Utilisable partout
+ * 
+ * Principe DRY: Centralise la logique de formatage des prix
  */
 export function useCurrency() {
   const displayMode = ref<CurrencyDisplay>('eur-only')
 
-  // Prix de référence (toujours en Euro dans la base de données)
-  const formatPrice = (priceEur: number) => {
+  /**
+   * Formater un prix selon le mode d'affichage
+   * @param priceEur - Prix en euros
+   * @returns Prix formaté selon le mode choisi
+   */
+  const formatPrice = (priceEur: number): string => {
     if (displayMode.value === 'eur-only') {
       return formatPriceEur(priceEur)
     }
     return formatPriceDual(priceEur)
   }
 
-  // Prix en Euro seulement
-  const formatPriceInEur = (priceEur: number) => {
+  /**
+   * Formater un prix en Euro seulement
+   * @param priceEur - Prix en euros
+   * @returns Prix formaté en euros
+   */
+  const formatPriceInEur = (priceEur: number): string => {
     return formatPriceEur(priceEur)
   }
 
-  // Prix en CFA seulement
-  const formatPriceInXaf = (priceEur: number) => {
+  /**
+   * Formater un prix en CFA seulement
+   * @param priceEur - Prix en euros
+   * @returns Prix formaté en CFA
+   */
+  const formatPriceInXaf = (priceEur: number): string => {
     return formatPriceXaf(convertEurToXaf(priceEur))
   }
 
-  // Basculer entre les modes d'affichage
-  const toggleDisplayMode = () => {
+  /**
+   * Basculer entre les modes d'affichage
+   */
+  const toggleDisplayMode = (): void => {
     displayMode.value = displayMode.value === 'eur-only' ? 'dual' : 'eur-only'
   }
 
-  // Set display mode
-  const setDisplayMode = (mode: CurrencyDisplay) => {
+  /**
+   * Définir le mode d'affichage
+   * @param mode - Nouveau mode d'affichage
+   */
+  const setDisplayMode = (mode: CurrencyDisplay): void => {
     displayMode.value = mode
   }
 
@@ -45,7 +77,7 @@ export function useCurrency() {
   )
 
   return {
-    // État
+    // État (readonly pour éviter les modifications externes)
     displayMode: readonly(displayMode),
     isDualMode,
     displayModeLabel,

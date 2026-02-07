@@ -1,0 +1,1 @@
+import{R as e}from"./index-CqM2Xncc.js";const o={async getAll(){return e.get("/orders")},async getById(r){return e.get(`/orders/${r}`)},async create(r){return e.post("/orders",r)},async updateOrder(r,t){return e.put(`/orders/${r}`,t)}};export{o};
