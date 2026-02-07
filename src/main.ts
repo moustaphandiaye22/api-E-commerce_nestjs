@@ -17,10 +17,11 @@ try {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
 
   // Serve uploaded files statically
   app.use('/uploads', express.static('uploads'));
-  this.logger?.log('Static file serving enabled for /uploads');
+  logger.log('Static file serving enabled for /uploads');
 
   // Compression pour améliorer les performances
   if (compression) {
