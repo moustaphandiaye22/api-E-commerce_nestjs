@@ -4,18 +4,29 @@ import { useApi } from '../composables/useApi'
 import type { Product, Category, Coupon, User, Order } from '../types/api'
 
 /**
+ * Interface pour les statistiques du dashboard admin
+ */
+interface AdminStats {
+  products: number
+  categories: number
+  orders: number
+  users: number
+  revenue: number
+}
+
+/**
  * Store Admin pour la gestion du dashboard et des statistiques
  */
 export const useAdminStore = defineStore('admin', () => {
   // État
-  const stats = ref({
+  const stats = ref<AdminStats>({
     products: 0,
     categories: 0,
     orders: 0,
     users: 0,
     revenue: 0,
   })
-  const { loading, error, execute } = useApi<any>()
+  const { loading, error, execute } = useApi<AdminStats>()
 
   // Getters
   function isAdmin(): boolean {

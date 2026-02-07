@@ -220,5 +220,42 @@ onMounted(loadUsers)
   text-align: center;
   padding: 3rem !important;
 }
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .page-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .users-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    min-width: 700px;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-header h1 {
+    font-size: 1.125rem;
+  }
+
+  .admin-users {
+    max-width: 100%;
+  }
+
+  .user-info span {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
 </style>
 

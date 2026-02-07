@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SlugifyUtil } from '../../common/utils/slugify.util';
 import { IProductsService } from './interfaces/products.interface';
@@ -6,6 +6,8 @@ import { ValidationException } from '../../common/exceptions/business.exception'
 
 @Injectable()
 export class ProductsService implements IProductsService {
+  private readonly logger = new Logger(ProductsService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async findAll(filters?: any) {
@@ -90,11 +92,16 @@ export class ProductsService implements IProductsService {
 
   async create(data: any) {
     try {
+      this.logger.log(`Creating product: ${data.nom}`);
+      this.logger.log(`Images data received: ${JSON.stringify(data.images)}`);
+
       const slug = SlugifyUtil.slugify(data.nom);
-      
+
       // Extract images from data before creating product
       const { images, ...productData } = data;
-      
+
+      this.logger.log(`Extracted ${images?.length || 0} images from data`);
+
       // Create the product first
       const product = await this.prisma.pRODUITS.create({
         data: {
@@ -113,8 +120,11 @@ export class ProductsService implements IProductsService {
         },
       });
 
+      this.logger.log(`Product created with ID: ${product.id}`);
+
       // Then create the images if they exist
       if (images && images.length > 0) {
+        this.logger.log(`Creating ${images.length} images for product`);
         await this.prisma.iMAGES_PRODUITS.createMany({
           data: images.map((img: any, index: number) => ({
             produit_id: product.id,
@@ -124,6 +134,9 @@ export class ProductsService implements IProductsService {
             ordre_tri: index,
           })),
         });
+        this.logger.log(`Images created successfully`);
+      } else {
+        this.logger.warn('No images provided for product creation');
       }
 
       // Return the product with images
@@ -136,6 +149,9 @@ export class ProductsService implements IProductsService {
 
   async update(id: string, data: any) {
     try {
+      this.logger.log(`Updating product: ${id}`);
+      this.logger.log(`Images data received: ${JSON.stringify(data.images)}`);
+
       // Extract images from data before updating product
       const { images, ...productData } = data;
 
@@ -166,6 +182,7 @@ export class ProductsService implements IProductsService {
 
         // Create new images if there are any
         if (images.length > 0) {
+          this.logger.log(`Updating ${images.length} images for product`);
           await this.prisma.iMAGES_PRODUITS.createMany({
             data: images.map((img: any, index: number) => ({
               produit_id: product.id,
@@ -175,13 +192,14 @@ export class ProductsService implements IProductsService {
               ordre_tri: index,
             })),
           });
+          this.logger.log(`Images updated successfully`);
         }
       }
 
       return this.findOne(product.id);
     } catch (error) {
       console.error('Error updating product:', error);
-      
+
       // Handle Prisma unique constraint error
       if (error.code === 'P2002') {
         const target = (error.meta?.target as string[]) || [];
@@ -192,7 +210,7 @@ export class ProductsService implements IProductsService {
           throw new ValidationException('Un produit avec ce nom existe déjà');
         }
       }
-      
+
       if (error.code === 'P2025') {
         throw new NotFoundException('Produit non trouvé');
       }

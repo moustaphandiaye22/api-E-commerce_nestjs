@@ -181,8 +181,7 @@ export class ProductsController {
   @ApiResponse({ status: 401, description: 'Token manquant ou invalide' })
   @ApiResponse({ status: 403, description: 'Accès interdit - Rôle insuffisant' })
   @ApiResponse({ status: 404, description: 'Produit non trouvé' })
-  @UsePipes(new ZodValidationPipe(UpdateProductDtoSchema))
-  update(@Param('id') id: string, @Body() updateProductDto: any) {
+  update(@Param('id') id: string, @Body(new ZodValidationPipe(UpdateProductDtoSchema)) updateProductDto: any) {
     return this.productsService.update(id, updateProductDto);
   }
 

@@ -148,21 +148,33 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import type { AxiosError } from 'axios'
 import { productsAPI } from '../../api/products'
 import { categoriesAPI } from '../../api/categories'
 import { uploadAPI } from '../../api/upload'
+import { useToast } from '../../composables/useToast'
 import Button from '../../components/ui/Button.vue'
+import type { Category, Product, ApiError } from '../../types/api'
 import { ArrowLeft, Upload, X } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 
 const fileInput = ref<HTMLInputElement>()
 const saving = ref(false)
-const categories = ref<any[]>([])
+const categories = ref<Category[]>([])
 
-const originalProduct = ref<any>(null)
+const originalProduct = ref<Product | null>(null)
 const isEditing = computed(() => !!route.params.id)
+
+/**
+ * Interface pour les images du formulaire
+ */
+interface FormImage {
+  url_image: string
+  est_principale: boolean
+}
 
 const form = reactive({
   nom: '',
@@ -172,7 +184,7 @@ const form = reactive({
   prix: 0,
   categorie_id: '',
   quantite_stock: 0,
-  images: [] as Array<{ url_image: string; est_principale: boolean }>,
+  images: [] as FormImage[],
 })
 
 const loadProduct = async (id: string) => {
@@ -234,10 +246,12 @@ const removeImage = (index: number) => {
 }
 
 /**
- * Helper to clean up images - remove entries with undefined/null url_image
+ * Nettoyer les images - supprimer les entrées avec url_image undefined/null
  */
-const cleanImages = (images: Array<any>) => {
-  return images.filter(img => img && img.url_image && typeof img.url_image === 'string')
+const cleanImages = (images: FormImage[]): FormImage[] => {
+  return images.filter((img): img is FormImage => 
+    Boolean(img && img.url_image && typeof img.url_image === 'string')
+  )
 }
 
 const handleSubmit = async () => {
@@ -270,16 +284,19 @@ const handleSubmit = async () => {
 
       // If nothing changed, avoid sending an empty PUT
       if (Object.keys(productData).length === 0) {
-        alert('Aucune modification détectée.')
+        toast.warning('Aucune modification détectée.')
         return
       }
 
       console.log('Données envoyées (update):', productData)
       await productsAPI.update(route.params.id as string, productData)
+      toast.success('Produit mis à jour avec succès!')
+      router.push('/admin/products')
     } else {
       // Creation: ensure required fields are present
       if (!form.categorie_id || form.categorie_id.trim() === '') {
-        throw new Error('Veuillez sélectionner une catégorie')
+        toast.error('Veuillez sélectionner une catégorie')
+        return
       }
 
       productData = {
@@ -295,14 +312,17 @@ const handleSubmit = async () => {
 
       console.log('Données envoyées (create):', productData)
       await productsAPI.create(productData)
+      toast.success('Produit créé avec succès!')
+      router.push('/admin/products')
     }
-
-    router.push('/admin/products')
-  } catch (error: any) {
-    console.error('Erreur lors de l\'enregistrement:', error)
+  } catch (err: unknown) {
+    console.error('Erreur lors de l\'enregistrement:', err)
     // Show user-friendly error message
-    const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de l\'enregistrement du produit'
-    alert(`Erreur: ${errorMessage}`)
+    const axiosError = err as AxiosError<ApiError>
+    const messageData = axiosError.response?.data?.message
+    const messageString = Array.isArray(messageData) ? messageData.join(', ') : (messageData || '')
+    const errorMessage = messageString || (typeof axiosError.message === 'string' ? axiosError.message : 'Erreur lors de l\'enregistrement du produit')
+    toast.error(errorMessage)
   } finally {
     saving.value = false
   }
@@ -502,6 +522,63 @@ onMounted(() => {
   background: var(--bg-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border-light);
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .admin-product-form {
+    max-width: 100%;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .form-section.full-width {
+    grid-column: 1;
+  }
+
+  .form-container {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .form-container {
+    padding: 1rem;
+    border-radius: 0.75rem;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .uploaded-image,
+  .upload-box {
+    width: 100px;
+    height: 100px;
+  }
+
+  .upload-box p {
+    display: none;
+  }
 }
 </style>
 
