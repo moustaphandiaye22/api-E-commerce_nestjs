@@ -1,7 +1,6 @@
 import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary } from 'cloudinary';
-import * as streamifier from 'streamifier';
 
 @Injectable()
 export class UploadService {
@@ -105,11 +104,12 @@ export class UploadService {
       throw new BadRequestException('Service d\'upload non configuré. Veuillez configurer Cloudinary.');
     }
 
-    // Upload to Cloudinary
+    // Upload to Cloudinary using base64
     this.logger.log(`Uploading to Cloudinary folder: ecommerce/${folder}`);
     
-    const result = await new Promise<any>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
+    try {
+      const result = await cloudinary.uploader.upload(
+        `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
         {
           folder: `ecommerce/${folder}`,
           resource_type: 'image',
@@ -122,22 +122,16 @@ export class UploadService {
             { width: 800, height: 800, crop: 'limit', quality: 'auto' }, // Medium
           ],
           eager_async: true,
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
         }
       );
-      
-      // Use streamifier to handle buffer upload
-      streamifier.createUploadStream(uploadStream).end(file.buffer);
-    });
 
-    const url = result.secure_url;
-    this.logger.log(`Cloudinary upload successful: ${url}`);
-    
-    // Return the original upload URL (not the eager transformation URLs)
-    return url;
+      const url = result.secure_url;
+      this.logger.log(`Cloudinary upload successful: ${url}`);
+      return url;
+    } catch (error: any) {
+      this.logger.error(`Cloudinary upload failed: ${error.message}`);
+      throw new BadRequestException(`Erreur lors de l'upload vers Cloudinary: ${error.message}`);
+    }
   }
 
   async deleteImage(imagePath: string): Promise<void> {

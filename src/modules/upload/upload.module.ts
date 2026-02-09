@@ -8,12 +8,13 @@ import { PrismaModule } from '../../prisma/prisma.module';
   imports: [
     PrismaModule,
     MulterModule.register({
+      storage: undefined, // Use default memory storage
       limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limit
+        fileSize: 10 * 1024 * 1024, // 10MB limit
       },
       fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
-          cb(new Error('Invalid file type'), false);
+        if (!file.mimetype.match(/\/(jpg|jpeg|png|webp|gif)$/)) {
+          cb(new Error('Invalid file type. Only images are allowed.'), false);
         } else {
           cb(null, true);
         }
