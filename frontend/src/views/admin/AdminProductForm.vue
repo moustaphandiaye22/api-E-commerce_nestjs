@@ -72,6 +72,27 @@
               placeholder="0"
             />
           </div>
+
+          <!-- Status toggles -->
+          <div class="form-group">
+            <div class="toggle-group">
+              <label class="toggle-label">
+                <input type="checkbox" v-model="form.est_actif" />
+                <span class="toggle-text"> Produit actif</span>
+                <span class="toggle-hint">(Visible dans la boutique)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="toggle-group">
+              <label class="toggle-label">
+                <input type="checkbox" v-model="form.est_vedette" />
+                <span class="toggle-text"> Produit en vedette</span>
+                <span class="toggle-hint">(Affiché en premier)</span>
+              </label>
+            </div>
+          </div>
         </div>
 
         <!-- Description -->
@@ -166,6 +187,7 @@ const saving = ref(false)
 const categories = ref<Category[]>([])
 
 const originalProduct = ref<Product | null>(null)
+const originalImages = ref<FormImage[]>([])
 const isEditing = computed(() => !!route.params.id)
 
 /**
@@ -184,6 +206,8 @@ const form = reactive({
   prix: 0,
   categorie_id: '',
   quantite_stock: 0,
+  est_actif: true,
+  est_vedette: false,
   images: [] as FormImage[],
 })
 
@@ -192,6 +216,9 @@ const loadProduct = async (id: string) => {
     const response = await productsAPI.getById(id)
     const product = response.data
     if (!product) throw new Error('Produit non trouvé')
+    
+    const productImages = product.images || product.images_produits || []
+    
     Object.assign(form, {
       nom: product.nom,
       description: product.description,
@@ -200,10 +227,15 @@ const loadProduct = async (id: string) => {
       prix: Number(product.prix),
       categorie_id: product.categorie_id || product.categorie?.id,
       quantite_stock: Number(product.quantite_stock),
-      images: product.images || product.images_produits || [],
+      est_actif: product.est_actif !== undefined ? product.est_actif : true,
+      est_vedette: product.est_vedette || false,
+      images: productImages,
     })
+    
     // Keep a copy of the original product to send only changed fields on update
     originalProduct.value = product
+    // Store original images separately for comparison
+    originalImages.value = cleanImages(productImages)
   } catch (error) {
     console.error('Erreur lors du chargement du produit:', error)
   }
@@ -229,7 +261,8 @@ const handleImageUpload = async (event: Event) => {
 
   try {
     const response = await uploadAPI.uploadImage(file)
-    const imageUrl = response.data?.url
+    // uploadAPI.uploadImage() returns { url: string } directly
+    const imageUrl = response.url
     if (!imageUrl) throw new Error('URL d\'image non retournée')
     
     form.images.push({
@@ -275,11 +308,16 @@ const handleSubmit = async () => {
         productData.categorie_id = form.categorie_id
       }
 
-      if (JSON.stringify(form.images || []) !== JSON.stringify(originalProduct.value.images || originalProduct.value.images_produits || [])) {
-        const cleanedImages = cleanImages(form.images || [])
-        if (cleanedImages.length > 0) {
-          productData.images = cleanedImages
-        }
+      // Check if images have changed (new images added or removed)
+      const currentImages = cleanImages(form.images || [])
+      const originalImagesClean = originalImages.value
+      
+      // Compare image counts or content
+      const imagesChanged = currentImages.length !== originalImagesClean.length || 
+        JSON.stringify(currentImages) !== JSON.stringify(originalImagesClean)
+      
+      if (imagesChanged) {
+        productData.images = currentImages
       }
 
       // If nothing changed, avoid sending an empty PUT
@@ -522,6 +560,35 @@ onMounted(() => {
   background: var(--bg-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border-light);
+}
+
+.toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.toggle-text {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.toggle-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 /* Responsive styles */

@@ -25,9 +25,28 @@ export class UploadService {
 
   async uploadImage(file: any, folder: string = 'products'): Promise<string> {
     this.logger.log(`Upload attempt: ${file?.originalname}, size: ${file?.size}, mimetype: ${file?.mimetype}`);
+    
+    // Check if buffer exists
+    if (!file?.buffer) {
+      this.logger.warn('File buffer is missing - checking for alternative properties');
+      this.logger.warn('File keys:', Object.keys(file || {}));
+    }
 
     if (!file) {
       throw new BadRequestException('Aucun fichier fourni');
+    }
+
+    // If buffer is missing but file has data, try to create buffer
+    if (!file.buffer && file.buffer === undefined) {
+      this.logger.warn('Converting file data to buffer...');
+      if (file.arrayBuffer) {
+        try {
+          file.buffer = Buffer.from(await file.arrayBuffer());
+          this.logger.log('Buffer created from arrayBuffer');
+        } catch (e) {
+          this.logger.error('Failed to create buffer:', e);
+        }
+      }
     }
 
     // Validate file type
@@ -48,6 +67,24 @@ export class UploadService {
       // Upload to Cloudinary if configured
       if (this.isConfigured) {
         this.logger.log(`Uploading to Cloudinary folder: ${folder}`);
+        
+        // Ensure buffer exists
+        if (!file.buffer) {
+          this.logger.warn('Creating buffer from file data for Cloudinary upload');
+          if (file.arrayBuffer) {
+            file.buffer = Buffer.from(await file.arrayBuffer());
+          } else if (file.stream) {
+            const chunks: Buffer[] = [];
+            for await (const chunk of file.stream()) {
+              chunks.push(Buffer.from(chunk));
+            }
+            file.buffer = Buffer.concat(chunks);
+          }
+        }
+        
+        if (!file.buffer) {
+          throw new BadRequestException('Impossible de traiter le fichier: buffer manquant');
+        }
         
         const result = await new Promise<any>((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
@@ -79,7 +116,12 @@ export class UploadService {
       this.logger.error(`Cloudinary upload failed: ${error.message}`);
       // Try local fallback
       this.logger.warn('Falling back to local storage');
-      return this.uploadLocal(file, folder);
+      try {
+        return await this.uploadLocal(file, folder);
+      } catch (localError) {
+        this.logger.error(`Local upload also failed: ${localError.message}`);
+        throw new BadRequestException('Échec de l\'upload: ' + error.message);
+      }
     }
   }
 
@@ -89,6 +131,24 @@ export class UploadService {
   private async uploadLocal(file: any, folder: string): Promise<string> {
     const fs = await import('fs');
     const path = await import('path');
+
+    // Ensure buffer exists
+    if (!file.buffer) {
+      this.logger.warn('Creating buffer from file data for local upload');
+      if (file.arrayBuffer) {
+        file.buffer = Buffer.from(await file.arrayBuffer());
+      } else if (file.stream) {
+        const chunks: Buffer[] = [];
+        for await (const chunk of file.stream()) {
+          chunks.push(Buffer.from(chunk));
+        }
+        file.buffer = Buffer.concat(chunks);
+      }
+    }
+
+    if (!file.buffer) {
+      throw new BadRequestException('Impossible de traiter le fichier: buffer manquant');
+    }
 
     const extension = path.extname(file.originalname);
     const filename = `${Date.now()}-${Math.random().toString(36).substring(2)}${extension}`;

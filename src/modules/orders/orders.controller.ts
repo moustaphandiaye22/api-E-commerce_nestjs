@@ -13,6 +13,19 @@ import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
+  @Get('admin/all')
+  @ApiOperation({ summary: 'Lister toutes les commandes (Admin)' })
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @ApiResponse({
+    status: 200,
+    description: 'Liste de toutes les commandes',
+  })
+  findAllAdmin() {
+    return this.ordersService.findAllAdmin();
+  }
+
   @Get()
   @ApiOperation({ summary: 'Lister les commandes de l\'utilisateur' })
   @ApiBearerAuth('JWT-auth')

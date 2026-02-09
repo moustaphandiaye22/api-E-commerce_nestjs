@@ -53,4 +53,24 @@ export const productsAPI = {
   async delete(id: string): Promise<ApiResponse<void>> {
     return apiClient.delete(`/products/${id}`)
   },
+
+  /**
+   * Importer des produits en masse (Admin)
+   * POST /products/import
+   */
+  async bulkImport(formData: FormData): Promise<ApiResponse<{ imported: number; errors: any[] }>> {
+    return apiClient.post('/products/import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  },
+
+  /**
+   * Dupliquer un produit (Admin)
+   * POST /products/:id/duplicate
+   */
+  async duplicate(id: string): Promise<ApiResponse<Product>> {
+    return apiClient.post(`/products/${id}/duplicate`)
+  },
 }

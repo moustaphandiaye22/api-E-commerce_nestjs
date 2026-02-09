@@ -6,10 +6,16 @@
         <h1>Gestion des produits</h1>
         <p class="text-[var(--text-muted)]">Gérez votre catalogue de produits</p>
       </div>
-      <router-link to="/admin/products/new" class="btn btn-primary">
-        <Plus class="w-5 h-5" />
-        Ajouter un produit
-      </router-link>
+      <div class="header-actions">
+        <button @click="showImportModal = true" class="btn btn-secondary">
+          <Upload class="w-5 h-5" />
+          Importer CSV
+        </button>
+        <router-link to="/admin/products/new" class="btn btn-primary">
+          <Plus class="w-5 h-5" />
+          Ajouter un produit
+        </router-link>
+      </div>
     </div>
 
     <!-- Filters -->
@@ -42,6 +48,8 @@
             <th>Catégorie</th>
             <th>Prix</th>
             <th>Stock</th>
+            <th>Actif</th>
+            <th>Vedette</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -104,7 +112,30 @@
               </span>
             </td>
             <td>
+              <button
+                class="toggle-btn"
+                :class="product.est_actif ? 'active' : 'inactive'"
+                @click="toggleStatus(product, 'est_actif')"
+                title="Activer/Désactiver"
+              >
+                {{ product.est_actif ? 'Oui' : 'Non' }}
+              </button>
+            </td>
+            <td>
+              <button
+                class="toggle-btn"
+                :class="product.est_vedette ? 'active featured' : 'inactive'"
+                @click="toggleStatus(product, 'est_vedette')"
+                title="Mettre en vedette"
+              >
+                {{ product.est_vedette ? 'Oui' : 'Non' }}
+              </button>
+            </td>
+            <td>
               <div class="actions">
+                <button @click="duplicateProduct(product)" class="action-btn" title="Dupliquer">
+                  <Copy class="w-4 h-4" />
+                </button>
                 <router-link :to="`/admin/products/${product.id}`" class="action-btn" title="Modifier">
                   <Edit class="w-4 h-4" />
                 </router-link>
@@ -153,6 +184,39 @@
         </div>
       </div>
     </Modal>
+
+    <!-- Bulk Import Modal -->
+    <Modal :model-value="showImportModal" @update:model-value="showImportModal = $event">
+      <div class="modal-content">
+        <h3>Importer des produits</h3>
+        <p>Télécharger un fichier CSV ou Excel pour importer des produits en masse.</p>
+        <div class="import-info">
+          <p class="info-text">Format attendu:</p>
+          <code class="code-block">
+            nom,description,description_courte,sku,prix,quantite_stock,categorie_id,marque
+          </code>
+        </div>
+        <div class="form-group">
+          <label for="import-file">Fichier CSV/Excel</label>
+          <input
+            id="import-file"
+            type="file"
+            accept=".csv,.xlsx,.xls"
+            @change="handleFileSelect"
+          />
+        </div>
+        <div v-if="importFile" class="file-selected">
+          <File class="w-4 h-4" />
+          <span>{{ importFile.name }}</span>
+        </div>
+        <div class="modal-actions">
+          <Button variant="secondary" @click="showImportModal = false">Annuler</Button>
+          <Button variant="primary" :loading="importing" :disabled="!importFile" @click="handleImport">
+            Importer
+          </Button>
+        </div>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -176,6 +240,9 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  Copy,
+  Upload,
+  File,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -189,11 +256,15 @@ const searchQuery = ref('')
 const selectedCategory = ref('')
 const showDeleteModal = ref(false)
 const productToDelete = ref<Product | null>(null)
+const showImportModal = ref(false)
+const importFile = ref<File | null>(null)
+const importing = ref(false)
 
 const pagination = ref({
   currentPage: 1,
   totalPages: 1,
   total: 0,
+  limit: 10,
 })
 
 let searchTimeout: ReturnType<typeof setTimeout>
@@ -270,6 +341,65 @@ const deleteProduct = async () => {
   }
 }
 
+const toggleStatus = async (product: Product, field: 'est_actif' | 'est_vedette') => {
+  try {
+    const newValue = !product[field]
+    await productsAPI.update(product.id, { [field]: newValue })
+    product[field] = newValue as boolean
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour:', error)
+  }
+}
+
+const duplicateProduct = async (product: Product) => {
+  try {
+    const duplicateData = {
+      nom: `${product.nom} (copie)`,
+      slug: `${product.slug}-copie-${Date.now()}`,
+      description: product.description || '',
+      description_courte: product.description_courte || '',
+      sku: `${product.sku || 'SKU'}-COP-${Date.now()}`,
+      prix: product.prix,
+      categorie_id: product.categorie_id || '',
+      marque: product.marque || '',
+      quantite_stock: product.quantite_stock || 0,
+      seuil_stock_bas: 5,
+      est_actif: false,
+      est_vedette: false,
+    }
+    await productsAPI.create(duplicateData)
+    loadProducts()
+  } catch (error) {
+    console.error('Erreur lors de la duplication:', error)
+  }
+}
+
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    importFile.value = target.files[0]
+  }
+}
+
+const handleImport = async () => {
+  if (!importFile.value) return
+  
+  importing.value = true
+  try {
+    const formData = new FormData()
+    formData.append('file', importFile.value)
+    
+    await productsAPI.bulkImport(formData)
+    showImportModal.value = false
+    importFile.value = null
+    loadProducts()
+  } catch (error) {
+    console.error('Erreur lors de l\'import:', error)
+  } finally {
+    importing.value = false
+  }
+}
+
 onMounted(() => {
   loadProducts()
   loadCategories()
@@ -320,6 +450,15 @@ onMounted(() => {
   background: var(--bg-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border-light);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-hover);
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
 }
 
 .btn-danger {
@@ -498,6 +637,38 @@ onMounted(() => {
   color: #dc2626;
 }
 
+.toggle-btn {
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border-light);
+  transition: all 0.2s;
+}
+
+.toggle-btn.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: rgb(16, 185, 129);
+  border-color: rgb(16, 185, 129);
+}
+
+.toggle-btn.inactive {
+  background: rgba(107, 114, 128, 0.1);
+  color: rgb(107, 114, 128);
+  border-color: rgb(107, 114, 128);
+}
+
+.toggle-btn.featured {
+  background: rgba(245, 158, 11, 0.1);
+  color: rgb(245, 158, 11);
+  border-color: rgb(245, 158, 11);
+}
+
+.toggle-btn:hover {
+  opacity: 0.8;
+}
+
 .pagination {
   display: flex;
   align-items: center;
@@ -553,6 +724,67 @@ onMounted(() => {
 .warning-text {
   color: #dc2626 !important;
   font-size: 0.875rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-light);
+  border-radius: 0.5rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.form-group input[type="file"] {
+  padding: 0.5rem;
+}
+
+.import-info {
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.info-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.code-block {
+  display: block;
+  background: var(--bg-primary);
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  overflow-x: auto;
+}
+
+.file-selected {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 0.5rem;
+  color: rgb(16, 185, 129);
+  margin-top: 0.5rem;
 }
 
 .modal-actions {

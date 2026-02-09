@@ -84,6 +84,15 @@
               type="color"
             />
           </div>
+          <div class="form-group">
+            <label for="categorie_parent_id">Catégorie parente</label>
+            <select id="categorie_parent_id" v-model="form.categorie_parent_id">
+              <option value="">Aucune (catégorie principale)</option>
+              <option v-for="cat in parentCategories" :key="cat.id" :value="cat.id">
+                {{ cat.nom }}
+              </option>
+            </select>
+          </div>
           <div class="modal-actions">
             <Button type="button" variant="secondary" @click="closeModal">Annuler</Button>
             <Button type="submit" variant="primary" :loading="saving">
@@ -97,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { categoriesAPI } from '../../api/categories'
 import type { Category } from '../../types/api'
 import Button from '../../components/ui/Button.vue'
@@ -115,6 +124,11 @@ const form = reactive({
   slug: '',
   description: '',
   couleur: '#3b82f6',
+  categorie_parent_id: '',
+})
+
+const parentCategories = computed(() => {
+  return categories.value.filter(cat => cat.id !== editingCategory.value?.id)
 })
 
 const loadCategories = async () => {
@@ -137,10 +151,11 @@ const openModal = (category?: Category) => {
       slug: category.slug,
       description: category.description || '',
       couleur: category.couleur || '#3b82f6',
+      categorie_parent_id: (category as any).categorie_parent_id || '',
     })
   } else {
     editingCategory.value = null
-    Object.assign(form, { nom: '', slug: '', description: '', couleur: '#3b82f6' })
+    Object.assign(form, { nom: '', slug: '', description: '', couleur: '#3b82f6', categorie_parent_id: '' })
   }
   showModal.value = true
 }
@@ -306,7 +321,8 @@ onMounted(loadCategories)
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group select {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid var(--border-light);
