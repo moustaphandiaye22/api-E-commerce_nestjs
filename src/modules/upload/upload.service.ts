@@ -53,21 +53,30 @@ export class UploadService {
     // Check if buffer exists
     if (!file?.buffer) {
       this.logger.warn('File buffer is missing - checking for alternative properties');
+      this.logger.warn(`File object keys: ${Object.keys(file || {}).join(', ')}`);
       // Try to create buffer from arrayBuffer or stream
       if (file.arrayBuffer) {
         try {
           file.buffer = Buffer.from(await file.arrayBuffer());
           this.logger.log('Buffer created from arrayBuffer');
-        } catch (e) {
-          this.logger.error('Failed to create buffer from arrayBuffer:', e);
+        } catch (e: any) {
+          this.logger.error('Failed to create buffer from arrayBuffer:', e?.message);
+          throw new BadRequestException('Impossible de traiter le fichier: erreur lors de la conversion en buffer');
         }
       } else if (file.stream) {
         const chunks: Buffer[] = [];
-        for await (const chunk of file.stream()) {
-          chunks.push(Buffer.from(chunk));
+        try {
+          for await (const chunk of file.stream()) {
+            chunks.push(Buffer.from(chunk));
+          }
+          file.buffer = Buffer.concat(chunks);
+          this.logger.log('Buffer created from stream');
+        } catch (e: any) {
+          this.logger.error('Failed to create buffer from stream:', e?.message);
+          throw new BadRequestException('Impossible de traiter le fichier: erreur lors de la lecture du stream');
         }
-        file.buffer = Buffer.concat(chunks);
-        this.logger.log('Buffer created from stream');
+      } else {
+        throw new BadRequestException('Impossible de traiter le fichier: format non reconnu. Assurez-vous d\'envoyer un fichier via FormData');
       }
     }
 
