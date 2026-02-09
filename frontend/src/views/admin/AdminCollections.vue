@@ -1,49 +1,93 @@
 <template>
-  <div class="admin-collections">
-    <div class="page-header">
-      <div class="header-content">
-        <h1>Gestion des collections</h1>
-        <p class="text-[var(--text-muted)]">Créez et gérez vos collections de produits</p>
+  <div class="max-w-7xl">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)]">Gestion des collections</h1>
+        <p class="text-sm text-[var(--text-muted)] mt-1">Créez et gérez vos collections de produits</p>
       </div>
-      <button @click="openModal()" class="btn btn-primary">
+      <Button variant="primary" @click="openModal()" class="w-full sm:w-auto">
         <Plus class="w-5 h-5" />
-        Nouvelle collection
-      </button>
+        <span>Nouvelle collection</span>
+      </Button>
     </div>
 
-    <div class="collections-grid">
-      <div v-if="loading" class="loading-state">
-        <div v-for="n in 4" :key="n" class="collection-card-skeleton"></div>
-      </div>
+    <!-- Collections Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+      <!-- Loading State -->
+      <template v-if="loading">
+        <div v-for="n in 4" :key="n" class="animate-pulse">
+          <div class="bg-(--bg-tertiary) h-40 rounded-t-xl"></div>
+          <div class="bg-(--bg-primary) border border-(--border-light) rounded-b-xl p-4 space-y-3">
+            <div class="h-4 bg-(--bg-tertiary) rounded w-3/4"></div>
+            <div class="h-3 bg-(--bg-tertiary) rounded w-1/2"></div>
+          </div>
+        </div>
+      </template>
 
-      <div v-else-if="collections.length === 0" class="empty-state">
-        <FolderTree class="w-16 h-16 text-[var(--text-muted)] mb-4" />
-        <p>Auc ne collection</p>
-        <button @click="openModal()" class="btn btn-primary mt-4">
+      <!-- Empty State -->
+      <div v-else-if="collections.length === 0" class="col-span-full flex flex-col items-center justify-center py-16 sm:py-20">
+        <FolderTree class="w-12 h-12 sm:w-16 sm:h-16 text-[var(--text-muted)] mb-4" />
+        <p class="text-[var(--text-secondary)] mb-4">Aucune collection</p>
+        <Button variant="primary" @click="openModal()">
           Créer votre première collection
-        </button>
+        </Button>
       </div>
 
-      <div v-for="collection in collections" :key="collection.id" class="collection-card">
-        <div class="collection-image" v-if="collection.url_image">
-          <img :src="collection.url_image" :alt="collection.nom" />
+      <!-- Collection Cards -->
+      <div
+        v-for="collection in collections"
+        :key="collection.id"
+        class="bg-(--bg-primary) rounded-xl border border-(--border-light) overflow-hidden transition-smooth hover:shadow-lg hover:border-(--color-primary) group"
+      >
+        <!-- Image -->
+        <div class="h-32 sm:h-40 bg-(--bg-secondary) flex items-center justify-center overflow-hidden">
+          <img
+            v-if="collection.url_image"
+            :src="collection.url_image"
+            :alt="collection.nom"
+            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <Image v-else class="w-8 h-8 sm:w-10 sm:h-10 text-[var(--text-muted)]" />
         </div>
-        <div class="collection-image placeholder" v-else>
-          <Image class="w-8 h-8" />
-        </div>
-        <div class="collection-info">
-          <h3>{{ collection.nom }}</h3>
-          <p>{{ collection.produits?.length || 0 }} produits</p>
-          <span class="status-badge" :class="{ active: collection.est_actif }">
+
+        <!-- Content -->
+        <div class="p-3 sm:p-4 space-y-2">
+          <h3 class="font-semibold text-[var(--text-primary)] text-sm sm:text-base truncate">
+            {{ collection.nom }}
+          </h3>
+          <p class="text-xs sm:text-sm text-[var(--text-muted)]">
+            {{ collection.produits?.length || 0 }} produit{{ (collection.produits?.length || 0) > 1 ? 's' : '' }}
+          </p>
+          <span
+            :class="[
+              'inline-flex px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium',
+              collection.est_actif
+                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+            ]"
+          >
             {{ collection.est_actif ? 'Active' : 'Inactive' }}
           </span>
         </div>
-        <div class="collection-actions">
-          <button @click="openModal(collection)" class="action-btn" title="Modifier">
+
+        <!-- Actions -->
+        <div class="flex gap-2 p-3 sm:p-4 pt-0 border-t border-(--border-light)">
+          <button
+            @click="openModal(collection)"
+            class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-lg bg-(--bg-secondary) hover:bg-(--bg-hover) text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-smooth text-sm"
+            title="Modifier"
+          >
             <Edit class="w-4 h-4" />
+            <span class="hidden sm:inline">Modifier</span>
           </button>
-          <button @click="confirmDelete(collection)" class="action-btn delete" title="Supprimer">
+          <button
+            @click="confirmDelete(collection)"
+            class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-lg bg-(--bg-secondary) hover:bg-red-50 dark:hover:bg-red-900/20 text-[var(--text-secondary)] hover:text-red-600 transition-smooth text-sm"
+            title="Supprimer"
+          >
             <Trash2 class="w-4 h-4" />
+            <span class="hidden sm:inline">Supprimer</span>
           </button>
         </div>
       </div>
@@ -51,64 +95,102 @@
 
     <!-- Collection Modal -->
     <Modal :model-value="showModal" @update:model-value="showModal = $event">
-      <div class="modal-content">
-        <h3>{{ editingCollection ? 'Modifier la collection' : 'Nouvelle collection' }}</h3>
-        <form @submit.prevent="saveCollection">
-          <div class="form-group">
-            <label for="nom">Nom *</label>
+      <div class="p-4 sm:p-6 w-full max-w-lg">
+        <h3 class="text-xl sm:text-2xl font-semibold text-[var(--text-primary)] mb-4 sm:mb-6">
+          {{ editingCollection ? 'Modifier la collection' : 'Nouvelle collection' }}
+        </h3>
+        
+        <form @submit.prevent="saveCollection" class="space-y-4 sm:space-y-5">
+          <!-- Nom -->
+          <div>
+            <label for="nom" class="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Nom <span class="text-red-500">*</span>
+            </label>
             <input
               id="nom"
               v-model="form.nom"
               type="text"
               required
               placeholder="Nom de la collection"
+              class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-(--border-light) bg-(--bg-secondary) text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-hidden focus:ring-2 focus:ring-(--color-primary) focus:border-transparent transition-smooth text-sm sm:text-base"
             />
           </div>
-          <div class="form-group">
-            <label for="slug">Slug</label>
+
+          <!-- Slug -->
+          <div>
+            <label for="slug" class="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Slug
+            </label>
             <input
               id="slug"
               v-model="form.slug"
               type="text"
               placeholder="slug-de-la-collection"
+              class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-(--border-light) bg-(--bg-secondary) text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-hidden focus:ring-2 focus:ring-(--color-primary) focus:border-transparent transition-smooth text-sm sm:text-base"
             />
           </div>
-          <div class="form-group">
-            <label for="description">Description</label>
+
+          <!-- Description -->
+          <div>
+            <label for="description" class="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Description
+            </label>
             <textarea
               id="description"
               v-model="form.description"
               rows="3"
               placeholder="Description de la collection"
+              class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-(--border-light) bg-(--bg-secondary) text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-hidden focus:ring-2 focus:ring-(--color-primary) focus:border-transparent transition-smooth resize-none text-sm sm:text-base"
             ></textarea>
           </div>
-          <div class="form-group">
-            <label for="url_image">Image URL</label>
+
+          <!-- Image URL -->
+          <div>
+            <label for="url_image" class="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Image URL
+            </label>
             <input
               id="url_image"
               v-model="form.url_image"
               type="text"
               placeholder="https://example.com/image.jpg"
+              class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-(--border-light) bg-(--bg-secondary) text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-hidden focus:ring-2 focus:ring-(--color-primary) focus:border-transparent transition-smooth text-sm sm:text-base"
             />
           </div>
-          <div class="form-group">
-            <label for="ordre_tri">Ordre d'affichage</label>
+
+          <!-- Ordre -->
+          <div>
+            <label for="ordre_tri" class="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Ordre d'affichage
+            </label>
             <input
               id="ordre_tri"
               v-model.number="form.ordre_tri"
               type="number"
               min="0"
+              class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-(--border-light) bg-(--bg-secondary) text-[var(--text-primary)] focus:outline-hidden focus:ring-2 focus:ring-(--color-primary) focus:border-transparent transition-smooth text-sm sm:text-base"
             />
           </div>
-          <div class="form-group checkbox-group">
-            <label>
-              <input type="checkbox" v-model="form.est_actif" />
+
+          <!-- Active Checkbox -->
+          <div class="flex items-center gap-2">
+            <input
+              id="est_actif"
+              type="checkbox"
+              v-model="form.est_actif"
+              class="w-4 h-4 rounded border-(--border-medium) text-[var(--color-primary)] focus:ring-2 focus:ring-(--color-primary) focus:ring-offset-0 cursor-pointer"
+            />
+            <label for="est_actif" class="text-sm font-medium text-[var(--text-secondary)] cursor-pointer">
               Collection active
             </label>
           </div>
-          <div class="modal-actions">
-            <Button type="button" variant="secondary" @click="closeModal">Annuler</Button>
-            <Button type="submit" variant="primary" :loading="saving">
+
+          <!-- Actions -->
+          <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-(--border-light)">
+            <Button type="button" variant="secondary" @click="closeModal" class="w-full sm:w-auto">
+              Annuler
+            </Button>
+            <Button type="submit" variant="primary" :loading="saving" class="w-full sm:w-auto">
               {{ editingCollection ? 'Mettre à jour' : 'Créer' }}
             </Button>
           </div>
@@ -118,13 +200,21 @@
 
     <!-- Delete Confirmation Modal -->
     <Modal :model-value="showDeleteModal" @update:model-value="showDeleteModal = $event">
-      <div class="modal-content">
-        <h3>Confirmer la suppression</h3>
-        <p>Êtes-vous sûr de vouloir supprimer <strong>{{ collectionToDelete?.nom }}</strong> ?</p>
-        <p class="warning-text">Cette action est irréversible.</p>
-        <div class="modal-actions">
-          <Button variant="secondary" @click="showDeleteModal = false">Annuler</Button>
-          <Button variant="danger" :loading="deleting" @click="deleteCollection">
+      <div class="p-4 sm:p-6 w-full max-w-md">
+        <h3 class="text-xl sm:text-2xl font-semibold text-[var(--text-primary)] mb-4">
+          Confirmer la suppression
+        </h3>
+        <p class="text-sm sm:text-base text-[var(--text-secondary)] mb-2">
+          Êtes-vous sûr de vouloir supprimer <strong class="text-[var(--text-primary)]">{{ collectionToDelete?.nom }}</strong> ?
+        </p>
+        <p class="text-xs sm:text-sm text-red-600 dark:text-red-400 mb-6">
+          Cette action est irréversible.
+        </p>
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3">
+          <Button variant="secondary" @click="showDeleteModal = false" class="w-full sm:w-auto">
+            Annuler
+          </Button>
+          <Button variant="danger" :loading="deleting" @click="deleteCollection" class="w-full sm:w-auto">
             Supprimer
           </Button>
         </div>
@@ -234,211 +324,3 @@ const deleteCollection = async () => {
 
 onMounted(loadCollections)
 </script>
-
-<style scoped>
-.admin-collections {
-  max-width: 1200px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-}
-
-.page-header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-}
-
-.btn-primary {
-  background: var(--color-primary);
-  color: white;
-}
-
-.btn-primary:hover {
-  background: var(--color-primary-700);
-}
-
-.collections-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-}
-
-.collection-card {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-light);
-  border-radius: 0.75rem;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.collection-image {
-  height: 160px;
-  background: var(--bg-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.collection-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.collection-image.placeholder {
-  color: var(--text-muted);
-}
-
-.collection-info {
-  padding: 1rem;
-  flex: 1;
-}
-
-.collection-info h3 {
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 0.25rem;
-}
-
-.collection-info p {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  margin-bottom: 0.5rem;
-}
-
-.status-badge {
-  display: inline-flex;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  background: rgba(107, 114, 128, 0.1);
-  color: rgb(107, 114, 128);
-}
-
-.status-badge.active {
-  background: rgba(16, 185, 129, 0.1);
-  color: rgb(16, 185, 129);
-}
-
-.collection-actions {
-  display: flex;
-  gap: 0.5rem;
-  padding: 1rem;
-  border-top: 1px solid var(--border-light);
-}
-
-.action-btn {
-  flex: 1;
-  padding: 0.5rem;
-  border-radius: 0.375rem;
-  background: var(--bg-secondary);
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  transition: all 0.2s;
-}
-
-.action-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-.action-btn.delete:hover {
-  background: rgba(220, 38, 38, 0.1);
-  color: #dc2626;
-}
-
-.modal-content {
-  padding: 1.5rem;
-  min-width: 450px;
-}
-
-.modal-content h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 1.5rem;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border-light);
-  border-radius: 0.5rem;
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-}
-
-.form-group.checkbox-group label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-
-.form-group.checkbox-group input {
-  width: auto;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.warning-text {
-  color: #dc2626 !important;
-  font-size: 0.875rem;
-}
-
-.empty-state,
-.loading-state {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem;
-}
-
-.collection-card-skeleton {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-light);
-  border-radius: 0.75rem;
-  height: 250px;
-}
-</style>

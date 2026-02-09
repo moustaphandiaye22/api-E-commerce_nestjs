@@ -1,88 +1,117 @@
 <template>
-  <div class="dashboard">
+  <div class="max-w-7xl">
     <!-- Stats Cards -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon products">
-          <Package class="w-6 h-6" />
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+      <!-- Products Stat -->
+      <div class="bg-(--bg-primary) border border-(--border-light) rounded-xl p-4 sm:p-6 flex items-center gap-3 sm:gap-4 hover:shadow-md transition-smooth">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+          <Package class="w-6 h-6 sm:w-7 sm:h-7 text-blue-600 dark:text-blue-400" />
         </div>
-        <div class="stat-content">
-          <p class="stat-label">Produits</p>
-          <p class="stat-value">{{ stats.products }}</p>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon categories">
-          <FolderTree class="w-6 h-6" />
-        </div>
-        <div class="stat-content">
-          <p class="stat-label">Catégories</p>
-          <p class="stat-value">{{ stats.categories }}</p>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs sm:text-sm text-[var(--text-muted)] mb-1">Produits</p>
+          <p class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] truncate">{{ stats.products }}</p>
         </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon orders">
-          <ShoppingBag class="w-6 h-6" />
+      <!-- Categories Stat -->
+      <div class="bg-(--bg-primary) border border-(--border-light) rounded-xl p-4 sm:p-6 flex items-center gap-3 sm:gap-4 hover:shadow-md transition-smooth">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+          <FolderTree class="w-6 h-6 sm:w-7 sm:h-7 text-green-600 dark:text-green-400" />
         </div>
-        <div class="stat-content">
-          <p class="stat-label">Commandes</p>
-          <p class="stat-value">{{ stats.orders }}</p>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs sm:text-sm text-[var(--text-muted)] mb-1">Catégories</p>
+          <p class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] truncate">{{ stats.categories }}</p>
         </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon users">
-          <Users class="w-6 h-6" />
+      <!-- Orders Stat -->
+      <div class="bg-(--bg-primary) border border-(--border-light) rounded-xl p-4 sm:p-6 flex items-center gap-3 sm:gap-4 hover:shadow-md transition-smooth">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center flex-shrink-0">
+          <ShoppingBag class="w-6 h-6 sm:w-7 sm:h-7 text-yellow-600 dark:text-yellow-400" />
         </div>
-        <div class="stat-content">
-          <p class="stat-label">Utilisateurs</p>
-          <p class="stat-value">{{ stats.users }}</p>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs sm:text-sm text-[var(--text-muted)] mb-1">Commandes</p>
+          <p class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] truncate">{{ stats.orders }}</p>
+        </div>
+      </div>
+
+      <!-- Users Stat -->
+      <div class="bg-(--bg-primary) border border-(--border-light) rounded-xl p-4 sm:p-6 flex items-center gap-3 sm:gap-4 hover:shadow-md transition-smooth">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+          <Users class="w-6 h-6 sm:w-7 sm:h-7 text-purple-600 dark:text-purple-400" />
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs sm:text-sm text-[var(--text-muted)] mb-1">Utilisateurs</p>
+          <p class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] truncate">{{ stats.users }}</p>
         </div>
       </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="section">
-      <h2 class="section-title">Actions rapides</h2>
-      <div class="quick-actions">
-        <router-link to="/admin/products/new" class="action-card">
-          <PlusCircle class="w-8 h-8 text-[var(--color-primary)]" />
-          <span>Ajouter un produit</span>
+    <div class="bg-(--bg-primary) border border-(--border-light) rounded-xl p-4 sm:p-6 mb-6 sm:mb-8">
+      <h2 class="text-lg sm:text-xl font-semibold text-[var(--text-primary)] mb-4 sm:mb-6">
+        Actions rapides
+      </h2>
+      <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <!-- Add Product -->
+        <router-link
+          to="/admin/products/new"
+          class="flex flex-col items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 bg-(--bg-secondary) border border-(--border-light) rounded-xl hover:border-(--color-primary) hover:bg-(--color-primary-50) transition-smooth group"
+        >
+          <PlusCircle class="w-8 h-8 sm:w-10 sm:h-10 text-[var(--color-primary)] group-hover:scale-110 transition-transform" />
+          <span class="text-xs sm:text-sm font-medium text-[var(--text-primary)] text-center">Ajouter un produit</span>
         </router-link>
-        <router-link to="/admin/categories" class="action-card">
-          <FolderPlus class="w-8 h-8 text-[var(--color-primary)]" />
-          <span>Créer une catégorie</span>
+
+        <!-- Create Category -->
+        <router-link
+          to="/admin/categories"
+          class="flex flex-col items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 bg-(--bg-secondary) border border-(--border-light) rounded-xl hover:border-(--color-primary) hover:bg-(--color-primary-50) transition-smooth group"
+        >
+          <FolderPlus class="w-8 h-8 sm:w-10 sm:h-10 text-[var(--color-primary)] group-hover:scale-110 transition-transform" />
+          <span class="text-xs sm:text-sm font-medium text-[var(--text-primary)] text-center">Créer une catégorie</span>
         </router-link>
-        <router-link to="/admin/coupons/new" class="action-card">
-          <Tag class="w-8 h-8 text-[var(--color-primary)]" />
-          <span>Créer un coupon</span>
+
+        <!-- Create Coupon -->
+        <router-link
+          to="/admin/coupons/new"
+          class="flex flex-col items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 bg-(--bg-secondary) border border-(--border-light) rounded-xl hover:border-(--color-primary) hover:bg-(--color-primary-50) transition-smooth group"
+        >
+          <Tag class="w-8 h-8 sm:w-10 sm:h-10 text-[var(--color-primary)] group-hover:scale-110 transition-transform" />
+          <span class="text-xs sm:text-sm font-medium text-[var(--text-primary)] text-center">Créer un coupon</span>
         </router-link>
-        <router-link to="/admin/orders" class="action-card">
-          <FileText class="w-8 h-8 text-[var(--color-primary)]" />
-          <span>Voir les commandes</span>
+
+        <!-- View Orders -->
+        <router-link
+          to="/admin/orders"
+          class="flex flex-col items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 bg-(--bg-secondary) border border-(--border-light) rounded-xl hover:border-(--color-primary) hover:bg-(--color-primary-50) transition-smooth group"
+        >
+          <FileText class="w-8 h-8 sm:w-10 sm:h-10 text-[var(--color-primary)] group-hover:scale-110 transition-transform" />
+          <span class="text-xs sm:text-sm font-medium text-[var(--text-primary)] text-center">Voir les commandes</span>
         </router-link>
       </div>
     </div>
 
     <!-- Recent Activity -->
-    <div class="section">
-      <h2 class="section-title">Activité récente</h2>
-      <div class="activity-list">
-        <div v-if="loading" class="loading-state">
-          <div v-for="n in 3" :key="n" class="animate-pulse flex items-center gap-4 p-4">
-            <div class="w-10 h-10 bg-(--bg-tertiary) rounded-full"></div>
-            <div class="flex-1">
-              <div class="h-4 bg-(--bg-tertiary) rounded w-1/3 mb-2"></div>
-              <div class="h-3 bg-(--bg-tertiary) rounded w-1/4"></div>
-            </div>
+    <div class="bg-(--bg-primary) border border-(--border-light) rounded-xl p-4 sm:p-6">
+      <h2 class="text-lg sm:text-xl font-semibold text-[var(--text-primary)] mb-4 sm:mb-6">
+        Activité récente
+      </h2>
+      
+      <!-- Loading State -->
+      <div v-if="loading" class="space-y-4">
+        <div v-for="n in 3" :key="n" class="animate-pulse flex items-center gap-3 sm:gap-4 p-3 sm:p-4">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-(--bg-tertiary) rounded-full flex-shrink-0"></div>
+          <div class="flex-1 min-w-0">
+            <div class="h-3 sm:h-4 bg-(--bg-tertiary) rounded w-1/3 mb-2"></div>
+            <div class="h-2 sm:h-3 bg-(--bg-tertiary) rounded w-1/4"></div>
           </div>
         </div>
-        <div v-else class="empty-state">
-          <Activity class="w-12 h-12 text-[var(--text-muted)] mb-4" />
-          <p class="text-[var(--text-secondary)]">Aucune activité récente</p>
-        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else class="flex flex-col items-center justify-center py-12 sm:py-16">
+        <Activity class="w-12 h-12 sm:w-16 sm:h-16 text-[var(--text-muted)] mb-3 sm:mb-4" />
+        <p class="text-sm sm:text-base text-[var(--text-secondary)]">Aucune activité récente</p>
       </div>
     </div>
   </div>
@@ -136,120 +165,3 @@ onMounted(async () => {
   }
 })
 </script>
-
-<style scoped>
-.dashboard {
-  max-width: 1200px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-light);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.stat-icon {
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stat-icon.products {
-  background: rgba(59, 130, 246, 0.1);
-  color: rgb(59, 130, 246);
-}
-
-.stat-icon.categories {
-  background: rgba(16, 185, 129, 0.1);
-  color: rgb(16, 185, 129);
-}
-
-.stat-icon.orders {
-  background: rgba(245, 158, 11, 0.1);
-  color: rgb(245, 158, 11);
-}
-
-.stat-icon.users {
-  background: rgba(139, 92, 246, 0.1);
-  color: rgb(139, 92, 246);
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  margin-bottom: 0.25rem;
-}
-
-.stat-value {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.section {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-light);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.section-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 1rem;
-}
-
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.action-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 1.5rem;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-light);
-  border-radius: 0.75rem;
-  text-decoration: none;
-  color: var(--text-primary);
-  transition: all 0.2s;
-}
-
-.action-card:hover {
-  border-color: var(--color-primary);
-  background: var(--color-primary-50);
-}
-
-.action-card span {
-  font-weight: 500;
-  text-align: center;
-}
-
-.empty-state,
-.loading-state {
-  padding: 2rem;
-  text-align: center;
-}
-</style>
-

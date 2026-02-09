@@ -1,20 +1,20 @@
 <template>
   <footer class="bg-(--bg-primary) border-t border-(--border-light) mt-auto">
     <!-- Main Footer -->
-    <div class="container mx-auto px-4 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+    <div class="container mx-auto px-4 py-8 sm:py-12">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
         <!-- Brand Section -->
-        <div class="space-y-4">
+        <div class="space-y-4 sm:col-span-2 lg:col-span-1">
           <div class="flex items-center gap-3">
-            <img src="/images/logos.png" alt="Baobab Market" class="h-10 w-10 object-contain" />
-            <span class="text-xl font-bold gradient-text">Baobab Market</span>
+            <img src="/images/logos.png" alt="Baobab Market" class="h-8 sm:h-10 w-8 sm:w-10 object-contain" />
+            <span class="text-lg sm:text-xl font-bold gradient-text">Baobab Market</span>
           </div>
           <p class="text-sm text-[var(--text-secondary)] leading-relaxed">
             Votre marketplace de confiance pour des produits africains authentiques. 
             Qualité premium et livraison rapide partout en Europe.
           </p>
           <!-- Social Media -->
-          <div class="flex items-center gap-3 pt-2">
+          <div class="flex items-center gap-2 sm:gap-3 pt-2">
             <a
               href="https://facebook.com"
               target="_blank"
@@ -55,8 +55,8 @@
         </div>
 
         <!-- Quick Links -->
-        <div class="space-y-4">
-          <h3 class="text-base font-semibold text-[var(--text-primary)]">Liens rapides</h3>
+        <div class="space-y-3 sm:space-y-4">
+          <h3 class="text-sm sm:text-base font-semibold text-[var(--text-primary)]">Liens rapides</h3>
           <ul class="space-y-2">
             <li>
               <router-link
@@ -98,8 +98,8 @@
         </div>
 
         <!-- Customer Service -->
-        <div class="space-y-4">
-          <h3 class="text-base font-semibold text-[var(--text-primary)]">Service client</h3>
+        <div class="space-y-3 sm:space-y-4">
+          <h3 class="text-sm sm:text-base font-semibold text-[var(--text-primary)]">Service client</h3>
           <ul class="space-y-2">
             <li>
               <a
@@ -150,9 +150,9 @@
         </div>
 
         <!-- Newsletter -->
-        <div class="space-y-4">
-          <h3 class="text-base font-semibold text-[var(--text-primary)]">Newsletter</h3>
-          <p class="text-sm text-[var(--text-secondary)]">
+        <div class="space-y-3 sm:space-y-4 sm:col-span-2 lg:col-span-1">
+          <h3 class="text-sm sm:text-base font-semibold text-[var(--text-primary)]">Newsletter</h3>
+          <p class="text-xs sm:text-sm text-[var(--text-secondary)]">
             Inscrivez-vous pour recevoir nos offres exclusives et nouveautés.
           </p>
           <form @submit.prevent="handleSubscribe" class="space-y-3">
@@ -197,27 +197,27 @@
 
     <!-- Bottom Bar -->
     <div class="border-t border-(--border-light) bg-(--bg-secondary)">
-      <div class="container mx-auto px-4 py-6">
-        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-          <p class="text-sm text-[var(--text-muted)] text-center md:text-left">
+      <div class="container mx-auto px-4 py-4 sm:py-6">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+          <p class="text-xs sm:text-sm text-[var(--text-muted)] text-center sm:text-left">
             © {{ currentYear }} Baobab Market. Tous droits réservés.
           </p>
-          <div class="flex items-center gap-6">
+          <div class="flex items-center gap-4 sm:gap-6 flex-wrap justify-center">
             <a
               href="#"
-              class="text-sm text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-smooth"
+              class="text-xs sm:text-sm text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-smooth"
             >
               Conditions générales
             </a>
             <a
               href="#"
-              class="text-sm text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-smooth"
+              class="text-xs sm:text-sm text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-smooth"
             >
               Confidentialité
             </a>
             <a
               href="#"
-              class="text-sm text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-smooth"
+              class="text-xs sm:text-sm text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-smooth"
             >
               Cookies
             </a>

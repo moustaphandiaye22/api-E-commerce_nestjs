@@ -20,42 +20,19 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const cardClasses = computed(() => [
-  'card',
-  `card-padding-${props.padding}`,
-  { 'card-hover': props.hover },
-  { 'card-bordered': props.bordered }
+  'bg-(--bg-primary) rounded-xl transition-smooth',
+  {
+    // Padding variants
+    'p-0': props.padding === 'none',
+    'p-4': props.padding === 'sm',
+    'p-6': props.padding === 'md',
+    'p-8': props.padding === 'lg',
+    
+    // Border
+    'border border-(--border-light)': props.bordered,
+    
+    // Hover effect
+    'hover:shadow-lg hover:-translate-y-0.5': props.hover,
+  }
 ])
 </script>
-
-<style scoped>
-.card {
-  background-color: var(--color-bg-primary);
-  border-radius: var(--border-radius-lg);
-  transition: all var(--transition-base);
-}
-
-.card-bordered {
-  border: var(--border-width) solid var(--color-border-light);
-}
-
-.card-hover:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-
-.card-padding-none {
-  padding: 0;
-}
-
-.card-padding-sm {
-  padding: var(--spacing-4);
-}
-
-.card-padding-md {
-  padding: var(--spacing-6);
-}
-
-.card-padding-lg {
-  padding: var(--spacing-8);
-}
-</style>
