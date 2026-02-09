@@ -8,11 +8,12 @@ import { UploadService } from './upload.service';
 
 @ApiTags('upload')
 @Controller('upload')
-@UseGuards(JwtAuthGuard)
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
   @Post('image')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Uploader une image' })
   @ApiConsumes('multipart/form-data')
   @ApiBearerAuth('JWT-auth')
