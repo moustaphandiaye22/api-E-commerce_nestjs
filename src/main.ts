@@ -38,8 +38,8 @@ async function bootstrap() {
   });
   logger.log('CORS enabled for frontend');
 
-  // Note: Images are now served from Cloudinary, but also serve uploads directory for local files
-  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+  // Note: Images are now served from Cloudinary only - no local storage
+  // app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'))); // REMOVED
 
   // Compression pour améliorer les performances
   if (compression) {
@@ -57,14 +57,14 @@ async function bootstrap() {
   }
 
   // Sécurité : Headers HTTP avec Helmet renforcés
-  // Relax CSP for images from trusted sources (Cloudinary, etc.)
+  // CSP configured for Cloudinary-only images
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        imgSrc: ["'self'", "data:", "https:", "blob:", "*.cloudinary.com", "*.res.cloudinary.com", "*.vercel.app", "*.render.com", "*.onrender.com", "http://localhost:3000", "http://localhost:5173"],
+        imgSrc: ["'self'", "data:", "https:", "blob:", "*.cloudinary.com", "*.res.cloudinary.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         connectSrc: ["'self'", "https://api.stripe.com", "https://api-e-commerce-nestjs-1.onrender.com", "https://api.cloudinary.com"],
         frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"],
