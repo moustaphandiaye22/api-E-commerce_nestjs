@@ -12,7 +12,7 @@
         loading="lazy"
         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
-      <div v-else class="flex items-center justify-center w-full h-full text-[var(--text-muted)]">
+      <div v-else class="flex items-center justify-center w-full h-full bg-(--bg-tertiary) text-[var(--text-muted)]">
         <ImageIcon :class="showDescription ? 'w-12 h-12' : 'w-16 h-16'" />
       </div>
 
@@ -29,6 +29,7 @@
         v-if="showWishlist"
         @click.stop="$emit('toggleWishlist', product.id)"
         :class="wishlistButtonClass"
+        aria-label="Add to wishlist"
       >
         <Heart :class="props.isInWishlist ? 'fill-current' : ''" class="w-4 h-4" />
       </button>
@@ -53,7 +54,7 @@
 
       <!-- Price & Action Row -->
       <div :class="actionRowClasses">
-        <div class="space-y-1">
+        <div class="space-y-1 flex-1">
           <p :class="priceClasses">
             {{ formatPrice(product.prix) }}
           </p>
@@ -70,10 +71,11 @@
           @click.stop="$emit('addToCart', product.id)"
           :disabled="product.quantite_stock <= 0"
           :class="addToCartButtonClasses"
+          :aria-label="showDescription ? 'Ajouter au panier' : 'Ajouter'"
         >
-          <ShoppingCart :class="showDescription ? 'w-4 h-4' : 'w-4 h-4'" />
-          <span v-if="showDescription">Ajouter au panier</span>
-          <span v-else>Ajouter</span>
+          <ShoppingCart class="w-4 h-4 flex-shrink-0" />
+          <span v-if="showDescription" class="hidden sm:inline">Ajouter au panier</span>
+          <span v-else-if="!showDescription" class="hidden xs:inline">Ajouter</span>
         </button>
       </div>
     </div>
@@ -114,54 +116,63 @@ const cardClasses = computed(() => [
   'group cursor-pointer bg-(--bg-primary) rounded-xl overflow-hidden transition-smooth',
   'border border-(--border-light) hover:border-(--color-primary)',
   'hover:shadow-lg',
-  props.showDescription ? 'flex flex-row h-auto' : 'flex flex-col hover:-translate-y-1',
+  props.showDescription 
+    ? 'flex flex-col sm:flex-row h-auto' // Stack on mobile, row on tablet+
+    : 'flex flex-col hover:-translate-y-1',
 ])
 
 const imageContainerClasses = computed(() => [
-  'relative overflow-hidden bg-(--bg-tertiary) group flex-shrink-0',
+  'relative overflow-hidden bg-(--bg-tertiary) flex-shrink-0',
   props.showDescription 
-    ? 'w-40 h-40 sm:w-48 sm:h-48' // Smaller fixed size for list view
+    ? 'w-full h-48 sm:w-48 sm:h-48 md:w-56 md:h-56' // Full width on mobile, fixed on tablet+
     : 'aspect-square w-full'  // Square aspect for grid view
 ])
 
 const badgePositionClasses = computed(() => [
-  'absolute',
+  'absolute z-10',
   props.showDescription ? 'top-2 left-2' : 'top-3 left-3'
 ])
 
 const wishlistButtonClass = computed(() => [
-  'absolute p-2 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800 transition-smooth shadow-md',
+  'absolute p-2 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm',
+  'hover:bg-white dark:hover:bg-gray-800 hover:scale-110',
+  'transition-smooth shadow-md z-10',
   props.showDescription ? 'top-2 right-2' : 'top-3 right-3',
-  props.isInWishlist ? 'text-red-500' : 'text-gray-400'
+  props.isInWishlist ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
 ])
 
 const contentClasses = computed(() => [
   'flex flex-col',
-  props.showDescription ? 'flex-1 p-4 sm:p-6 space-y-3' : 'p-4 space-y-2'
+  props.showDescription 
+    ? 'flex-1 p-4 sm:p-5 md:p-6 space-y-2 sm:space-y-3' 
+    : 'p-3 sm:p-4 space-y-2'
 ])
 
 const titleClasses = computed(() => [
-  'font-semibold text-[var(--text-primary)]',
+  'font-semibold text-[var(--text-primary)] transition-colors group-hover:text-[var(--color-primary)]',
   props.showDescription 
-    ? 'text-lg sm:text-xl line-clamp-2' 
-    : 'text-base line-clamp-2 min-h-[3rem]'
+    ? 'text-base sm:text-lg md:text-xl line-clamp-2' 
+    : 'text-sm sm:text-base line-clamp-2 min-h-[2.5rem] sm:min-h-[3rem]'
 ])
 
 const priceClasses = computed(() => [
   'font-bold text-[var(--color-primary)]',
-  props.showDescription ? 'text-2xl' : 'text-xl'
+  props.showDescription ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'
 ])
 
 const actionRowClasses = computed(() => [
-  'flex items-center justify-between',
-  props.showDescription ? 'pt-3 mt-auto' : 'pt-2'
+  'flex items-end justify-between gap-2 sm:gap-3',
+  props.showDescription ? 'pt-2 sm:pt-3 mt-auto' : 'pt-2'
 ])
 
 const addToCartButtonClasses = computed(() => [
-  'rounded-lg bg-(--color-primary) text-white hover:bg-(--color-primary-700) disabled:opacity-50 disabled:cursor-not-allowed transition-smooth flex items-center gap-2 font-medium',
+  'rounded-lg bg-(--color-primary) text-white hover:bg-(--color-primary-700)',
+  'disabled:opacity-50 disabled:cursor-not-allowed',
+  'transition-smooth flex items-center justify-center gap-2 font-medium',
+  'hover:shadow-md active:scale-95',
   props.showDescription 
-    ? 'px-5 py-2.5 text-sm' 
-    : 'px-4 py-2 text-sm'
+    ? 'px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm' 
+    : 'px-3 sm:px-4 py-2 text-xs sm:text-sm'
 ])
 
 const getImageUrl = (url?: string) => {

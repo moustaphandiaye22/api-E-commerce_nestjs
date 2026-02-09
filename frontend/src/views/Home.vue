@@ -4,38 +4,39 @@
     <section class="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
       
-      <div class="container mx-auto px-4 py-16 md:py-24 relative">
-        <div class="max-w-4xl mx-auto text-center space-y-8">
-          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-(--color-primary-100) text-[var(--color-primary-800)] text-sm font-medium mb-4">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="container mx-auto px-4 py-12 sm:py-16 md:py-20 lg:py-24 relative">
+        <div class="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
+          <div class="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-(--color-primary-100) text-[var(--color-primary-800)] text-xs sm:text-sm font-medium mb-2 sm:mb-4">
+            <svg class="w-3 h-3 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
             </svg>
             <span>Découvrez nos nouveautés</span>
           </div>
           
-          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--text-primary)] leading-tight">
+          <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--text-primary)] leading-tight px-4">
             Bienvenue sur
-            <span class="gradient-text">Baobab Market</span>
+            <span class="gradient-text block sm:inline mt-2 sm:mt-0">Baobab Market</span>
           </h1>
           
-          <p class="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto">
+          <p class="text-base sm:text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto px-4">
             Découvrez notre sélection de produits africains authentiques. 
             Qualité premium, livraison rapide et paiement sécurisé.
           </p>
           
-          <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-2 sm:pt-4 px-4">
             <Button
               variant="primary"
               size="lg"
-              class="group"
+              class="group w-full sm:w-auto"
               @click="$router.push('/products')"
             >
               <span>Explorer les produits</span>
-              <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight class="w-4 sm:w-5 h-4 sm:h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button
               variant="outline"
               size="lg"
+              class="w-full sm:w-auto"
               @click="scrollToFeatures"
             >
               <span>En savoir plus</span>
@@ -43,18 +44,18 @@
           </div>
 
           <!-- Stats -->
-          <div class="grid grid-cols-3 gap-8 pt-12 max-w-2xl mx-auto">
-            <div class="space-y-2">
-              <p class="text-3xl md:text-4xl font-bold text-[var(--color-primary)]">500+</p>
-              <p class="text-sm text-[var(--text-muted)]">Produits</p>
+          <div class="grid grid-cols-3 gap-4 sm:gap-6 md:gap-8 pt-8 sm:pt-10 md:pt-12 max-w-2xl mx-auto px-4">
+            <div class="space-y-1 sm:space-y-2">
+              <p class="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-primary)]">500+</p>
+              <p class="text-xs sm:text-sm text-[var(--text-muted)]">Produits</p>
             </div>
-            <div class="space-y-2">
-              <p class="text-3xl md:text-4xl font-bold text-[var(--color-primary)]">5000+</p>
-              <p class="text-sm text-[var(--text-muted)]">Clients</p>
+            <div class="space-y-1 sm:space-y-2">
+              <p class="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-primary)]">5000+</p>
+              <p class="text-xs sm:text-sm text-[var(--text-muted)]">Clients</p>
             </div>
-            <div class="space-y-2">
-              <p class="text-3xl md:text-4xl font-bold text-[var(--color-primary)]">98%</p>
-              <p class="text-sm text-[var(--text-muted)]">Satisfaits</p>
+            <div class="space-y-1 sm:space-y-2">
+              <p class="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-primary)]">98%</p>
+              <p class="text-xs sm:text-sm text-[var(--text-muted)]">Satisfaits</p>
             </div>
           </div>
         </div>
@@ -62,19 +63,19 @@
     </section>
 
     <!-- Featured Products -->
-    <section ref="featuresSection" class="py-16 md:py-24 bg-(--bg-primary)">
+    <section ref="featuresSection" class="py-12 sm:py-16 md:py-20 lg:py-24 bg-(--bg-primary)">
       <div class="container mx-auto px-4">
-        <div class="flex items-center justify-between mb-12">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 sm:mb-10 md:mb-12">
           <div>
-            <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-3">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-2 sm:mb-3">
               Produits populaires
             </h2>
-            <p class="text-[var(--text-secondary)]">Découvrez nos meilleures ventes</p>
+            <p class="text-sm sm:text-base text-[var(--text-secondary)]">Découvrez nos meilleures ventes</p>
           </div>
           <Button
             variant="outline"
             @click="$router.push('/products')"
-            class="hidden sm:flex items-center gap-2"
+            class="hidden sm:flex items-center gap-2 flex-shrink-0"
           >
             <span>Voir tout</span>
             <ArrowRight class="w-4 h-4" />
@@ -82,7 +83,7 @@
         </div>
 
         <!-- Loading State -->
-        <div v-if="productsStore.loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div v-if="productsStore.loading" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           <div v-for="n in 4" :key="n" class="animate-pulse">
             <div class="bg-(--bg-tertiary) aspect-square rounded-xl mb-4"></div>
             <div class="h-4 bg-(--bg-tertiary) rounded mb-2"></div>
@@ -105,7 +106,7 @@
         </Alert>
 
         <!-- Products Grid -->
-        <div v-else-if="featuredProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div v-else-if="featuredProducts.length > 0" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           <ProductCard
             v-for="product in featuredProducts"
             :key="product.id"
@@ -138,16 +139,16 @@
     </section>
 
     <!-- Features Section -->
-    <section class="py-16 md:py-24 bg-(--bg-secondary)">
+    <section class="py-12 sm:py-16 md:py-20 lg:py-24 bg-(--bg-secondary)">
       <div class="container mx-auto px-4">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-3">
+        <div class="text-center mb-8 sm:mb-10 md:mb-12">
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-2 sm:mb-3">
             Pourquoi choisir Baobab Market ?
           </h2>
-          <p class="text-[var(--text-secondary)]">Une expérience d'achat exceptionnelle</p>
+          <p class="text-sm sm:text-base text-[var(--text-secondary)]">Une expérience d'achat exceptionnelle</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
           <div class="group p-6 bg-(--bg-primary) rounded-xl border border-(--border-light) hover:border-(--color-primary) hover:shadow-lg transition-smooth">
             <div class="w-12 h-12 rounded-lg bg-(--color-primary-100) flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Truck class="w-6 h-6 text-[var(--color-primary)]" />

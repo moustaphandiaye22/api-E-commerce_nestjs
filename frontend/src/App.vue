@@ -1,20 +1,20 @@
 <template>
   <div id="app" class="min-h-screen flex flex-col bg-(--bg-secondary)">
     <!-- Header/Navbar -->
-    <header class="sticky top-0 z-40 bg-(--bg-primary) border-b border-(--border-light) backdrop-blur-lg bg-opacity-90">
-      <div class="container mx-auto">
-        <div class="flex items-center justify-between h-16">
+    <header class="sticky top-0 z-40 bg-(--bg-primary) border-b border-(--border-light) backdrop-blur-lg bg-opacity-90 shadow-sm">
+      <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-14 sm:h-16">
           <!-- Brand -->
-          <router-link to="/" class="flex items-center gap-3 group">
-            <img src="/images/logos.png" alt="Baobab Market" class="h-10 w-10 object-contain" />
-            <span class="text-xl font-bold gradient-text hidden sm:block">Baobab Market</span>
+          <router-link to="/" class="flex items-center gap-2 sm:gap-3 group flex-shrink-0">
+            <img src="/images/logos.png" alt="Baobab Market" class="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
+            <span class="text-lg sm:text-xl font-bold gradient-text hidden sm:block">Baobab Market</span>
           </router-link>
 
           <!-- Desktop Navigation -->
-          <nav class="hidden md:flex items-center gap-1">
+          <nav class="hidden md:flex items-center gap-1 flex-1 justify-center max-w-md mx-4">
             <router-link
               to="/"
-              class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
+              class="flex items-center gap-2 px-3 lg:px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
               active-class="!text-[var(--color-primary)] !bg-(--color-primary-100)"
             >
               <Home class="w-4 h-4" />
@@ -22,7 +22,7 @@
             </router-link>
             <router-link
               to="/products"
-              class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
+              class="flex items-center gap-2 px-3 lg:px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
               active-class="!text-[var(--color-primary)] !bg-(--color-primary-100)"
             >
               <Package class="w-4 h-4" />
@@ -31,19 +31,20 @@
           </nav>
 
           <!-- Right Section -->
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <!-- Global Actions -->
-            <div class="hidden sm:flex items-center gap-1">
+            <div class="hidden lg:flex items-center gap-1">
               <LanguageSelector />
               <ThemeToggle />
             </div>
 
             <!-- User Actions -->
-            <div v-if="authStore.isAuthenticated()" class="flex items-center gap-1">
+            <div v-if="authStore.isAuthenticated()" class="flex items-center gap-0.5 sm:gap-1">
               <!-- Cart -->
               <router-link
                 to="/cart"
-                class="relative p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
+                class="relative p-1.5 sm:p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
+                title="Panier"
               >
                 <ShoppingCart class="w-5 h-5" />
                 <Badge
@@ -51,16 +52,17 @@
                   variant="primary"
                   size="sm"
                   rounded
-                  class="absolute -top-1 -right-1 min-w-[1.25rem] h-5"
+                  class="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 min-w-[1.25rem] h-5"
                 >
                   {{ cartStore.itemCount }}
                 </Badge>
               </router-link>
 
-              <!-- Wishlist -->
+              <!-- Wishlist - Hidden on small screens -->
               <router-link
                 to="/wishlist"
-                class="relative p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
+                class="hidden sm:flex relative p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
+                title="Liste de souhaits"
               >
                 <Heart class="w-5 h-5" />
                 <Badge
@@ -74,11 +76,12 @@
                 </Badge>
               </router-link>
 
-              <!-- Notifications -->
+              <!-- Notifications - Hidden on small screens -->
               <button
                 @click.stop="toggleNotifications"
-                class="relative p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
+                class="hidden sm:flex relative p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
                 :class="{ '!bg-(--color-primary-100) !text-[var(--color-primary)]': showNotifications }"
+                title="Notifications"
               >
                 <Bell class="w-5 h-5" />
                 <Badge
@@ -93,11 +96,12 @@
               <div class="relative">
                 <button
                   @click.stop="toggleUserMenu"
-                  class="flex items-center gap-2 p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
+                  class="flex items-center gap-1 sm:gap-2 p-1.5 sm:p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover) transition-smooth"
                   :class="{ '!bg-(--color-primary-100) !text-[var(--color-primary)]': showUserMenu }"
+                  aria-label="Menu utilisateur"
                 >
                   <Avatar :name="authStore.user?.prenom" size="sm" />
-                  <ChevronDown class="w-4 h-4 hidden sm:block" />
+                  <ChevronDown class="w-3 h-3 sm:w-4 sm:h-4 hidden md:block" />
                 </button>
 
                 <!-- User Dropdown -->
@@ -160,10 +164,10 @@
             </div>
 
             <!-- Auth Links -->
-            <div v-else class="flex items-center gap-2">
+            <div v-else class="flex items-center gap-1 sm:gap-2">
               <router-link
                 to="/login"
-                class="px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--color-primary)] transition-smooth hidden sm:block"
+                class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--color-primary)] transition-smooth"
               >
                 {{ t('nav.login') }}
               </router-link>
@@ -171,6 +175,7 @@
                 variant="primary"
                 size="sm"
                 @click="$router.push('/register')"
+                class="text-xs sm:text-sm px-3 sm:px-4"
               >
                 {{ t('nav.register') }}
               </Button>
@@ -200,9 +205,9 @@
     >
       <div
         v-if="showMobileMenu"
-        class="md:hidden fixed inset-x-0 top-16 z-30 bg-(--bg-primary) border-b border-(--border-light) shadow-xl"
+        class="md:hidden fixed inset-x-0 top-14 sm:top-16 z-30 bg-(--bg-primary) border-b border-(--border-light) shadow-xl max-h-[calc(100vh-3.5rem)] sm:max-h-[calc(100vh-4rem)] overflow-y-auto"
       >
-        <nav class="container mx-auto py-4 space-y-1">
+        <nav class="container mx-auto py-3 sm:py-4 space-y-0.5 sm:space-y-1">
           <router-link
             to="/"
             class="flex items-center gap-3 px-4 py-3 rounded-lg text-[var(--text-secondary)] hover:bg-(--bg-hover) hover:text-[var(--color-primary)] transition-smooth"

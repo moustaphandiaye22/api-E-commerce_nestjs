@@ -5,21 +5,21 @@ import { z } from 'zod';
  * Converts empty strings to undefined for cleaner handling
  */
 const optionalString = () =>
-  z.string().transform((val) => {
+  z.union([z.string(), z.null(), z.undefined()]).transform((val) => {
     if (val === undefined || val === null || val === '') return undefined;
     return val;
-  }).optional().nullable();
+  }).optional();
 
 /**
  * Helper for optional number fields that may receive empty strings
  * Converts empty strings to undefined for cleaner handling
  */
 const optionalNumber = () =>
-  z.union([z.number(), z.string()]).transform((val) => {
+  z.union([z.number(), z.string(), z.null(), z.undefined()]).transform((val) => {
     if (val === undefined || val === null || val === '') return undefined;
     const num = Number(val);
     return isNaN(num) ? undefined : num;
-  }).optional().nullable();
+  }).optional();
 
 /**
  * Helper for optional UUID fields (like category_id)
@@ -27,19 +27,15 @@ const optionalNumber = () =>
  * Empty strings are converted to undefined
  */
 const optionalUuid = () =>
-  z.string().transform((val) => {
+  z.union([z.string(), z.null(), z.undefined()]).transform((val) => {
     if (val === undefined || val === null || val === '') return undefined;
-    // Ne pas valider le format UUID ici pour éviter les erreurs
-    // Le service ou la base de données validera si nécessaire
     return val;
-  }).optional().nullable();
+  }).optional();
 
 export const CreateProductDtoSchema = z.object({
-  nom: z.string().min(1, 'Nom requis').or(z.string().length(0).transform(() => {
-    throw new Error('Nom requis');
-  })),
+  nom: z.string().trim().min(1, 'Nom requis'),
   description: z.string().min(1, 'Description requise'),
-  description_courte: z.string().optional().default(''),
+  description_courte: optionalString().default(''),
   sku: z.string().min(1, 'SKU requis'),
   prix: z.union([z.number(), z.string()]).transform((val) => {
     if (val === undefined || val === null || val === '') return 0;
@@ -64,8 +60,8 @@ export const CreateProductDtoSchema = z.object({
   prix_compare: optionalNumber(),
   prix_coutant: optionalNumber(),
   images: z.array(z.object({
-    url_image: z.string(),
-    est_principale: z.boolean().default(false),
+    url_image: z.string().min(1, 'url_image ne peut pas être vide'),
+    est_principale: z.boolean().optional().default(false),
   })).optional().default([]),
 }).strict();
 

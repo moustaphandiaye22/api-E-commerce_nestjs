@@ -7,6 +7,7 @@ import * as streamifier from 'streamifier';
 export class UploadService {
   private readonly logger = new Logger(UploadService.name);
   private isConfigured = false;
+  private readonly apiUrl: string;
 
   constructor(private configService: ConfigService) {
     // Configure Cloudinary from environment variable
@@ -21,6 +22,11 @@ export class UploadService {
     } else {
       this.logger.warn('CLOUDINARY_URL not configured - using local storage fallback');
     }
+
+    // Get API URL for constructing full image URLs
+    this.apiUrl = this.configService.get<string>('API_URL') || 
+                   process.env.API_URL || 
+                   `http://localhost:${process.env.PORT || 3000}`;
   }
 
   async uploadImage(file: any, folder: string = 'products'): Promise<string> {
@@ -109,15 +115,21 @@ export class UploadService {
         this.logger.log(`Cloudinary upload successful: ${url}`);
         return url;
       } else {
-        // Fallback to local storage
-        return this.uploadLocal(file, folder);
+        // Fallback to local storage - return FULL URL including domain
+        const localUrl = await this.uploadLocal(file, folder);
+        const fullUrl = `${this.apiUrl}${localUrl}`;
+        this.logger.log(`Local upload successful with full URL: ${fullUrl}`);
+        return fullUrl;
       }
     } catch (error) {
-      this.logger.error(`Cloudinary upload failed: ${error.message}`);
+      this.logger.error(`Upload failed: ${error.message}`);
       // Try local fallback
       this.logger.warn('Falling back to local storage');
       try {
-        return await this.uploadLocal(file, folder);
+        const localUrl = await this.uploadLocal(file, folder);
+        const fullUrl = `${this.apiUrl}${localUrl}`;
+        this.logger.log(`Local upload successful with full URL: ${fullUrl}`);
+        return fullUrl;
       } catch (localError) {
         this.logger.error(`Local upload also failed: ${localError.message}`);
         throw new BadRequestException('Échec de l\'upload: ' + error.message);

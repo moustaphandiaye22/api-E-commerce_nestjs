@@ -1,43 +1,84 @@
 <template>
-  <div class="admin-categories">
-    <div class="page-header">
-      <div class="header-content">
-        <h1>Gestion des catégories</h1>
-        <p class="text-[var(--text-muted)]">Organisez vos produits par catégories</p>
+  <div class="max-w-6xl">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)]">Gestion des catégories</h1>
+        <p class="text-sm text-[var(--text-muted)] mt-1">Organisez vos produits par catégories</p>
       </div>
-      <button @click="openModal()" class="btn btn-primary">
+      <Button variant="primary" @click="openModal()" class="w-full sm:w-auto">
         <Plus class="w-5 h-5" />
-        Ajouter une catégorie
-      </button>
+        <span>Ajouter une catégorie</span>
+      </Button>
     </div>
 
-    <div class="categories-grid">
-      <div v-if="loading" class="loading-state">
-        <div v-for="n in 6" :key="n" class="animate-pulse category-card-skeleton"></div>
-      </div>
-      
-      <div v-else-if="categories.length === 0" class="empty-state">
-        <FolderTree class="w-16 h-16 text-[var(--text-muted)] mb-4" />
-        <p>Auc ne catégorie</p>
-        <button @click="openModal()" class="btn btn-primary mt-4">
+    <!-- Categories Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <!-- Loading State -->
+      <template v-if="loading">
+        <div v-for="n in 6" :key="n" class="animate-pulse">
+          <div class="bg-(--bg-primary) border border-(--border-light) rounded-xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4">
+            <div class="w-12 h-12 bg-(--bg-tertiary) rounded-xl flex-shrink-0"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-4 bg-(--bg-tertiary) rounded w-3/4"></div>
+              <div class="h-3 bg-(--bg-tertiary) rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- Empty State -->
+      <div v-else-if="categories.length === 0" class="col-span-full flex flex-col items-center justify-center py-16 sm:py-20">
+        <FolderTree class="w-12 h-12 sm:w-16 sm:h-16 text-[var(--text-muted)] mb-4" />
+        <p class="text-[var(--text-secondary)] mb-4">Aucune catégorie</p>
+        <Button variant="primary" @click="openModal()">
           Créer votre première catégorie
-        </button>
+        </Button>
       </div>
 
-      <div v-for="category in categories" :key="category.id" class="category-card">
-        <div class="category-icon" :style="{ background: category.couleur || '#3b82f6' }">
-          <FolderTree class="w-6 h-6 text-white" />
+      <!-- Category Cards -->
+      <div
+        v-for="category in categories"
+        :key="category.id"
+        class="bg-(--bg-primary) border border-(--border-light) rounded-xl p-4 sm:p-5 hover:shadow-md hover:border-(--color-primary) transition-smooth group"
+      >
+        <div class="flex items-center gap-3 sm:gap-4 mb-3">
+          <!-- Icon with custom color -->
+          <div
+            class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center flex-shrink-0"
+            :style="{ background: category.couleur || '#3b82f6' }"
+          >
+            <FolderTree class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+          </div>
+          
+          <!-- Info -->
+          <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-[var(--text-primary)] text-sm sm:text-base truncate mb-0.5">
+              {{ category.nom }}
+            </h3>
+            <p class="text-xs sm:text-sm text-[var(--text-muted)] truncate">
+              {{ category.slug }}
+            </p>
+          </div>
         </div>
-        <div class="category-info">
-          <h3>{{ category.nom }}</h3>
-          <p>{{ category.slug }}</p>
-        </div>
-        <div class="category-actions">
-          <button @click="openModal(category)" class="action-btn">
+
+        <!-- Actions -->
+        <div class="flex gap-2 pt-3 border-t border-(--border-light)">
+          <button
+            @click="openModal(category)"
+            class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-(--bg-secondary) hover:bg-(--bg-hover) text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-smooth text-sm"
+            title="Modifier"
+          >
             <Edit class="w-4 h-4" />
+            <span class="hidden sm:inline">Modifier</span>
           </button>
-          <button @click="confirmDelete(category)" class="action-btn delete">
+          <button
+            @click="confirmDelete(category)"
+            class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-(--bg-secondary) hover:bg-red-50 dark:hover:bg-red-900/20 text-[var(--text-secondary)] hover:text-red-600 transition-smooth text-sm"
+            title="Supprimer"
+          >
             <Trash2 class="w-4 h-4" />
+            <span class="hidden sm:inline">Supprimer</span>
           </button>
         </div>
       </div>
@@ -45,57 +86,91 @@
 
     <!-- Category Modal -->
     <Modal :model-value="showModal" @update:model-value="showModal = $event">
-      <div class="modal-content">
-        <h3>{{ editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}</h3>
-        <form @submit.prevent="saveCategory">
-          <div class="form-group">
-            <label for="nom">Nom *</label>
+      <div class="p-4 sm:p-6 w-full max-w-lg">
+        <h3 class="text-xl sm:text-2xl font-semibold text-[var(--text-primary)] mb-4 sm:mb-6">
+          {{ editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}
+        </h3>
+        
+        <form @submit.prevent="saveCategory" class="space-y-4 sm:space-y-5">
+          <!-- Nom -->
+          <div>
+            <label for="nom" class="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Nom <span class="text-red-500">*</span>
+            </label>
             <input
               id="nom"
               v-model="form.nom"
               type="text"
               required
               placeholder="Nom de la catégorie"
+              class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-(--border-light) bg-(--bg-secondary) text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-hidden focus:ring-2 focus:ring-(--color-primary) focus:border-transparent transition-smooth text-sm sm:text-base"
             />
           </div>
-          <div class="form-group">
-            <label for="slug">Slug</label>
+
+          <!-- Slug -->
+          <div>
+            <label for="slug" class="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Slug
+            </label>
             <input
               id="slug"
               v-model="form.slug"
               type="text"
               placeholder="slug-de-la-categorie"
+              class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-(--border-light) bg-(--bg-secondary) text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-hidden focus:ring-2 focus:ring-(--color-primary) focus:border-transparent transition-smooth text-sm sm:text-base"
             />
           </div>
-          <div class="form-group">
-            <label for="description">Description</label>
+
+          <!-- Description -->
+          <div>
+            <label for="description" class="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Description
+            </label>
             <textarea
               id="description"
               v-model="form.description"
               rows="3"
               placeholder="Description de la catégorie"
+              class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-(--border-light) bg-(--bg-secondary) text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-hidden focus:ring-2 focus:ring-(--color-primary) focus:border-transparent transition-smooth resize-none text-sm sm:text-base"
             ></textarea>
           </div>
-          <div class="form-group">
-            <label for="couleur">Couleur</label>
+
+          <!-- Couleur -->
+          <div>
+            <label for="couleur" class="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Couleur
+            </label>
             <input
               id="couleur"
               v-model="form.couleur"
               type="color"
+              class="w-full h-10 sm:h-12 rounded-lg border border-(--border-light) cursor-pointer"
             />
           </div>
-          <div class="form-group">
-            <label for="categorie_parent_id">Catégorie parente</label>
-            <select id="categorie_parent_id" v-model="form.categorie_parent_id">
+
+          <!-- Catégorie parente -->
+          <div>
+            <label for="categorie_parent_id" class="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Catégorie parente
+            </label>
+            <select
+              id="categorie_parent_id"
+              v-model="form.categorie_parent_id"
+              class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-(--border-light) bg-(--bg-secondary) text-[var(--text-primary)] focus:outline-hidden focus:ring-2 focus:ring-(--color-primary) focus:border-transparent transition-smooth appearance-none cursor-pointer text-sm sm:text-base"
+            >
               <option value="">Aucune (catégorie principale)</option>
               <option v-for="cat in parentCategories" :key="cat.id" :value="cat.id">
                 {{ cat.nom }}
               </option>
             </select>
           </div>
-          <div class="modal-actions">
-            <Button type="button" variant="secondary" @click="closeModal">Annuler</Button>
-            <Button type="submit" variant="primary" :loading="saving">
+
+          <!-- Actions -->
+          <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-(--border-light)">
+            <Button type="button" variant="secondary" @click="closeModal" class="w-full sm:w-auto">
+              Annuler
+            </Button>
+            <Button type="submit" variant="primary" :loading="saving" class="w-full sm:w-auto">
               {{ editingCategory ? 'Mettre à jour' : 'Créer' }}
             </Button>
           </div>
@@ -195,169 +270,3 @@ const confirmDelete = async (category: Category) => {
 
 onMounted(loadCategories)
 </script>
-
-<style scoped>
-.admin-categories {
-  max-width: 1000px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-}
-
-.page-header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-}
-
-.btn-primary {
-  background: var(--color-primary);
-  color: white;
-}
-
-.categories-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-}
-
-.category-card {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-light);
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.category-icon {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.category-info {
-  flex: 1;
-}
-
-.category-info h3 {
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.category-info p {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.category-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.action-btn {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.375rem;
-  background: var(--bg-secondary);
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-}
-
-.action-btn:hover {
-  background: var(--bg-hover);
-}
-
-.action-btn.delete:hover {
-  background: rgba(220, 38, 38, 0.1);
-  color: #dc2626;
-}
-
-.modal-content {
-  padding: 1.5rem;
-  min-width: 400px;
-}
-
-.modal-content h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 1.5rem;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border-light);
-  border-radius: 0.5rem;
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-}
-
-.form-group input[type="color"] {
-  height: 42px;
-  padding: 0.25rem;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.empty-state,
-.loading-state {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem;
-}
-
-.category-card-skeleton {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-light);
-  border-radius: 0.75rem;
-  height: 80px;
-}
-</style>
-

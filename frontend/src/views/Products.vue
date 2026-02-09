@@ -7,11 +7,11 @@
       </div>
     </div>
 
-    <div class="container mx-auto px-4 py-8">
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <div class="container mx-auto px-4 py-6 sm:py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
         <!-- Sidebar Filters -->
         <aside class="lg:col-span-1">
-          <div class="bg-(--bg-primary) rounded-xl border border-(--border-light) p-6 sticky top-24">
+          <div class="bg-(--bg-primary) rounded-xl border border-(--border-light) p-4 sm:p-6 sticky top-20 sm:top-24">
             <div class="flex items-center justify-between mb-6">
               <h3 class="text-lg font-semibold text-[var(--text-primary)]">Filtres</h3>
               <button
@@ -108,17 +108,17 @@
         <!-- Main Content -->
         <main class="lg:col-span-3">
           <!-- Header -->
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div>
-              <h1 class="text-3xl font-bold text-[var(--text-primary)]">Nos Produits</h1>
-              <p v-if="!productsStore.loading" class="text-sm text-[var(--text-muted)] mt-1">
+              <h1 class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)]">Nos Produits</h1>
+              <p v-if="!productsStore.loading" class="text-xs sm:text-sm text-[var(--text-muted)] mt-1">
                 {{ productsStore.pagination.total }} produit{{ productsStore.pagination.total > 1 ? 's' : '' }} trouvé{{ productsStore.pagination.total > 1 ? 's' : '' }}
               </p>
             </div>
 
-            <div class="flex items-center gap-3 w-full sm:w-auto">
+            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <!-- Sort -->
-              <Select v-model="sortBy" @change="applySorting" class="flex-1 sm:flex-initial sm:w-48">
+              <Select v-model="sortBy" @change="applySorting" class="flex-1 sm:flex-initial sm:w-44 md:w-48 text-sm">
                 <option value="name">Nom A-Z</option>
                 <option value="name_desc">Nom Z-A</option>
                 <option value="price">Prix croissant</option>
@@ -128,41 +128,43 @@
               </Select>
 
               <!-- View Toggle -->
-              <div class="flex items-center gap-1 bg-(--bg-primary) rounded-lg border border-(--border-light) p-1">
+              <div class="hidden sm:flex items-center gap-0.5 sm:gap-1 bg-(--bg-primary) rounded-lg border border-(--border-light) p-0.5 sm:p-1">
                 <button
                   @click="viewMode = 'grid'"
                   :class="[
-                    'p-2 rounded transition-smooth',
+                    'p-1.5 sm:p-2 rounded transition-smooth',
                     viewMode === 'grid'
                       ? 'bg-(--color-primary) text-white'
                       : 'text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover)'
                   ]"
                   title="Vue grille"
+                  aria-label="Vue grille"
                 >
-                  <Grid3x3 class="w-4 h-4" />
+                  <Grid3x3 class="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                 </button>
                 <button
                   @click="viewMode = 'list'"
                   :class="[
-                    'p-2 rounded transition-smooth',
+                    'p-1.5 sm:p-2 rounded transition-smooth',
                     viewMode === 'list'
                       ? 'bg-(--color-primary) text-white'
                       : 'text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-(--bg-hover)'
                   ]"
                   title="Vue liste"
+                  aria-label="Vue liste"
                 >
-                  <List class="w-4 h-4" />
+                  <List class="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                 </button>
               </div>
             </div>
           </div>
 
           <!-- Loading State -->
-          <div v-if="productsStore.loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div v-if="productsStore.loading" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             <div v-for="n in 6" :key="n" class="animate-pulse">
-              <div class="bg-(--bg-tertiary) aspect-square rounded-xl mb-4"></div>
-              <div class="h-4 bg-(--bg-tertiary) rounded mb-2"></div>
-              <div class="h-4 bg-(--bg-tertiary) rounded w-2/3"></div>
+              <div class="bg-(--bg-tertiary) aspect-square rounded-xl mb-3 sm:mb-4"></div>
+              <div class="h-3 sm:h-4 bg-(--bg-tertiary) rounded mb-2"></div>
+              <div class="h-3 sm:h-4 bg-(--bg-tertiary) rounded w-2/3"></div>
             </div>
           </div>
 
@@ -184,10 +186,10 @@
           <div
             v-else-if="productsStore.products.length > 0"
             :class="[
-              'grid gap-6',
+              'grid',
               viewMode === 'grid'
-                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-                : 'grid-cols-1'
+                ? 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6'
+                : 'grid-cols-1 gap-4 sm:gap-6'
             ]"
           >
             <ProductCard
