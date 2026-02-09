@@ -257,4 +257,130 @@ export class ProductsService implements IProductsService {
       take: 20,
     });
   }
+
+  async bulkImport(file: any) {
+    try {
+      this.logger.log(`Starting bulk import with file: ${file?.originalname}`);
+      
+      if (!file) {
+        throw new ValidationException('Aucun fichier fourni');
+      }
+
+      const csv = require('csv-parse');
+      const fs = require('fs');
+      
+      const results: any[] = [];
+      const errors: any[] = [];
+      let imported = 0;
+
+      return new Promise((resolve, reject) => {
+        const parser = csv.parse({ columns: true, skip_empty_lines: true });
+        
+        parser.on('readable', () => {
+          let record;
+          while ((record = parser.read()) !== null) {
+            results.push(record);
+          }
+        });
+
+        parser.on('error', (err: Error) => {
+          reject(err);
+        });
+
+        parser.on('end', async () => {
+          try {
+            for (const row of results) {
+              try {
+                await this.prisma.pRODUITS.create({
+                  data: {
+                    nom: row.nom,
+                    slug: SlugifyUtil.slugify(row.nom) + '-' + Date.now(),
+                    description: row.description || '',
+                    description_courte: row.description_courte || '',
+                    sku: row.sku || `SKU-${Date.now()}`,
+                    prix: parseFloat(row.prix) || 0,
+                    quantite_stock: parseInt(row.quantite_stock) || 0,
+                    categorie_id: row.categorie_id || null,
+                    marque: row.marque || '',
+                    est_actif: row.est_actif !== 'false',
+                    est_vedette: row.est_vedette === 'true',
+                    seuil_stock_bas: parseInt(row.seuil_stock_bas) || 5,
+                  },
+                });
+                imported++;
+              } catch (err: any) {
+                errors.push({ row, error: err.message });
+              }
+            }
+
+            resolve({
+              imported,
+              errors,
+            });
+          } catch (err) {
+            reject(err);
+          }
+        });
+
+        fs.createReadStream(file.path).pipe(parser);
+      });
+    } catch (error) {
+      this.logger.error(`Error in bulk import: ${error}`);
+      throw error;
+    }
+  }
+
+  async duplicate(id: string) {
+    try {
+      const originalProduct = await this.prisma.pRODUITS.findUnique({
+        where: { id },
+        include: {
+          images_produits: true,
+        },
+      });
+
+      if (!originalProduct) {
+        throw new NotFoundException('Produit non trouvé');
+      }
+
+      const slug = SlugifyUtil.slugify(originalProduct.nom) + '-copie-' + Date.now();
+
+      const duplicatedProduct = await this.prisma.pRODUITS.create({
+        data: {
+          nom: `${originalProduct.nom} (copie)`,
+          slug,
+          description: originalProduct.description,
+          description_courte: originalProduct.description_courte,
+          sku: `${originalProduct.sku}-COP`,
+          prix: originalProduct.prix,
+          prix_compare: originalProduct.prix_compare,
+          prix_coutant: originalProduct.prix_coutant,
+          categorie_id: originalProduct.categorie_id,
+          marque: originalProduct.marque,
+          quantite_stock: originalProduct.quantite_stock,
+          seuil_stock_bas: originalProduct.seuil_stock_bas,
+          est_actif: false,
+          est_vedette: false,
+        },
+      });
+
+      // Duplicate images if they exist
+      if (originalProduct.images_produits && originalProduct.images_produits.length > 0) {
+        await this.prisma.iMAGES_PRODUITS.createMany({
+          data: originalProduct.images_produits.map((img, index) => ({
+            produit_id: duplicatedProduct.id,
+            url_image: img.url_image,
+            texte_alt: img.texte_alt || duplicatedProduct.nom,
+            est_principale: img.est_principale,
+            ordre_tri: img.ordre_tri,
+          })),
+        });
+      }
+
+      return this.findOne(duplicatedProduct.id);
+    } catch (error) {
+      this.logger.error(`Error duplicating product: ${error}`);
+      throw error;
+    }
+  }
 }

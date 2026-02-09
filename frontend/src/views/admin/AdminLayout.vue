@@ -53,6 +53,15 @@
             <FolderTree class="w-5 h-5" />
             <span>Catégories</span>
           </router-link>
+          <router-link
+            to="/admin/collections"
+            class="nav-item"
+            :class="{ active: currentRoute === 'AdminCollections' }"
+            @click="closeSidebar"
+          >
+            <Layers class="w-5 h-5" />
+            <span>Collections</span>
+          </router-link>
         </div>
 
         <div class="nav-section">
@@ -136,6 +145,7 @@ import {
   LayoutDashboard,
   Package,
   FolderTree,
+  Layers,
   ShoppingBag,
   Tag,
   Users,
@@ -165,6 +175,7 @@ const pageTitle = computed(() => {
     AdminDashboard: 'Tableau de bord',
     AdminProducts: 'Gestion des produits',
     AdminCategories: 'Gestion des catégories',
+    AdminCollections: 'Gestion des collections',
     AdminOrders: 'Gestion des commandes',
     AdminCoupons: 'Gestion des coupons',
     AdminUsers: 'Gestion des utilisateurs',

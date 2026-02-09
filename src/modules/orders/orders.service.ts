@@ -6,6 +6,28 @@ import { STATUT_COMMANDE } from '@prisma/client';
 export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
+  async findAllAdmin() {
+    return this.prisma.cOMMANDES.findMany({
+      include: {
+        utilisateur: {
+          select: {
+            id: true,
+            prenom: true,
+            nom: true,
+            email: true,
+          },
+        },
+        articles_commande: {
+          include: {
+            produit: true,
+            variante: true,
+          },
+        },
+      },
+      orderBy: { cree_le: 'desc' },
+    });
+  }
+
   async findUserOrders(userId: string) {
     return this.prisma.cOMMANDES.findMany({
       where: { utilisateur_id: userId },

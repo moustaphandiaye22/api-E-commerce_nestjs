@@ -19,6 +19,7 @@ const AdminDashboard = () => import('../views/admin/AdminDashboard.vue')
 const AdminProducts = () => import('../views/admin/AdminProducts.vue')
 const AdminProductForm = () => import('../views/admin/AdminProductForm.vue')
 const AdminCategories = () => import('../views/admin/AdminCategories.vue')
+const AdminCollections = () => import('../views/admin/AdminCollections.vue')
 const AdminCoupons = () => import('../views/admin/AdminCoupons.vue')
 const AdminOrders = () => import('../views/admin/AdminOrders.vue')
 const AdminUsers = () => import('../views/admin/AdminUsers.vue')
@@ -111,6 +112,11 @@ const routes: RouteRecordRaw[] = [
         path: 'categories',
         name: 'AdminCategories',
         component: AdminCategories,
+      },
+      {
+        path: 'collections',
+        name: 'AdminCollections',
+        component: AdminCollections,
       },
       {
         path: 'coupons',

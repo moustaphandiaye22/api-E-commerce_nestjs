@@ -31,10 +31,11 @@
             </td>
           </tr>
 <tr v-for="order in orders" :key="order.id">
-            <td class="order-id">#{{ order.numero_commande }}</td>
+            <td class="order-number">#{{ order.numero_commande }}</td>
             <td>
               <div class="customer-info">
-                <p class="customer-name">{{ order.utilisateur_id }}</p>
+                <p class="customer-name">{{ getClientName(order) }}</p>
+                <p class="customer-email" v-if="order.utilisateur?.email">{{ order.utilisateur.email }}</p>
               </div>
             </td>
             <td>{{ order.articles_commande?.length || 0 }} produit(s)</td>
@@ -70,7 +71,8 @@
         <div v-if="selectedOrder" class="order-details">
           <div class="detail-section">
             <h4>Client</h4>
-            <p>ID: {{ selectedOrder.utilisateur_id }}</p>
+            <p>{{ getClientName(selectedOrder) }}</p>
+            <p v-if="selectedOrder.utilisateur?.email">{{ selectedOrder.utilisateur.email }}</p>
           </div>
           <div class="detail-section">
             <h4>Adresse de livraison</h4>
@@ -106,10 +108,20 @@ import Button from '../../components/ui/Button.vue'
 import Modal from '../../components/ui/Modal.vue'
 import { ShoppingBag, Eye } from 'lucide-vue-next'
 
-const orders = ref<Order[]>([])
+// Extended order type with user info for admin
+interface OrderWithUser extends Order {
+  utilisateur?: {
+    id: string
+    prenom: string
+    nom: string
+    email: string
+  }
+}
+
+const orders = ref<OrderWithUser[]>([])
 const loading = ref(true)
 const showDetailModal = ref(false)
-const selectedOrder = ref<Order | null>(null)
+const selectedOrder = ref<OrderWithUser | null>(null)
 
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('fr-FR', {
@@ -122,7 +134,7 @@ const formatDate = (date: string) => {
 const loadOrders = async () => {
   loading.value = true
   try {
-    const response = await ordersAPI.getAll()
+    const response = await ordersAPI.getAllAdmin()
     orders.value = response.data || []
   } catch (error) {
     console.error('Erreur:', error)
@@ -143,9 +155,17 @@ const updateStatus = async (order: Order, event: Event) => {
   }
 }
 
-const viewOrder = (order: Order) => {
+const viewOrder = (order: OrderWithUser) => {
   selectedOrder.value = order
   showDetailModal.value = true
+}
+
+// Helper to get client name
+const getClientName = (order: OrderWithUser): string => {
+  if (order.utilisateur) {
+    return `${order.utilisateur.prenom} ${order.utilisateur.nom}`
+  }
+  return 'Client'
 }
 
 onMounted(loadOrders)
@@ -193,7 +213,7 @@ onMounted(loadOrders)
   border-bottom: 1px solid var(--border-light);
 }
 
-.order-id {
+.order-number {
   font-family: monospace;
   font-weight: 600;
 }

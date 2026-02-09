@@ -1,4 +1,6 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query, UseGuards, UsePipes } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Query, UseGuards, UsePipes, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -208,5 +210,64 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Produit non trouvé' })
   remove(@Param('id') id: string) {
     return this.productsService.remove(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Post('import')
+  @ApiOperation({ summary: 'Importer des produits en masse (Admin)' })
+  @ApiBearerAuth('JWT-auth')
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({
+    status: 201,
+    description: 'Import terminé',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        statusCode: { type: 'number', example: 201 },
+        message: { type: 'string', example: 'Import terminé avec succès' },
+        data: {
+          type: 'object',
+          properties: {
+            imported: { type: 'number', example: 10 },
+            errors: { type: 'array' },
+          },
+        },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  bulkImport(@UploadedFile() file: any) {
+    return this.productsService.bulkImport(file);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Post(':id/duplicate')
+  @ApiOperation({ summary: 'Dupliquer un produit (Admin)' })
+  @ApiParam({ name: 'id', description: 'ID du produit à dupliquer', example: 'uuid' })
+  @ApiBearerAuth('JWT-auth')
+  @ApiResponse({
+    status: 201,
+    description: 'Produit dupliqué',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        statusCode: { type: 'number', example: 201 },
+        message: { type: 'string', example: 'Produit dupliqué avec succès' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            nom: { type: 'string' },
+          },
+        },
+      },
+    },
+  })
+  duplicate(@Param('id') id: string) {
+    return this.productsService.duplicate(id);
   }
 }

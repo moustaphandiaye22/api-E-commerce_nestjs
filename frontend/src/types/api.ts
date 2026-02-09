@@ -57,6 +57,8 @@ export interface Product {
   quantite_stock?: number
   sku?: string
   est_actif: boolean
+  est_vedette?: boolean
+  marque?: string
   categorie_id?: string
   slug?: string
   categorie?: Category
@@ -270,6 +272,21 @@ export interface WishlistItem {
   produit_id: string
   cree_le: string
   produit: Product
+}
+
+// Collection
+export interface Collection {
+  id: string
+  nom: string
+  slug: string
+  description?: string
+  url_image?: string
+  est_active?: boolean
+  est_actif: boolean
+  ordre_tri?: number
+  produits?: Product[]
+  cree_le?: string
+  modifie_le?: string
 }
 
 // Notification

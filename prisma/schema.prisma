@@ -167,6 +167,22 @@ model CATEGORIES {
   @@map("categories")
 }
 
+model COLLECTIONS {
+  id          String   @id @default(uuid()) @db.Uuid
+  nom         String
+  slug        String   @unique
+  description String?
+  url_image   String?
+  est_active  Boolean  @default(true)
+  ordre_tri   Int      @default(0)
+  cree_le     DateTime @default(now()) @db.Timestamp
+  modifie_le  DateTime @updatedAt @db.Timestamp
+
+  produits PRODUITS[]
+
+  @@map("collections")
+}
+
 model PRODUITS {
   id                  String   @id @default(uuid()) @db.Uuid
   nom                 String
@@ -199,6 +215,7 @@ model PRODUITS {
   liste_souhaits  LISTE_SOUHAITS[]
   articles_panier ARTICLES_PANIER[]
   articles_commande ARTICLES_COMMANDE[]
+  collections     COLLECTIONS[]
 
   @@map("produits")
 }
