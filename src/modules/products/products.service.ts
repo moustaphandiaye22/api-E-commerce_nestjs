@@ -102,6 +102,12 @@ export class ProductsService implements IProductsService {
 
       this.logger.log(`Extracted ${images?.length || 0} images from data`);
 
+      // Handle empty categorie_id - use a default category or require it
+      if (!productData.categorie_id || productData.categorie_id === '') {
+        this.logger.warn('No category provided, product creation may fail');
+        // Don't throw here - let Prisma handle it with a proper error message
+      }
+
       // Create the product first
       const product = await this.prisma.pRODUITS.create({
         data: {

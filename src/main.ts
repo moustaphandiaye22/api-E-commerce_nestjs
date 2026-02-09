@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import * as express from 'express';
 import * as path from 'path';
 
@@ -96,6 +97,9 @@ async function bootstrap() {
 
   // Intercepteur global pour standardiser les réponses
   app.useGlobalInterceptors(new TransformInterceptor());
+
+  // Filtre global pour gérer les exceptions
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // Configuration Swagger
   const config = new DocumentBuilder()
