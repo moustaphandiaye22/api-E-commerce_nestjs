@@ -7,7 +7,6 @@ import * as streamifier from 'streamifier';
 export class UploadService {
   private readonly logger = new Logger(UploadService.name);
   private isConfigured = false;
-  private readonly apiUrl: string;
 
   constructor(private configService: ConfigService) {
     // Configure Cloudinary from config
@@ -38,169 +37,103 @@ export class UploadService {
         this.isConfigured = true;
         this.logger.log('Cloudinary configured successfully from env');
       } else {
-        this.logger.warn('Cloudinary credentials not configured - using local storage fallback');
+        this.logger.error('Cloudinary credentials not configured');
+        // Don't fallback to local storage - require Cloudinary
       }
     }
-
-    // Get API URL for constructing full image URLs
-    this.apiUrl = this.configService.get<string>('API_URL') || 
-                   process.env.API_URL || 
-                   `http://localhost:${process.env.PORT || 3000}`;
   }
 
   async uploadImage(file: any, folder: string = 'products'): Promise<string> {
     this.logger.log(`Upload attempt: ${file?.originalname}, size: ${file?.size}, mimetype: ${file?.mimetype}`);
     
-    // Check if buffer exists
-    if (!file?.buffer) {
-      this.logger.warn('File buffer is missing - checking for alternative properties');
-      this.logger.warn('File keys:', Object.keys(file || {}));
-    }
-
     if (!file) {
       throw new BadRequestException('Aucun fichier fourni');
     }
 
-    // If buffer is missing but file has data, try to create buffer
-    if (!file.buffer && file.buffer === undefined) {
-      this.logger.warn('Converting file data to buffer...');
+    // Check if buffer exists
+    if (!file?.buffer) {
+      this.logger.warn('File buffer is missing - checking for alternative properties');
+      // Try to create buffer from arrayBuffer or stream
       if (file.arrayBuffer) {
         try {
           file.buffer = Buffer.from(await file.arrayBuffer());
           this.logger.log('Buffer created from arrayBuffer');
         } catch (e) {
-          this.logger.error('Failed to create buffer:', e);
+          this.logger.error('Failed to create buffer from arrayBuffer:', e);
         }
-      }
-    }
-
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.mimetype)) {
-      this.logger.warn(`Invalid file type: ${file.mimetype}`);
-      throw new BadRequestException('Type de fichier non autorisé. Utilisez JPEG, PNG ou WebP');
-    }
-
-    // Validate file size (5MB max)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      this.logger.warn(`File too large: ${file.size} bytes`);
-      throw new BadRequestException('Fichier trop volumineux (max 5MB)');
-    }
-
-    try {
-      // Upload to Cloudinary if configured
-      if (this.isConfigured) {
-        this.logger.log(`Uploading to Cloudinary folder: ${folder}`);
-        
-        // Ensure buffer exists
-        if (!file.buffer) {
-          this.logger.warn('Creating buffer from file data for Cloudinary upload');
-          if (file.arrayBuffer) {
-            file.buffer = Buffer.from(await file.arrayBuffer());
-          } else if (file.stream) {
-            const chunks: Buffer[] = [];
-            for await (const chunk of file.stream()) {
-              chunks.push(Buffer.from(chunk));
-            }
-            file.buffer = Buffer.concat(chunks);
-          }
-        }
-        
-        if (!file.buffer) {
-          throw new BadRequestException('Impossible de traiter le fichier: buffer manquant');
-        }
-        
-        const result = await new Promise<any>((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            {
-              folder: `ecommerce/${folder}`,
-              resource_type: 'image',
-              transformation: [
-                { width: 1200, height: 1200, crop: 'limit', quality: 'auto', fetch_format: 'auto' }
-              ]
-            },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          
-          // Use streamifier to handle buffer upload
-          streamifier.createUploadStream(uploadStream).end(file.buffer);
-        });
-
-        const url = result.secure_url;
-        this.logger.log(`Cloudinary upload successful: ${url}`);
-        return url;
-      } else {
-        // Fallback to local storage - return FULL URL including domain
-        const localUrl = await this.uploadLocal(file, folder);
-        const fullUrl = `${this.apiUrl}${localUrl}`;
-        this.logger.log(`Local upload successful with full URL: ${fullUrl}`);
-        return fullUrl;
-      }
-    } catch (error) {
-      this.logger.error(`Upload failed: ${error.message}`);
-      // Try local fallback
-      this.logger.warn('Falling back to local storage');
-      try {
-        const localUrl = await this.uploadLocal(file, folder);
-        const fullUrl = `${this.apiUrl}${localUrl}`;
-        this.logger.log(`Local upload successful with full URL: ${fullUrl}`);
-        return fullUrl;
-      } catch (localError) {
-        this.logger.error(`Local upload also failed: ${localError.message}`);
-        throw new BadRequestException('Échec de l\'upload: ' + error.message);
-      }
-    }
-  }
-
-  /**
-   * Local storage fallback - saves to uploads directory
-   */
-  private async uploadLocal(file: any, folder: string): Promise<string> {
-    const fs = await import('fs');
-    const path = await import('path');
-
-    // Ensure buffer exists
-    if (!file.buffer) {
-      this.logger.warn('Creating buffer from file data for local upload');
-      if (file.arrayBuffer) {
-        file.buffer = Buffer.from(await file.arrayBuffer());
       } else if (file.stream) {
         const chunks: Buffer[] = [];
         for await (const chunk of file.stream()) {
           chunks.push(Buffer.from(chunk));
         }
         file.buffer = Buffer.concat(chunks);
+        this.logger.log('Buffer created from stream');
       }
     }
 
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.mimetype)) {
+      this.logger.warn(`Invalid file type: ${file.mimetype}`);
+      throw new BadRequestException('Type de fichier non autorisé. Utilisez JPEG, PNG, WebP ou GIF');
+    }
+
+    // Validate file size (10MB max for Cloudinary)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      this.logger.warn(`File too large: ${file.size} bytes`);
+      throw new BadRequestException('Fichier trop volumineux (max 10MB)');
+    }
+
+    // Ensure buffer exists before upload
     if (!file.buffer) {
       throw new BadRequestException('Impossible de traiter le fichier: buffer manquant');
     }
 
-    const extension = path.extname(file.originalname);
-    const filename = `${Date.now()}-${Math.random().toString(36).substring(2)}${extension}`;
-
-    const uploadDir = path.join(process.cwd(), 'uploads', folder);
-    
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    // Cloudinary must be configured
+    if (!this.isConfigured) {
+      this.logger.error('Cloudinary not configured - please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables');
+      throw new BadRequestException('Service d\'upload non configuré. Veuillez configurer Cloudinary.');
     }
 
-    const filePath = path.join(uploadDir, filename);
-    fs.writeFileSync(filePath, file.buffer);
+    // Upload to Cloudinary
+    this.logger.log(`Uploading to Cloudinary folder: ecommerce/${folder}`);
+    
+    const result = await new Promise<any>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: `ecommerce/${folder}`,
+          resource_type: 'image',
+          transformation: [
+            { width: 1200, height: 1200, crop: 'limit', quality: 'auto', fetch_format: 'auto' }
+          ],
+          // Generate multiple formats for optimal display
+          eager: [
+            { width: 300, height: 300, crop: 'fill', quality: 'auto' }, // Thumbnail
+            { width: 800, height: 800, crop: 'limit', quality: 'auto' }, // Medium
+          ],
+          eager_async: true,
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      
+      // Use streamifier to handle buffer upload
+      streamifier.createUploadStream(uploadStream).end(file.buffer);
+    });
 
-    const url = `/uploads/${folder}/${filename}`;
-    this.logger.log(`Local upload successful: ${url}`);
+    const url = result.secure_url;
+    this.logger.log(`Cloudinary upload successful: ${url}`);
+    
+    // Return the original upload URL (not the eager transformation URLs)
     return url;
   }
 
   async deleteImage(imagePath: string): Promise<void> {
     try {
-      // If it's a Cloudinary URL, extract public_id and delete from Cloudinary
+      // Only handle Cloudinary URLs
       if (imagePath.includes('cloudinary.com')) {
         // Extract public_id from URL
         const matches = imagePath.match(/\/v\d+\/(?:.*\/)?([^/]+)\.[^.]+$/);
@@ -209,27 +142,29 @@ export class UploadService {
           await cloudinary.uploader.destroy(publicId);
           this.logger.log(`Deleted image from Cloudinary: ${publicId}`);
         }
-      } else if (imagePath.startsWith('/uploads/')) {
-        // Local file deletion
-        const fs = await import('fs');
-        const path = await import('path');
-        const fullPath = path.join(process.cwd(), imagePath);
-        if (fs.existsSync(fullPath)) {
-          fs.unlinkSync(fullPath);
-          this.logger.log(`Deleted local file: ${fullPath}`);
-        }
+      } else {
+        this.logger.warn(`Attempted to delete non-Cloudinary URL: ${imagePath}`);
       }
     } catch (error) {
-      this.logger.error(`Error deleting image: ${error.message}`);
+      this.logger.error(`Error deleting image from Cloudinary: ${error.message}`);
+      throw error;
     }
   }
 
   validateImageUrl(url: string): boolean {
-    // Validate Cloudinary URLs
+    // Only validate Cloudinary URLs
     if (url.includes('cloudinary.com') && url.includes('upload')) {
       return true;
     }
-    // Validate local URLs
-    return url.startsWith('/uploads/') && /\.(jpg|jpeg|png|webp)$/i.test(url);
+    // Reject local URLs
+    return false;
+  }
+
+  /**
+   * Check if Cloudinary is properly configured
+   */
+  isReady(): boolean {
+    return this.isConfigured;
   }
 }
+

@@ -14,13 +14,13 @@ export class UploadController {
   @Post('image')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiOperation({ summary: 'Uploader une image' })
+  @ApiOperation({ summary: 'Uploader une image sur Cloudinary' })
   @ApiConsumes('multipart/form-data')
   @ApiBearerAuth('JWT-auth')
   @UseInterceptors(FileInterceptor('file'))
   @ApiResponse({
     status: 201,
-    description: 'Image uploadée',
+    description: 'Image uploadée avec succès sur Cloudinary',
     schema: {
       type: 'object',
       properties: {
@@ -30,17 +30,20 @@ export class UploadController {
         data: {
           type: 'object',
           properties: {
-            url: { type: 'string', example: '/uploads/products/image.jpg' },
+            url: { type: 'string', example: 'https://res.cloudinary.com/demo/image/upload/v123456/products/image.jpg' },
           },
         },
       },
     },
   })
   @ApiResponse({ status: 400, description: 'Fichier invalide' })
+  @ApiResponse({ status: 500, description: 'Erreur lors de l\'upload' })
   async uploadImage(@UploadedFile() file: any) {
     const url = await this.uploadService.uploadImage(file);
     return {
-      message: 'Image uploadée avec succès',
+      success: true,
+      statusCode: 201,
+      message: 'Image uploadée avec succès sur Cloudinary',
       data: { url },
     };
   }
