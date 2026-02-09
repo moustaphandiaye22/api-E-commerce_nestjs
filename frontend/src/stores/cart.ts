@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { cartsAPI } from '../api/carts'
 import { couponsAPI } from '../api/coupons'
 import { useApi } from '../composables/useApi'
+import { useAuthStore } from './auth'
 import type { Cart, AddToCartDto, CouponValidationResult } from '../types/api'
 
 /**
@@ -14,6 +16,8 @@ export const useCartStore = defineStore('cart', () => {
   const cart = ref<Cart | null>(null)
   const appliedCoupon = ref<CouponValidationResult | null>(null)
   const { loading, error, execute } = useApi<Cart>()
+  const router = useRouter()
+  const authStore = useAuthStore()
 
   // Getters
   const itemCount = computed(() => {
@@ -39,9 +43,24 @@ export const useCartStore = defineStore('cart', () => {
   })
 
   /**
+   * Helper pour vérifier l'authentification
+   */
+  function requireAuth(): boolean {
+    if (!authStore.isAuthenticated()) {
+      // Stocker l'URL de retour pour redirection après connexion
+      const currentPath = window.location.pathname
+      localStorage.setItem('redirectAfterLogin', currentPath)
+      router.push('/login')
+      return false
+    }
+    return true
+  }
+
+  /**
    * Récupérer le panier
    */
   async function fetchCart() {
+    if (!requireAuth()) return null
     return execute(
       async () => {
         const response = await cartsAPI.get()
@@ -55,6 +74,7 @@ export const useCartStore = defineStore('cart', () => {
    * Ajouter un article au panier
    */
   async function addItem(item: AddToCartDto) {
+    if (!requireAuth()) return null
     return execute(
       async () => {
         const response = await cartsAPI.addItem(item)
@@ -68,6 +88,7 @@ export const useCartStore = defineStore('cart', () => {
    * Mettre à jour la quantité d'un article
    */
   async function updateItem(itemId: string, quantity: number) {
+    if (!requireAuth()) return null
     return execute(
       async () => {
         const response = await cartsAPI.updateItem(itemId, quantity)
@@ -81,6 +102,7 @@ export const useCartStore = defineStore('cart', () => {
    * Supprimer un article du panier
    */
   async function removeItem(itemId: string) {
+    if (!requireAuth()) return null
     return execute(
       async () => {
         await cartsAPI.removeItem(itemId)
@@ -96,6 +118,7 @@ export const useCartStore = defineStore('cart', () => {
    * Vider le panier
    */
   async function clearCart() {
+    if (!requireAuth()) return null
     return execute(
       async () => {
         await cartsAPI.clear()
@@ -110,6 +133,7 @@ export const useCartStore = defineStore('cart', () => {
    * Appliquer un coupon
    */
   async function applyCoupon(code: string) {
+    if (!requireAuth()) return null
     return execute(
       async () => {
         const response = await couponsAPI.validate({

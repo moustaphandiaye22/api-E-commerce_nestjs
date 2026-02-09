@@ -31,12 +31,13 @@ import jwtConfig from './config/jwt.config';
 import stripeConfig from './config/stripe.config';
 import awsConfig from './config/aws.config';
 import mailConfig from './config/mail.config';
+import cloudinaryConfig from './config/cloudinary.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, jwtConfig, stripeConfig, awsConfig, mailConfig],
+      load: [databaseConfig, jwtConfig, stripeConfig, awsConfig, mailConfig, cloudinaryConfig],
     }),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'public'),

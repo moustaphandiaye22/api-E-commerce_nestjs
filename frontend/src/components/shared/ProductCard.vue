@@ -177,7 +177,9 @@ const addToCartButtonClasses = computed(() => [
 
 const getImageUrl = (url?: string) => {
   if (!url) return ''
+  // If URL is already a full URL (Cloudinary or http), return it directly
   if (url.startsWith('http')) return url
+  // Otherwise, prepend API URL for local uploads
   return `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${url}`
 }
 

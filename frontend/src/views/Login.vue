@@ -231,9 +231,16 @@ const handleSubmit = async () => {
   try {
     await authStore.login(form)
     
-    // Redirect to intended page or home
-    const redirect = route.query.redirect as string
-    router.push(redirect || '/')
+    // Redirect to intended page or stored redirect URL or home
+    const redirectFromQuery = route.query.redirect as string
+    const redirectFromStorage = localStorage.getItem('redirectAfterLogin')
+    
+    // Clear the stored redirect URL
+    localStorage.removeItem('redirectAfterLogin')
+    
+    // Prioritize: query param > stored URL > home
+    const redirect = redirectFromQuery || redirectFromStorage || '/'
+    router.push(redirect)
   } catch (error) {
     console.error('Erreur de connexion:', error)
   }

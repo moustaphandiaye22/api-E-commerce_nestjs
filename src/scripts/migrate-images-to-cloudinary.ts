@@ -30,8 +30,8 @@ const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-// URL de base de l'API pour les images locales
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
+// URL de base de l'API backend pour les images locales
+const API_BASE_URL = process.env.API_BASE_URL || 'https://api-e-commerce-nestjs-1.onrender.com';
 
 // Configuration Cloudinary avec les variables individuelles
 const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
