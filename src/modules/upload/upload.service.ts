@@ -10,17 +10,36 @@ export class UploadService {
   private readonly apiUrl: string;
 
   constructor(private configService: ConfigService) {
-    // Configure Cloudinary from environment variable
-    const cloudinaryUrl = this.configService.get<string>('CLOUDINARY_URL');
+    // Configure Cloudinary from config
+    const cloudName = this.configService.get<string>('cloudinary.cloud_name');
+    const apiKey = this.configService.get<string>('cloudinary.api_key');
+    const apiSecret = this.configService.get<string>('cloudinary.api_secret');
     
-    if (cloudinaryUrl) {
+    if (cloudName && apiKey && apiSecret) {
       cloudinary.config({
-        cloudinary_url: cloudinaryUrl,
+        cloud_name: cloudName,
+        api_key: apiKey,
+        api_secret: apiSecret,
       });
       this.isConfigured = true;
       this.logger.log('Cloudinary configured successfully');
     } else {
-      this.logger.warn('CLOUDINARY_URL not configured - using local storage fallback');
+      // Fallback to direct environment variables
+      const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME;
+      const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY;
+      const cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET;
+      
+      if (cloudinaryCloudName && cloudinaryApiKey && cloudinaryApiSecret) {
+        cloudinary.config({
+          cloud_name: cloudinaryCloudName,
+          api_key: cloudinaryApiKey,
+          api_secret: cloudinaryApiSecret,
+        });
+        this.isConfigured = true;
+        this.logger.log('Cloudinary configured successfully from env');
+      } else {
+        this.logger.warn('Cloudinary credentials not configured - using local storage fallback');
+      }
     }
 
     // Get API URL for constructing full image URLs

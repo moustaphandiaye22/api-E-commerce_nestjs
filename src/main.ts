@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import * as express from 'express';
+import * as path from 'path';
 
 // Compression middleware (will be available after npm install)
 let compression: any;
@@ -16,16 +17,29 @@ try {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true, // Enable raw body for Stripe webhooks
+  });
   const logger = new Logger('Bootstrap');
 
-  // Serve uploaded files statically with CORS headers
-  app.use('/uploads', (req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cache-Control', 'public, max-age=31536000');
-    next();
-  }, express.static('uploads'));
-  logger.log('Static file serving enabled for /uploads with CORS');
+  // Configuration CORS pour le frontend
+  app.enableCors({
+    origin: [
+      'http://localhost:5173', // Vite dev server
+      'http://localhost:3000', // Local development
+      'https://baobabmarketecommerce.vercel.app', // Production Vercel
+      /\.vercel\.app$/, // Allow all Vercel domains for preview deployments
+      /^https:\/\/.*\.vercel\.app$/, // Allow all Vercel preview deployments
+      /^https:\/\/.*\.onrender\.com$/, // Allow all Render preview deployments
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  });
+  logger.log('CORS enabled for frontend');
+
+  // Note: Images are now served from Cloudinary, but also serve uploads directory for local files
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // Compression pour améliorer les performances
   if (compression) {
@@ -43,15 +57,16 @@ async function bootstrap() {
   }
 
   // Sécurité : Headers HTTP avec Helmet renforcés
+  // Relax CSP for images from trusted sources (Cloudinary, etc.)
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        imgSrc: ["'self'", "data:", "https:", "*.vercel.app", "*.render.com", "*.onrender.com", "api-e-commerce-nestjs-1.onrender.com"],
+        imgSrc: ["'self'", "data:", "https:", "blob:", "*.cloudinary.com", "*.res.cloudinary.com", "*.vercel.app", "*.render.com", "*.onrender.com", "http://localhost:3000", "http://localhost:5173"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        connectSrc: ["'self'", "https://api.stripe.com", "https://api-e-commerce-nestjs-1.onrender.com"],
+        connectSrc: ["'self'", "https://api.stripe.com", "https://api-e-commerce-nestjs-1.onrender.com", "https://api.cloudinary.com"],
         frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"],
         upgradeInsecureRequests: [],
       },
@@ -68,20 +83,6 @@ async function bootstrap() {
       action: 'deny',
     },
   }));
-
-  // Configuration CORS pour le frontend
-  app.enableCors({
-    origin: [
-      'http://localhost:5173', // Vite dev server
-      'http://localhost:3000', // Local development
-      'https://baobabmarketecommerce.vercel.app', // Production Vercel
-      /\.vercel\.app$/, // Allow all Vercel domains for preview deployments
-      /^https:\/\/.*\.vercel\.app$/, // Allow all Vercel preview deployments
-    ],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  });
 
   // Validation globale
   // Note: ZodValidationPipe handles specific routes, this is a fallback
