@@ -19,9 +19,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
 
-  // Serve uploaded files statically
-  app.use('/uploads', express.static('uploads'));
-  logger.log('Static file serving enabled for /uploads');
+  // Serve uploaded files statically with CORS headers
+  app.use('/uploads', (req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+    next();
+  }, express.static('uploads'));
+  logger.log('Static file serving enabled for /uploads with CORS');
 
   // Compression pour améliorer les performances
   if (compression) {
@@ -45,10 +49,11 @@ async function bootstrap() {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        imgSrc: ["'self'", "data:", "https:", "*.vercel.app", "*.stripe.com"],
+        imgSrc: ["'self'", "data:", "https:", "*.vercel.app", "*.render.com", "*.onrender.com", "api-e-commerce-nestjs-1.onrender.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        connectSrc: ["'self'", "https://api.stripe.com"],
+        connectSrc: ["'self'", "https://api.stripe.com", "https://api-e-commerce-nestjs-1.onrender.com"],
         frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"],
+        upgradeInsecureRequests: [],
       },
     },
     hsts: {

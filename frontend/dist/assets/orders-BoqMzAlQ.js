@@ -1,0 +1,1 @@
+import{R as e}from"./index-BIQu6HMz.js";const n={async getAllAdmin(){return e.get("/orders/admin/all")},async getAll(){return e.get("/orders")},async getById(r){return e.get(`/orders/${r}`)},async create(r){return e.post("/orders",r)},async updateOrder(r,t){return e.put(`/orders/${r}`,t)}};export{n as o};

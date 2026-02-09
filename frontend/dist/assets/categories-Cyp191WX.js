@@ -1,1 +1,0 @@
-import{R as t}from"./index-CqM2Xncc.js";const s={async getAll(){return t.get("/categories")},async getTree(){return t.get("/categories/tree")},async getById(e){return t.get(`/categories/${e}`)},async create(e){return t.post("/categories",e)},async update(e,r){return t.put(`/categories/${e}`,r)},async delete(e){return t.delete(`/categories/${e}`)}};export{s as c};
